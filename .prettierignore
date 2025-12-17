@@ -1,0 +1,25 @@
+# Dependencies
+node_modules
+
+# Production
+.next
+out
+build
+dist
+
+# Misc
+.DS_Store
+*.log
+.env*.local
+
+# Testing
+coverage
+
+# Cache
+.cache
+.turbo
+
+# Lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml

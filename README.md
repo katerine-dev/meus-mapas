@@ -1,8 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Meus Mapas
 
-## Getting Started
+Aplicação para criar e gerenciar Mapas e Pontos (latitude/longitude), lista de mapas, visualização de um mapa com pontos, adição de pontos clicando no mapa, edição do nome, exclusão de pontos e exclusão em massa.
 
-First, run the development server:
+## Sumário
+
+- [Meus Mapas](#meus-mapas)
+  - [Sumário](#sumário)
+  - [Aquitetura do projeto](#aquitetura-do-projeto)
+  - [Objetivo](#objetivo)
+    - [Principais pontos:](#principais-pontos)
+  - [Estrutura do repositório](#estrutura-do-repositório)
+  - [Variáveis de ambiente](#variáveis-de-ambiente)
+  - [Rodando localmente](#rodando-localmente)
+  - [ESlint + Prettier](#eslint--prettier)
+
+## Aquitetura do projeto
+
+- **Frontend**: Next.js 16 (App Router) + React + TypeScript
+- **Mapa**: Leaflet.js + OpenStreetMap
+- **Backend**: Next.js API Routes (REST API)
+- **Banco de Dados**: PostgreSQL
+- **Migrations**:
+- **Containerização**: Docker + Docker Compose
+- **Deploy**:
+
+## Objetivo
+
+Construir uma aplicação simples e bem documentada que permita criar mapas e gerenciar pontos georreferenciados via frontend (Leaflet + OSM) e uma API REST (Next.js API Routes).
+
+### Principais pontos:
+
+- CRUD de mapas
+- CRUD de pontos (associados a um mapa)
+- Adicionar ponto clicando no mapa (Leaflet)
+- Visualização de mapa com marcações (Leaflet + OpenStreetMap)
+- Exclusão em massa de pontos de um mapa
+- API REST simples consumida pelo frontend
+
+## Estrutura do repositório
+
+```bash
+├─ app/
+├─ public/
+├─ migrations/
+├─ app/
+├─ public/
+├─ Dockerfile
+├─ docker-compose.yml
+├─ package.json
+├─ postcss.config.mjs
+├─ tsconfig.json
+└─ README.md
+```
+
+## Variáveis de ambiente
+
+Crie um arquivo `.env.local` com pelo menos:
+
+```env
+DATABASE_URL=postgres://USERNAME:PASSWORD@HOST:5432/DATABASE
+NEXT_PUBLIC_BASE_URL=http://localhost:3000
+
+# Opcional (se usar Mapbox)
+NEXT_PUBLIC_MAPBOX_TOKEN=
+```
+
+## Rodando localmente
 
 ```bash
 npm run dev
@@ -14,23 +77,19 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## ESlint + Prettier
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+# Verificar problemas de lint
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+npm run lint
 
-## Learn More
+# Corrigir problemas de lint automaticamente
+npm run lint:fix
 
-To learn more about Next.js, take a look at the following resources:
+# Formatar todo o código
+npm run format
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Verificar se o código está formatado
+npm run format:check
+```
