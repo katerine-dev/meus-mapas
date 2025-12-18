@@ -9,11 +9,13 @@ Aplicação para criar e gerenciar Mapas e Pontos (latitude/longitude), lista de
   - [Aquitetura do projeto](#aquitetura-do-projeto)
   - [Objetivo](#objetivo)
     - [Principais pontos:](#principais-pontos)
-  - [Estrutura do repositório](#estrutura-do-repositório)
   - [Variáveis de ambiente](#variáveis-de-ambiente)
   - [Rodando localmente](#rodando-localmente)
   - [ESlint + Prettier](#eslint--prettier)
   - [Postgres Database](#postgres-database)
+  - [Migrações](#migrações)
+- [Criando uma migração](#criando-uma-migração)
+- [Executando todas as migrações](#executando-todas-as-migrações)
 
 ## Aquitetura do projeto
 
@@ -38,33 +40,9 @@ Construir uma aplicação simples e bem documentada que permita criar mapas e ge
 - Exclusão em massa de pontos de um mapa
 - API REST simples consumida pelo frontend
 
-## Estrutura do repositório
-
-```bash
-├─ app/
-├─ public/
-├─ migrations/
-├─ app/
-├─ public/
-├─ Dockerfile
-├─ docker-compose.yml
-├─ package.json
-├─ postcss.config.mjs
-├─ tsconfig.json
-└─ README.md
-```
-
 ## Variáveis de ambiente
 
-Crie um arquivo `.env.local` com pelo menos:
-
-```env
-DATABASE_URL=postgres://USERNAME:PASSWORD@HOST:5432/DATABASE
-NEXT_PUBLIC_BASE_URL=http://localhost:3000
-
-# Opcional (se usar Mapbox)
-NEXT_PUBLIC_MAPBOX_TOKEN=
-```
+Copie o arquivo `.env.example` para um arquivo chamado `.env` e substitua as informações.
 
 ## Rodando localmente
 
@@ -109,4 +87,20 @@ npm run db:clean
 
 # Mostra os logs do container em tempo real (`-f` = follow)
 npm run db:logs
+```
+
+## Migrações
+
+# Criando uma migração
+
+```bash
+npm run migrations:create <NOME_DA_MIGRAÇÃO>
+```
+
+# Executando todas as migrações
+
+Após iniciar o container do banco de dados, execute
+
+```bash
+npm run migrations:migrate
 ```
