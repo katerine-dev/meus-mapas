@@ -13,6 +13,7 @@ Aplicação para criar e gerenciar Mapas e Pontos (latitude/longitude), lista de
   - [Variáveis de ambiente](#variáveis-de-ambiente)
   - [Rodando localmente](#rodando-localmente)
   - [ESlint + Prettier](#eslint--prettier)
+  - [Postgres Database](#postgres-database)
 
 ## Aquitetura do projeto
 
@@ -92,4 +93,20 @@ npm run format
 
 # Verificar se o código está formatado
 npm run format:check
+```
+
+## Postgres Database
+
+```bash
+# Inicia o container PostgreSQL em modo detached (`-d`)
+npm run db:up
+
+# Para e remove o container PostgreSQL. Os dados persistem no volume Docker
+npm run db:down
+
+# Para, remove o container **E remove o volume** (`-v`). CUIDADO: Apaga todos os dados do banco
+npm run db:clean
+
+# Mostra os logs do container em tempo real (`-f` = follow)
+npm run db:logs
 ```
