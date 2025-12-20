@@ -10,3 +10,8 @@ export async function POST(request: Request) {
 
   return Response.json({ id }, { status: 201 });
 }
+
+export async function GET() {
+  const maps = await mapsDb.getAllMaps();
+  return Response.json(maps);
+}
