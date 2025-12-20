@@ -9,6 +9,13 @@ export function post(url: string, body: object) {
   });
 }
 
+// Função auxiliar para criar uma requisição GET para testes
+export function get(url: string) {
+  return new Request(`http://localhost${url}`, {
+    method: 'GET',
+  });
+}
+
 // Função para limpar todas as tabelas do banco de dados de teste
 export async function cleanDatabase() {
   // Consulta todas as tabelas do schema 'public', excluindo a tabela de migrações
