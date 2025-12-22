@@ -20,8 +20,10 @@ describe('GET /api/maps/[id]', () => {
 
     // Simula os params da rota dinâmica
     const params = { params: Promise.resolve({ id: mapId }) };
+    // Cria uma requisição mock para o GET
+    const request = new Request(`http://localhost/api/maps/${mapId}`);
 
-    const response = await GET(params);
+    const response = await GET(request, params);
     expect(response.status).toBe(200);
 
     const body = await response.json();
@@ -35,8 +37,10 @@ describe('GET /api/maps/[id]', () => {
     // ID que não existe no banco
     const fakeId = '00000000-0000-0000-0000-000000000000';
     const params = { params: Promise.resolve({ id: fakeId }) };
+    // Cria uma requisição mock para o GET
+    const request = new Request(`http://localhost/api/maps/${fakeId}`);
 
-    const response = await GET(params);
+    const response = await GET(request, params);
     expect(response.status).toBe(404);
   });
 });
@@ -131,8 +135,10 @@ describe('DELETE /api/maps/[id]', () => {
 
     // Simula os params da rota dinâmica
     const params = { params: Promise.resolve({ id: mapId }) };
+    // Cria uma requisição mock para o DELETE
+    const request = new Request(`http://localhost/api/maps/${mapId}`, { method: 'DELETE' });
 
-    const response = await DELETE(params);
+    const response = await DELETE(request, params);
     expect(response.status).toBe(204);
 
     // Verifica se o mapa foi realmente deletado do banco
@@ -145,8 +151,10 @@ describe('DELETE /api/maps/[id]', () => {
     // ID que não existe no banco
     const fakeId = '00000000-0000-0000-0000-000000000000';
     const params = { params: Promise.resolve({ id: fakeId }) };
+    // Cria uma requisição mock para o DELETE
+    const request = new Request(`http://localhost/api/maps/${fakeId}`, { method: 'DELETE' });
 
-    const response = await DELETE(params);
+    const response = await DELETE(request, params);
     expect(response.status).toBe(404);
   });
 });
