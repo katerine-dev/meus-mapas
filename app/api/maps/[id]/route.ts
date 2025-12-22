@@ -32,3 +32,15 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
 
   return new Response(null, { status: 204 });
 }
+
+export async function GET({ params }: RouteParams) {
+  const { id } = await params;
+
+  const map = await mapsDb.getMapById(id);
+
+  if (!map) {
+    return new Response(null, { status: 404 });
+  }
+
+  return Response.json(map);
+}

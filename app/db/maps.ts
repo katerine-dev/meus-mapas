@@ -58,3 +58,13 @@ export async function deleteMap(id: string): Promise<boolean> {
   // Retorna true se alguma linha foi deletada, false caso contrário
   return result.rowCount !== null && result.rowCount > 0;
 }
+
+export async function getMapById(id: string): Promise<Map | null> {
+  const result = await connection.query(
+    `SELECT * FROM maps WHERE id = $1`,
+    [id]
+  );
+
+  // Retorna o mapa encontrado ou null se não existir
+  return result.rows[0] || null;
+}
