@@ -20,3 +20,15 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
   return new Response(null, { status: 204 });
 }
+
+export async function DELETE(_request: Request, { params }: RouteParams) {
+  const { id } = await params;
+
+  const deleted = await mapsDb.deleteMap(id);
+
+  if (!deleted) {
+    return new Response(null, { status: 404 });
+  }
+
+  return new Response(null, { status: 204 });
+}

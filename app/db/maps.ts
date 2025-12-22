@@ -48,3 +48,13 @@ export async function updateMap(data: UpdateMapData): Promise<Map | null> {
   // O || null garante que retornamos null em vez de undefined
   return result.rows[0] || null;
 }
+
+export async function deleteMap(id: string): Promise<boolean> {
+  const result = await connection.query(
+    `DELETE FROM maps WHERE id = $1`,
+    [id]
+  );
+
+  // Retorna true se alguma linha foi deletada, false caso contrário
+  return result.rowCount !== null && result.rowCount > 0;
+}
