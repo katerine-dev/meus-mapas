@@ -11,23 +11,7 @@ export async function POST(request: Request) {
   return Response.json({ id }, { status: 201 });
 }
 
-export async function GET(_request: Request) {
+export async function GET() {
   const maps = await mapsDb.getAllMaps();
   return Response.json(maps);
-}
-
-export async function PUT(request: Request) {
-  const body = await request.json();
-
-  const map = await mapsDb.updateMap({
-    id: body.id,
-    name: body.name,
-    description: body.description,
-  });
-
-  if (!map) {
-    return Response.json({ error: 'Map not found' }, { status: 404 });
-  }
-
-  return new Response(null, { status: 204 });
 }

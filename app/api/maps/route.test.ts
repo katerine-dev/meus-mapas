@@ -21,7 +21,7 @@ describe('Criando um novo mapa', () => {
     const response = await POST(request);
     expect(response.status).toBe(201);
     const body = await response.json();
-    // Verifica se o id retornado é uma string
+    // Verifica se o id retornado é um UUID válido
     expect(uuid.validate(body.id)).toBe(true);
   });
 
@@ -54,9 +54,7 @@ describe('Buscando todos os mapas', () => {
 
   // Teste: deve retornar todos os mapas com os valores esperados
   it('deve retornar todos os mapas com os valores esperados', async () => {
-    const request = testHelper.get('/api/maps');
-
-    const response = await GET(request);
+    const response = await GET();
     expect(response.status).toBe(200);
 
     const maps = await response.json();

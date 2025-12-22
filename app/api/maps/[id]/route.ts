@@ -4,6 +4,18 @@ interface RouteParams {
   params: Promise<{ id: string }>;
 }
 
+export async function GET({ params }: RouteParams) {
+  const { id } = await params;
+
+  const map = await mapsDb.getMapById(id);
+
+  if (!map) {
+    return new Response(null, { status: 404 });
+  }
+
+  return Response.json(map);
+}
+
 export async function PUT(request: Request, { params }: RouteParams) {
   const { id } = await params;
   const body = await request.json();
@@ -21,7 +33,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
   return new Response(null, { status: 204 });
 }
 
-export async function DELETE(_request: Request, { params }: RouteParams) {
+export async function DELETE({ params }: RouteParams) {
   const { id } = await params;
 
   const deleted = await mapsDb.deleteMap(id);
@@ -31,16 +43,4 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
   }
 
   return new Response(null, { status: 204 });
-}
-
-export async function GET({ params }: RouteParams) {
-  const { id } = await params;
-
-  const map = await mapsDb.getMapById(id);
-
-  if (!map) {
-    return new Response(null, { status: 404 });
-  }
-
-  return Response.json(map);
 }

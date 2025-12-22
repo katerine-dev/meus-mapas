@@ -9,13 +9,6 @@ export function post(url: string, body: object) {
   });
 }
 
-// Função auxiliar para criar uma requisição GET para testes
-export function get(url: string) {
-  return new Request(`http://localhost${url}`, {
-    method: 'GET',
-  });
-}
-
 // Função auxiliar para criar uma requisição PUT para testes
 export function put(url: string, body: object) {
   return new Request(`http://localhost${url}`, {
@@ -42,11 +35,4 @@ export async function cleanDatabase() {
     // CASCADE remove dados de tabelas relacionadas
     await connection.query(`TRUNCATE ${tables} RESTART IDENTITY CASCADE`);
   }
-}
-
-// Função auxiliar para criar uma requisição DELETE para testes
-export function del(url: string) {
-  return new Request(`http://localhost${url}`, {
-    method: 'DELETE',
-  });
 }

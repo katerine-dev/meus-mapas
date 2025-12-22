@@ -1,8 +1,45 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { PUT, DELETE } from './route';
+import { GET, PUT, DELETE } from './route';
 import * as testHelper from '@/lib/test-helper';
 import connection from '@/app/db/connection';
 import * as mapsDb from '@/app/db/maps';
+
+describe('GET /api/maps/[id]', () => {
+  // Limpa o banco antes de cada teste
+  beforeEach(async () => {
+    await testHelper.cleanDatabase();
+  });
+
+  // Teste: deve retornar um mapa existente com status 200
+  it('deve retornar um mapa existente com status 200', async () => {
+    // Primeiro cria um mapa no banco
+    const mapId = await mapsDb.createMap({
+      name: 'Mapa Teste',
+      description: 'Descrição do mapa',
+    });
+
+    // Simula os params da rota dinâmica
+    const params = { params: Promise.resolve({ id: mapId }) };
+
+    const response = await GET(params);
+    expect(response.status).toBe(200);
+
+    const body = await response.json();
+    expect(body.id).toBe(mapId);
+    expect(body.name).toBe('Mapa Teste');
+    expect(body.description).toBe('Descrição do mapa');
+  });
+
+  // Teste: deve retornar 404 quando o mapa não existe
+  it('deve retornar 404 quando o mapa não existe', async () => {
+    // ID que não existe no banco
+    const fakeId = '00000000-0000-0000-0000-000000000000';
+    const params = { params: Promise.resolve({ id: fakeId }) };
+
+    const response = await GET(params);
+    expect(response.status).toBe(404);
+  });
+});
 
 describe('PUT /api/maps/[id]', () => {
   // Limpa o banco antes de cada teste
@@ -92,13 +129,10 @@ describe('DELETE /api/maps/[id]', () => {
       description: 'Será deletado',
     });
 
-    // Cria a requisição DELETE
-    const request = testHelper.del(`/api/maps/${mapId}`);
-
     // Simula os params da rota dinâmica
     const params = { params: Promise.resolve({ id: mapId }) };
 
-    const response = await DELETE(request, params);
+    const response = await DELETE(params);
     expect(response.status).toBe(204);
 
     // Verifica se o mapa foi realmente deletado do banco
@@ -106,15 +140,13 @@ describe('DELETE /api/maps/[id]', () => {
     expect(result.rows).toHaveLength(0);
   });
 
-  // Teste: deve retornar 404 quando o mapa não existe
+  // Teste: deve retornar 404 ao tentar deletar mapa inexistente
   it('deve retornar 404 ao tentar deletar mapa inexistente', async () => {
+    // ID que não existe no banco
     const fakeId = '00000000-0000-0000-0000-000000000000';
-
-    const request = testHelper.del(`/api/maps/${fakeId}`);
-
     const params = { params: Promise.resolve({ id: fakeId }) };
 
-    const response = await DELETE(request, params);
+    const response = await DELETE(params);
     expect(response.status).toBe(404);
   });
 });
