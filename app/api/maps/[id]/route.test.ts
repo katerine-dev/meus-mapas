@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { PUT } from './route';
+import { PUT, DELETE } from './route';
 import * as testHelper from '@/lib/test-helper';
 import connection from '@/app/db/connection';
 import * as mapsDb from '@/app/db/maps';
@@ -75,5 +75,46 @@ describe('PUT /api/maps/[id]', () => {
     const result = await connection.query('SELECT * FROM maps WHERE id = $1', [mapId]);
     expect(result.rows[0].name).toBe('Mapa Sem Descrição');
     expect(result.rows[0].description).toBe('');
+  });
+});
+
+describe('DELETE /api/maps/[id]', () => {
+  // Limpa o banco antes de cada teste
+  beforeEach(async () => {
+    await testHelper.cleanDatabase();
+  });
+
+  // Teste: deve deletar um mapa existente e retornar 204
+  it('deve deletar um mapa existente e retornar 204', async () => {
+    // Primeiro cria um mapa no banco
+    const mapId = await mapsDb.createMap({
+      name: 'Mapa para Deletar',
+      description: 'Será deletado',
+    });
+
+    // Cria a requisição DELETE
+    const request = testHelper.del(`/api/maps/${mapId}`);
+
+    // Simula os params da rota dinâmica
+    const params = { params: Promise.resolve({ id: mapId }) };
+
+    const response = await DELETE(request, params);
+    expect(response.status).toBe(204);
+
+    // Verifica se o mapa foi realmente deletado do banco
+    const result = await connection.query('SELECT * FROM maps WHERE id = $1', [mapId]);
+    expect(result.rows).toHaveLength(0);
+  });
+
+  // Teste: deve retornar 404 quando o mapa não existe
+  it('deve retornar 404 ao tentar deletar mapa inexistente', async () => {
+    const fakeId = '00000000-0000-0000-0000-000000000000';
+
+    const request = testHelper.del(`/api/maps/${fakeId}`);
+
+    const params = { params: Promise.resolve({ id: fakeId }) };
+
+    const response = await DELETE(request, params);
+    expect(response.status).toBe(404);
   });
 });

@@ -43,3 +43,10 @@ export async function cleanDatabase() {
     await connection.query(`TRUNCATE ${tables} RESTART IDENTITY CASCADE`);
   }
 }
+
+// Função auxiliar para criar uma requisição DELETE para testes
+export function del(url: string) {
+  return new Request(`http://localhost${url}`, {
+    method: 'DELETE',
+  });
+}
