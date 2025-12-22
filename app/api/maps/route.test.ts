@@ -1,13 +1,8 @@
-import { describe, it, expect, afterAll, beforeEach, beforeAll } from 'vitest';
+import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
 import { POST, GET } from './route';
 import * as testHelper from '@/lib/test-helper';
 import connection from '@/app/db/connection';
 import * as uuid from 'uuid';
-
-/* Após todos os testes, fecha a conexão com o banco */
-afterAll(async () => {
-  await connection.end();
-});
 
 describe('Criando um novo mapa', () => {
   // Limpa o banco antes de cada teste de criação
@@ -42,6 +37,7 @@ describe('Criando um novo mapa', () => {
     expect(uuid.validate(body.id)).toBe(true);
   });
 });
+
 /* Antes de executar os testes é necessário ter mapas no banco de dados */
 describe('Buscando todos os mapas', () => {
   const map1 = { name: 'Mapa 1', description: 'Descrição do mapa 1' };

@@ -16,6 +16,15 @@ export function get(url: string) {
   });
 }
 
+// Função auxiliar para criar uma requisição PUT para testes
+export function put(url: string, body: object) {
+  return new Request(`http://localhost${url}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+}
+
 // Função para limpar todas as tabelas do banco de dados de teste
 export async function cleanDatabase() {
   // Consulta todas as tabelas do schema 'public', excluindo a tabela de migrações

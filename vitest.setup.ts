@@ -34,4 +34,12 @@ export default async function setup() {
     // Função de log vazia para suprimir mensagens de log
     log: () => {},
   });
+
+  // Retorna a função de teardown que será executada após todos os testes
+  return async () => {
+    const connection = new Pool({
+      connectionString: process.env.DATABASE_URL,
+    });
+    await connection.end();
+  };
 }
