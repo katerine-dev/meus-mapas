@@ -1,26 +1,43 @@
-@import "tailwindcss";
+/* Importa o Tailwind CSS para utilização das classes utilitárias */
+@import 'tailwindcss';
 
+/* Variáveis CSS globais - Tema claro (padrão) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8f6fc; /* Cor de fundo principal - lilás bem claro */
+  --foreground: #1a0a2e; /* Cor do texto principal - roxo escuro */
+
+  /* Paleta de cores roxa - Do mais escuro ao mais claro */
+  --purple-darkest: #1a0a2e; /* Roxo mais escuro - usado em textos e footer */
+  --purple-dark: #2d1b4e; /* Roxo escuro - usado em hovers */
+  --purple-main: #5c30bd; /* Roxo principal - cor primária da marca */
+  --purple-light: #9b7dd4; /* Roxo claro - textos secundários e bordas */
+  --purple-lightest: #c9b8e8; /* Roxo mais claro - backgrounds e hovers suaves */
 }
 
+/* Configuração do tema inline do Tailwind - Mapeia variáveis CSS para classes */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--background); /* bg-background */
+  --color-foreground: var(--foreground); /* text-foreground */
+  --color-purple-darkest: var(--purple-darkest); /* text-purple-darkest, bg-purple-darkest */
+  --color-purple-dark: var(--purple-dark); /* text-purple-dark, bg-purple-dark */
+  --color-purple-main: var(--purple-main); /* text-purple-main, bg-purple-main */
+  --color-purple-light: var(--purple-light); /* text-purple-light, bg-purple-light */
+  --color-purple-lightest: var(--purple-lightest); /* text-purple-lightest, bg-purple-lightest */
+  --font-sans: var(--font-geist-sans); /* Fonte sans-serif do Next.js */
+  --font-mono: var(--font-geist-mono); /* Fonte monospace do Next.js */
 }
 
+/* Tema escuro - Ativado automaticamente pela preferência do sistema */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #1a0a2e; /* Inverte: fundo escuro */
+    --foreground: #f8f6fc; /* Inverte: texto claro */
   }
 }
 
+/* Estilos base do body */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--background); /* Aplica a cor de fundo */
+  color: var(--foreground); /* Aplica a cor do texto */
+  font-family: Arial, Helvetica, sans-serif; /* Fonte fallback */
 }
