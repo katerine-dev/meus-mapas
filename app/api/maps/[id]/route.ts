@@ -1,5 +1,7 @@
 // Importa as funções de acesso ao banco de dados de mapas
 import * as mapsDb from '@/app/db/maps';
+// Importa a função de validação e tipos de erro do utilitário de validação
+import { validateMapData } from '@/app/utils/validation';
 
 // Interface que define o tipo dos parâmetros da rota dinâmica [id]
 interface RouteParams {
@@ -31,10 +33,19 @@ export async function PUT(request: Request, { params }: RouteParams) {
   // Extrai os dados do corpo da requisição
   const body = await request.json();
 
+  // Executa a validação dos dados recebidos antes de atualizar no banco
+  // Usa || '' para garantir que sempre passe uma string, mesmo se o campo for undefined
+  const errors = validateMapData(body.name || '', body.description || '');
+  // Se houver erros de validação, retorna status 400 (Bad Request) com a lista de erros
+  if (errors.length > 0) {
+    return Response.json({ errors }, { status: 400 });
+  }
+
   // Atualiza o mapa no banco de dados com os novos valores
   const map = await mapsDb.updateMap({
     id,
-    name: body.name,
+    // Remove espaços em branco do início e fim do nome antes de salvar
+    name: body.name.trim(),
     description: body.description,
   });
 
