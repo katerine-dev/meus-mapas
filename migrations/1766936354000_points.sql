@@ -4,8 +4,7 @@ CREATE TABLE points (
   map_id UUID NOT NULL REFERENCES maps(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   description TEXT,
-  latitude DECIMAL(10, 8) NOT NULL,
-  longitude DECIMAL(11, 8) NOT NULL,
+  location POINT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
