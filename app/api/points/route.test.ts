@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
-import { POST } from './route';
+import { POST, GET } from './route';
 import * as testHelper from '@/lib/test-helper';
 import connection from '@/app/db/connection';
 import * as uuid from 'uuid';
@@ -150,5 +150,69 @@ describe('Criando um novo ponto', () => {
 
     const response = await POST(request);
     expect(response.status).toBe(201);
+  });
+});
+
+describe('Buscando todos os pontos', () => {
+  // ID do mapa que será usado nos testes
+  let mapId: string;
+
+  // Cria um mapa e alguns pontos antes de todos os testes
+  beforeAll(async () => {
+    await testHelper.cleanDatabase();
+    // Cria um mapa para associar os pontos
+    const result = await connection.query(
+      'INSERT INTO maps (name, description) VALUES ($1, $2) RETURNING id',
+      ['Mapa para GET', 'Mapa para testar busca de pontos']
+    );
+    mapId = result.rows[0].id;
+
+    // Cria pontos para o mapa
+    await connection.query(
+      'INSERT INTO points (map_id, name, description, location) VALUES ($1, $2, $3, POINT($4, $5))',
+      [mapId, 'Ponto 1', 'Descrição 1', -46.6333, -23.5505]
+    );
+    await connection.query(
+      'INSERT INTO points (map_id, name, description, location) VALUES ($1, $2, $3, POINT($4, $5))',
+      [mapId, 'Ponto 2', null, -46.6544, -23.5629]
+    );
+  });
+
+  // Teste: deve retornar todos os pontos
+  it('deve retornar todos os pontos', async () => {
+    const response = await GET();
+    expect(response.status).toBe(200);
+
+    const points = await response.json();
+    expect(points).toHaveLength(2);
+
+    // Verifica se os pontos têm os campos esperados
+    points.forEach(
+      (point: {
+        id: string;
+        map_id: string;
+        name: string;
+        location: { longitude: number; latitude: number };
+      }) => {
+        expect(uuid.validate(point.id)).toBe(true);
+        expect(point.map_id).toBe(mapId);
+        expect(point.name).toBeDefined();
+        expect(point.location).toBeDefined();
+        expect(point.location.longitude).toBeDefined();
+        expect(point.location.latitude).toBeDefined();
+      }
+    );
+  });
+
+  // Teste: deve retornar lista vazia se não houver pontos
+  it('deve retornar lista vazia se não houver pontos', async () => {
+    // Limpa os pontos
+    await connection.query('DELETE FROM points');
+
+    const response = await GET();
+    expect(response.status).toBe(200);
+
+    const points = await response.json();
+    expect(points).toHaveLength(0);
   });
 });
