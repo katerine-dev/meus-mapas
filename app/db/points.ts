@@ -47,3 +47,18 @@ export async function getAllPoints(): Promise<Point[]> {
     location: { longitude: row.location.x, latitude: row.location.y },
   }));
 }
+
+// Função que busca um ponto específico pelo ID
+export async function getPointById(id: string): Promise<Point | null> {
+  const result = await connection.query('SELECT * FROM points WHERE id = $1', [id]);
+
+  if (result.rows.length === 0) {
+    return null;
+  }
+
+  const row = result.rows[0];
+  return {
+    ...row,
+    location: { longitude: row.location.x, latitude: row.location.y },
+  };
+}

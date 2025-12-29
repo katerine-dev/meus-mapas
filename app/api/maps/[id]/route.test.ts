@@ -13,10 +13,8 @@ describe('GET /api/maps/[id]', () => {
   // Teste: deve retornar um mapa existente com status 200
   it('deve retornar um mapa existente com status 200', async () => {
     // Primeiro cria um mapa no banco
-    const mapId = await mapsDb.createMap({
-      name: 'Mapa Teste',
-      description: 'Descrição do mapa',
-    });
+    const mapData = { name: 'Mapa Teste', description: 'Descrição do mapa' };
+    const mapId = await mapsDb.createMap(mapData);
 
     // Simula os params da rota dinâmica
     const params = { params: Promise.resolve({ id: mapId }) };
@@ -28,8 +26,8 @@ describe('GET /api/maps/[id]', () => {
 
     const body = await response.json();
     expect(body.id).toBe(mapId);
-    expect(body.name).toBe('Mapa Teste');
-    expect(body.description).toBe('Descrição do mapa');
+    expect(body.name).toBe(mapData.name);
+    expect(body.description).toBe(mapData.description);
   });
 
   // Teste: deve retornar 404 quando o mapa não existe
@@ -60,10 +58,8 @@ describe('PUT /api/maps/[id]', () => {
     });
 
     // Cria a requisição PUT com os novos dados
-    const request = testHelper.put(`/api/maps/${mapId}`, {
-      name: 'Mapa Atualizado',
-      description: 'Nova descrição',
-    });
+    const updatedData = { name: 'Mapa Atualizado', description: 'Nova descrição' };
+    const request = testHelper.put(`/api/maps/${mapId}`, updatedData);
 
     // Simula os params da rota dinâmica
     const params = { params: Promise.resolve({ id: mapId }) };
@@ -73,8 +69,8 @@ describe('PUT /api/maps/[id]', () => {
 
     // Verifica se o mapa foi realmente atualizado no banco
     const result = await connection.query('SELECT * FROM maps WHERE id = $1', [mapId]);
-    expect(result.rows[0].name).toBe('Mapa Atualizado');
-    expect(result.rows[0].description).toBe('Nova descrição');
+    expect(result.rows[0].name).toBe(updatedData.name);
+    expect(result.rows[0].description).toBe(updatedData.description);
   });
 
   // Teste: deve retornar 404 quando o mapa não existe
@@ -102,10 +98,8 @@ describe('PUT /api/maps/[id]', () => {
     });
 
     // Atualiza com descrição vazia
-    const request = testHelper.put(`/api/maps/${mapId}`, {
-      name: 'Mapa Sem Descrição',
-      description: '',
-    });
+    const updatedData = { name: 'Mapa Sem Descrição', description: '' };
+    const request = testHelper.put(`/api/maps/${mapId}`, updatedData);
 
     const params = { params: Promise.resolve({ id: mapId }) };
 
@@ -114,8 +108,8 @@ describe('PUT /api/maps/[id]', () => {
 
     // Verifica se a descrição foi atualizada para vazio
     const result = await connection.query('SELECT * FROM maps WHERE id = $1', [mapId]);
-    expect(result.rows[0].name).toBe('Mapa Sem Descrição');
-    expect(result.rows[0].description).toBe('');
+    expect(result.rows[0].name).toBe(updatedData.name);
+    expect(result.rows[0].description).toBe(updatedData.description);
   });
 });
 

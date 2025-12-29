@@ -3,14 +3,9 @@ import * as mapsDb from '@/app/db/maps';
 // Importa a função de validação e tipos de erro do utilitário de validação
 import { validateMapData } from '@/app/utils/validation';
 
-// Interface que define o tipo dos parâmetros da rota dinâmica [id]
-interface RouteParams {
-  params: Promise<{ id: string }>; // O id vem como Promise no Next.js 15+
-}
-
 // Handler GET - Busca um mapa específico pelo ID
 // O _request é prefixado com _ pois não é utilizado, mas é obrigatório na assinatura
-export async function GET(_request: Request, { params }: RouteParams) {
+export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   // Aguarda a resolução dos parâmetros da rota
   const { id } = await params;
 
@@ -27,7 +22,7 @@ export async function GET(_request: Request, { params }: RouteParams) {
 }
 
 // Handler PUT - Atualiza um mapa existente pelo ID
-export async function PUT(request: Request, { params }: RouteParams) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   // Aguarda a resolução dos parâmetros da rota
   const { id } = await params;
   // Extrai os dados do corpo da requisição
@@ -60,7 +55,7 @@ export async function PUT(request: Request, { params }: RouteParams) {
 
 // Handler DELETE - Remove um mapa pelo ID
 // O _request é prefixado com _ pois não é utilizado, mas é obrigatório na assinatura
-export async function DELETE(_request: Request, { params }: RouteParams) {
+export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   // Aguarda a resolução dos parâmetros da rota
   const { id } = await params;
 
