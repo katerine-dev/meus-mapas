@@ -142,6 +142,23 @@ describe('Criando um novo ponto', () => {
 describe('Buscando todos os pontos', () => {
   // ID do mapa que será usado nos testes
   let mapId: string;
+  const point1 = {
+    name: 'Ponto 1',
+    description: 'Descrição 1',
+    location: {
+      latitude: -46.6333,
+      longitude: -23.5505,
+    },
+  };
+
+  const point2 = {
+    name: 'Ponto 2',
+    description: null,
+    location: {
+      latitude: -46.6544,
+      longitude: -23.5629,
+    },
+  };
 
   // Cria um mapa e alguns pontos antes de todos os testes
   beforeAll(async () => {
@@ -153,15 +170,12 @@ describe('Buscando todos os pontos', () => {
     );
     mapId = result.rows[0].id;
 
+    const query =
+      'INSERT INTO points (map_id, name, description, location) VALUES ($1, $2, $3, POINT($4, $5))';
+
     // Cria pontos para o mapa
-    await connection.query(
-      'INSERT INTO points (map_id, name, description, location) VALUES ($1, $2, $3, POINT($4, $5))',
-      [mapId, 'Ponto 1', 'Descrição 1', -46.6333, -23.5505]
-    );
-    await connection.query(
-      'INSERT INTO points (map_id, name, description, location) VALUES ($1, $2, $3, POINT($4, $5))',
-      [mapId, 'Ponto 2', null, -46.6544, -23.5629]
-    );
+    await connection.query(query, [mapId, point1.name, point1.description, point1.location]);
+    await connection.query(query, [mapId, point2.name, point2.description, point2.location]);
   });
 
   // Teste: deve retornar todos os pontos
@@ -174,22 +188,18 @@ describe('Buscando todos os pontos', () => {
     const points = await response.json();
     expect(points).toHaveLength(2);
 
-    // Verifica se os pontos têm os campos esperados
-    points.forEach(
-      (point: {
-        id: string;
-        map_id: string;
-        name: string;
-        location: { longitude: number; latitude: number };
-      }) => {
-        expect(uuid.validate(point.id)).toBe(true);
-        expect(point.map_id).toBe(mapId);
-        expect(point.name).toBeDefined();
-        expect(point.location).toBeDefined();
-        expect(point.location.longitude).toBeDefined();
-        expect(point.location.latitude).toBeDefined();
-      }
-    );
+    expect(points[0].name).toBe(point1.name);
+    expect(points[0].description).toBe(point1.description);
+    expect(points[0].location).toBe(point1.location);
+
+    expect(points[0].name).toBe(point2.name);
+    expect(points[0].description).toBe(point2.description);
+    expect(points[0].location).toBe(point2.location);
+
+    points.forEach((point: { createdAt: string; updatedAt: string }) => {
+      expect(typeof point.createdAt).toBe('string');
+      expect(typeof point.updatedAt).toBe('string');
+    });
   });
 
   // Teste: deve retornar lista vazia se não houver pontos

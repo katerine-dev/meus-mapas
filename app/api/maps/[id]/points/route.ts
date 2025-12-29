@@ -17,7 +17,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   // Cria o ponto no banco de dados
   const pointId = await pointsDb.createPoint({
-    map_id: id,
+    mapId: id,
     name: body.name.trim(),
     description: body.description,
     latitude: body.latitude,

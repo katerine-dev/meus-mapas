@@ -2,7 +2,7 @@ import connection from './connection';
 import { Point } from '../model/point';
 
 interface CreatePointData {
-  map_id: string;
+  mapId: string;
   name: string;
   description?: string;
   latitude: number;
@@ -11,7 +11,7 @@ interface CreatePointData {
 
 // Função que cria um novo ponto no banco de dados
 export async function createPoint(data: CreatePointData): Promise<string> {
-  const { map_id, name, description, latitude, longitude } = data;
+  const { mapId: mapId, name, description, latitude, longitude } = data;
 
   // Insere o ponto usando a função POINT(longitude, latitude)
   // O PostgreSQL POINT usa formato (x, y) onde x=longitude, y=latitude
@@ -19,7 +19,7 @@ export async function createPoint(data: CreatePointData): Promise<string> {
     `INSERT INTO points (map_id, name, description, location)
      VALUES ($1, $2, $3, POINT($4, $5))
      RETURNING id`,
-    [map_id, name, description, longitude, latitude]
+    [mapId, name, description, longitude, latitude]
   );
 
   return result.rows[0].id;

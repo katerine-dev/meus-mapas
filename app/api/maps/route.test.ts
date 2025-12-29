@@ -60,7 +60,7 @@ describe('Buscando todos os mapas', () => {
     const maps = await response.json();
     expect(maps).toHaveLength(3);
 
-    // Verifica os valores (ordenado por created_at DESC, então map3 vem primeiro)
+    // Verifica os valores (ordenado por createdAt DESC, então map3 vem primeiro)
     expect(maps[0].name).toBe(map3.name);
     expect(maps[0].description).toBe(map3.description);
 
@@ -71,10 +71,10 @@ describe('Buscando todos os mapas', () => {
     expect(maps[2].description).toBe(map1.description);
 
     // Verifica se todos os mapas têm id e timestamps como strings
-    maps.forEach((map: { id: string; created_at: string; updated_at: string }) => {
+    maps.forEach((map: { id: string; createdAt: string; updatedAt: string }) => {
       expect(uuid.validate(map.id)).toBe(true);
-      expect(typeof map.created_at).toBe('string');
-      expect(typeof map.updated_at).toBe('string');
+      expect(typeof map.createdAt).toBe('string');
+      expect(typeof map.updatedAt).toBe('string');
     });
   });
 });

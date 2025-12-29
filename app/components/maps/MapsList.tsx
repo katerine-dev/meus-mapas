@@ -59,13 +59,13 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
     .sort((a, b) => {
       switch (sortOption) {
         case 'oldest':
-          return new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
+          return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
         case 'az':
           return a.name.localeCompare(b.name);
         case 'za':
           return b.name.localeCompare(a.name);
         default: // 'recent'
-          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
       }
     });
 
@@ -189,8 +189,8 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
               id={map.id}
               name={map.name}
               description={map.description}
-              updatedAt={map.updated_at}
-              createdAt={map.created_at}
+              updatedAt={map.updatedAt}
+              createdAt={map.createdAt}
               onEdit={() => openEditModal(map)}
               onOpen={() => handleOpenMap(map)}
               onDelete={() => openDeleteModal(map)}

@@ -5,10 +5,10 @@ export interface Location {
 
 export interface Point {
   id: string;
-  map_id: string;
+  mapId: string;
   name: string;
   description?: string;
   location: Location;
-  created_at: Date;
-  updated_at: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }

@@ -20,7 +20,7 @@ describe('GET /api/maps/[id]/points/[pointId]', () => {
 
     // Cria um ponto no banco
     const pointData = {
-      map_id: mapId,
+      mapId: mapId,
       name: 'Ponto Teste',
       description: 'Descrição do ponto',
       latitude: -23.5505,
@@ -38,7 +38,7 @@ describe('GET /api/maps/[id]/points/[pointId]', () => {
 
     const body = await response.json();
     expect(body.id).toBe(pointId);
-    expect(body.map_id).toBe(mapId);
+    expect(body.mapId).toBe(mapId);
     expect(body.name).toBe(pointData.name);
     expect(body.description).toBe(pointData.description);
     expect(body.location.longitude).toBeCloseTo(pointData.longitude, 4);
