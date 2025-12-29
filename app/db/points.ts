@@ -27,10 +27,23 @@ export async function createPoint(data: CreatePointData): Promise<string> {
 
 // Função que busca todos os pontos de um mapa específico
 export async function getPointsByMapId(mapId: string): Promise<Point[]> {
-  // Seleciona todos os campos incluindo location que vem como objeto {x, y}
   const result = await connection.query(
     'SELECT * FROM points WHERE map_id = $1 ORDER BY created_at DESC',
     [mapId]
   );
-  return result.rows;
+  // PostgreSQL POINT retorna {x: longitude, y: latitude}
+  return result.rows.map((row) => ({
+    ...row,
+    location: { longitude: row.location.x, latitude: row.location.y },
+  }));
+}
+
+// Função que busca todos os pontos
+export async function getAllPoints(): Promise<Point[]> {
+  const result = await connection.query('SELECT * FROM points ORDER BY created_at DESC');
+  // PostgreSQL POINT retorna {x: longitude, y: latitude}
+  return result.rows.map((row) => ({
+    ...row,
+    location: { longitude: row.location.x, latitude: row.location.y },
+  }));
 }

@@ -1,5 +1,10 @@
 import * as pointsDb from '@/app/db/points';
 
+export async function GET() {
+  const points = await pointsDb.getAllPoints();
+  return Response.json(points);
+}
+
 export async function POST(request: Request) {
   const body = await request.json();
 
