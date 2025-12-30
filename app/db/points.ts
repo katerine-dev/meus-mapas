@@ -62,3 +62,34 @@ export async function getPointById(id: string): Promise<Point | null> {
     location: { longitude: row.location.x, latitude: row.location.y },
   };
 }
+
+interface UpdatePointData {
+  id: string;
+  name: string;
+  description?: string;
+  latitude: number;
+  longitude: number;
+}
+
+// Função que atualiza um ponto
+export async function updatePoint(data: UpdatePointData): Promise<Point | null> {
+  const { id, name, description, latitude, longitude } = data;
+
+  const result = await connection.query(
+    `UPDATE points
+     SET name = $2, description = $3, location = POINT($4, $5), updated_at = NOW()
+     WHERE id = $1
+     RETURNING *`,
+    [id, name, description, longitude, latitude]
+  );
+
+  if (result.rows.length === 0) {
+    return null;
+  }
+
+  const row = result.rows[0];
+  return {
+    ...row,
+    location: { longitude: row.location.x, latitude: row.location.y },
+  };
+}

@@ -15,3 +15,26 @@ export async function GET(
 
   return Response.json(point);
 }
+
+// Handler PUT - Atualiza um ponto específico pelo ID
+export async function PUT(
+  request: Request,
+  { params }: { params: Promise<{ id: string; pointId: string }> }
+) {
+  const { pointId } = await params;
+  const body = await request.json();
+
+  const updatedPoint = await pointsDb.updatePoint({
+    id: pointId,
+    name: body.name,
+    description: body.description,
+    latitude: body.latitude,
+    longitude: body.longitude,
+  });
+
+  if (!updatedPoint) {
+    return new Response(null, { status: 404 });
+  }
+
+  return Response.json(updatedPoint);
+}
