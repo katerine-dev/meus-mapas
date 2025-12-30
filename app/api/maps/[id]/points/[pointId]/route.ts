@@ -38,3 +38,19 @@ export async function PUT(
 
   return new Response(null, { status: 204 });
 }
+
+// Handler DELETE - Remove um ponto pelo ID
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string; pointId: string }> }
+) {
+  const { pointId } = await params;
+
+  const deleted = await pointsDb.deletePoint(pointId);
+
+  if (!deleted) {
+    return new Response(null, { status: 404 });
+  }
+
+  return new Response(null, { status: 204 });
+}

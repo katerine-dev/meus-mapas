@@ -105,3 +105,10 @@ export async function updatePoint(data: UpdatePointData): Promise<Point | null> 
     updatedAt: row.updated_at,
   };
 }
+
+export async function deletePoint(id: string): Promise<boolean> {
+  const result = await connection.query(`DELETE FROM points WHERE id = $1`, [id]);
+
+  // Retorna true se alguma linha foi deletada, false caso contrário
+  return result.rowCount !== null && result.rowCount > 0;
+}
