@@ -174,8 +174,20 @@ describe('Buscando todos os pontos', () => {
       'INSERT INTO points (map_id, name, description, location) VALUES ($1, $2, $3, POINT($4, $5))';
 
     // Cria pontos para o mapa
-    await connection.query(query, [mapId, point1.name, point1.description, point1.location]);
-    await connection.query(query, [mapId, point2.name, point2.description, point2.location]);
+    await connection.query(query, [
+      mapId,
+      point1.name,
+      point1.description,
+      point1.location.longitude,
+      point1.location.latitude,
+    ]);
+    await connection.query(query, [
+      mapId,
+      point2.name,
+      point2.description,
+      point2.location.longitude,
+      point2.location.latitude,
+    ]);
   });
 
   // Teste: deve retornar todos os pontos
@@ -188,13 +200,16 @@ describe('Buscando todos os pontos', () => {
     const points = await response.json();
     expect(points).toHaveLength(2);
 
-    expect(points[0].name).toBe(point1.name);
-    expect(points[0].description).toBe(point1.description);
-    expect(points[0].location).toBe(point1.location);
-
+    // Ordenado por created_at DESC, então point2 vem primeiro
     expect(points[0].name).toBe(point2.name);
     expect(points[0].description).toBe(point2.description);
-    expect(points[0].location).toBe(point2.location);
+    expect(points[0].location.longitude).toBeCloseTo(point2.location.longitude, 4);
+    expect(points[0].location.latitude).toBeCloseTo(point2.location.latitude, 4);
+
+    expect(points[1].name).toBe(point1.name);
+    expect(points[1].description).toBe(point1.description);
+    expect(points[1].location.longitude).toBeCloseTo(point1.location.longitude, 4);
+    expect(points[1].location.latitude).toBeCloseTo(point1.location.latitude, 4);
 
     points.forEach((point: { createdAt: string; updatedAt: string }) => {
       expect(typeof point.createdAt).toBe('string');

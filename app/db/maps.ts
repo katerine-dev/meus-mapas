@@ -16,7 +16,11 @@ interface UpdateMapData {
 export async function getAllMaps(): Promise<Map[]> {
   // Ordenados por data de criação (mais recente primeiro)
   const result = await connection.query('SELECT * FROM maps ORDER BY created_at DESC');
-  return result.rows;
+  return result.rows.map((row) => ({
+    ...row,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }));
 }
 
 export async function createMap(data: CreateMapData): Promise<string> {
@@ -45,26 +49,37 @@ export async function updateMap(data: UpdateMapData): Promise<Map | null> {
   );
 
   // Retorna o mapa atualizado ou null se não encontrado
-  // O || null garante que retornamos null em vez de undefined
-  return result.rows[0] || null;
+  if (result.rows.length === 0) {
+    return null;
+  }
+
+  const row = result.rows[0];
+  return {
+    ...row,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
 }
 
 export async function deleteMap(id: string): Promise<boolean> {
-  const result = await connection.query(
-    `DELETE FROM maps WHERE id = $1`,
-    [id]
-  );
+  const result = await connection.query(`DELETE FROM maps WHERE id = $1`, [id]);
 
   // Retorna true se alguma linha foi deletada, false caso contrário
   return result.rowCount !== null && result.rowCount > 0;
 }
 
 export async function getMapById(id: string): Promise<Map | null> {
-  const result = await connection.query(
-    `SELECT * FROM maps WHERE id = $1`,
-    [id]
-  );
+  const result = await connection.query(`SELECT * FROM maps WHERE id = $1`, [id]);
 
   // Retorna o mapa encontrado ou null se não existir
-  return result.rows[0] || null;
+  if (result.rows.length === 0) {
+    return null;
+  }
+
+  const row = result.rows[0];
+  return {
+    ...row,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
 }

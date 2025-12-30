@@ -36,5 +36,5 @@ export async function PUT(
     return new Response(null, { status: 404 });
   }
 
-  return Response.json(updatedPoint);
+  return new Response(null, { status: 204 });
 }

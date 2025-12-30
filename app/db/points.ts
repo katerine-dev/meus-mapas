@@ -34,7 +34,10 @@ export async function getPointsByMapId(mapId: string): Promise<Point[]> {
   // PostgreSQL POINT retorna {x: longitude, y: latitude}
   return result.rows.map((row) => ({
     ...row,
+    mapId: row.map_id,
     location: { longitude: row.location.x, latitude: row.location.y },
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   }));
 }
 
@@ -44,7 +47,10 @@ export async function getAllPoints(): Promise<Point[]> {
   // PostgreSQL POINT retorna {x: longitude, y: latitude}
   return result.rows.map((row) => ({
     ...row,
+    mapId: row.map_id,
     location: { longitude: row.location.x, latitude: row.location.y },
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   }));
 }
 
@@ -59,7 +65,10 @@ export async function getPointById(id: string): Promise<Point | null> {
   const row = result.rows[0];
   return {
     ...row,
+    mapId: row.map_id,
     location: { longitude: row.location.x, latitude: row.location.y },
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 
@@ -90,6 +99,9 @@ export async function updatePoint(data: UpdatePointData): Promise<Point | null> 
   const row = result.rows[0];
   return {
     ...row,
+    mapId: row.map_id,
     location: { longitude: row.location.x, latitude: row.location.y },
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
