@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { GET, PUT } from './route';
+import { GET, PUT, DELETE } from './route';
 import * as testHelper from '@/lib/test-helper';
 import connection from '@/app/db/connection';
 import * as mapsDb from '@/app/db/maps';
@@ -156,5 +156,58 @@ describe('PUT /api/maps/[id]/points/[pointId]', () => {
     const result = await connection.query('SELECT * FROM points WHERE id = $1', [pointId]);
     expect(result.rows[0].name).toBe(updatedData.name);
     expect(result.rows[0].description).toBe(updatedData.description);
+  });
+});
+
+describe('DELETE /api/maps/[id]/points/[pointId]', () => {
+  // Limpa o banco antes de cada teste
+  beforeEach(async () => {
+    await testHelper.cleanDatabase();
+  });
+
+  // Teste: deve deletar um ponto existente e retornar 204
+  it('deve deletar um ponto existente e retornar 204', async () => {
+    // Primeiro cria um mapa no banco
+    const mapId = await mapsDb.createMap({
+      name: 'Mapa Teste',
+      description: 'Descrição do mapa',
+    });
+
+    // Cria um ponto no banco
+    const pointId = await pointsDb.createPoint({
+      mapId: mapId,
+      name: 'Ponto para Deletar',
+      description: 'Será deletado',
+      latitude: -23.5505,
+      longitude: -46.6333,
+    });
+
+    // Simula os params da rota dinâmica
+    const params = { params: Promise.resolve({ id: mapId, pointId }) };
+    // Cria uma requisição mock para o DELETE
+    const request = new Request(`http://localhost/api/maps/${mapId}/points/${pointId}`, {
+      method: 'DELETE',
+    });
+
+    const response = await DELETE(request, params);
+    expect(response.status).toBe(204);
+
+    // Verifica se o ponto foi realmente deletado do banco
+    const result = await connection.query('SELECT * FROM points WHERE id = $1', [pointId]);
+    expect(result.rows).toHaveLength(0);
+  });
+
+  // Teste: deve retornar 404 ao tentar deletar ponto inexistente
+  it('deve retornar 404 ao tentar deletar ponto inexistente', async () => {
+    // ID que não existe no banco
+    const fakeId = '00000000-0000-0000-0000-000000000000';
+    const params = { params: Promise.resolve({ id: fakeId, pointId: fakeId }) };
+    // Cria uma requisição mock para o DELETE
+    const request = new Request(`http://localhost/api/maps/${fakeId}/points/${fakeId}`, {
+      method: 'DELETE',
+    });
+
+    const response = await DELETE(request, params);
+    expect(response.status).toBe(404);
   });
 });
