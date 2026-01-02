@@ -27,7 +27,6 @@ describe('GET /api/maps/[id]/points/[pointId]', () => {
     expect(body.id).toBe(point.id);
     expect(body.mapId).toBe(map.id);
     expect(body.name).toBe(point.name);
-    expect(body.description).toBe(point.description);
     expect(body.location.longitude).toBeCloseTo(point.location.longitude, 4);
     expect(body.location.latitude).toBeCloseTo(point.location.latitude, 4);
     expect(body.deletedAt).toBeNull();
@@ -74,7 +73,6 @@ describe('PUT /api/maps/[id]/points/[pointId]', () => {
     // Cria a requisição PUT com os novos dados
     const updatedData = {
       name: 'Ponto Atualizado',
-      description: 'Nova descrição',
     };
     const request = testHelper.put(`/api/maps/${map.id}/points/${point.id}`, updatedData);
 
@@ -87,7 +85,6 @@ describe('PUT /api/maps/[id]/points/[pointId]', () => {
     // Verifica se o ponto foi realmente atualizado no banco
     const result = await connection.query('SELECT * FROM points WHERE id = $1', [point.id]);
     expect(result.rows[0].name).toBe(updatedData.name);
-    expect(result.rows[0].description).toBe(updatedData.description);
   });
 
   // Teste: deve retornar 404 quando o ponto não existe
@@ -97,7 +94,6 @@ describe('PUT /api/maps/[id]/points/[pointId]', () => {
 
     const request = testHelper.put(`/api/maps/${fakeId}/points/${fakeId}`, {
       name: 'Ponto Inexistente',
-      description: 'Descrição',
     });
 
     const params = { params: Promise.resolve({ id: fakeId, pointId: fakeId }) };
@@ -106,29 +102,6 @@ describe('PUT /api/maps/[id]/points/[pointId]', () => {
     expect(response.status).toBe(404);
   });
 
-  // Teste: deve atualizar um ponto com descrição vazia
-  it('deve atualizar um ponto com descrição vazia', async () => {
-    // Cria um mapa e um ponto com descrição
-    const map = await testHelper.insertMap();
-    const point = await testHelper.insertPoint(map.id);
-
-    // Atualiza com descrição vazia
-    const updatedData = {
-      name: 'Ponto Sem Descrição',
-      description: '',
-    };
-    const request = testHelper.put(`/api/maps/${map.id}/points/${point.id}`, updatedData);
-
-    const params = { params: Promise.resolve({ id: map.id, pointId: point.id }) };
-
-    const response = await PUT(request, params);
-    expect(response.status).toBe(204);
-
-    // Verifica se a descrição foi atualizada para vazio
-    const result = await connection.query('SELECT * FROM points WHERE id = $1', [point.id]);
-    expect(result.rows[0].name).toBe(updatedData.name);
-    expect(result.rows[0].description).toBe(updatedData.description);
-  });
   // Teste: não deve permitir atualizar ponto deletado (retorna 404)
   it('não deve permitir atualizar ponto deletado (retorna 404)', async () => {
     // Cria um mapa e um ponto já deletado
@@ -138,7 +111,6 @@ describe('PUT /api/maps/[id]/points/[pointId]', () => {
     // Tenta atualizar o ponto deletado
     const request = testHelper.put(`/api/maps/${map.id}/points/${point.id}`, {
       name: 'Tentativa de Atualização',
-      description: 'Não deveria funcionar',
     });
 
     const params = { params: Promise.resolve({ id: map.id, pointId: point.id }) };
@@ -154,7 +126,6 @@ describe('PUT /api/maps/[id]/points/[pointId]', () => {
 
     const request = testHelper.put(`/api/maps/${map.id}/points/${point.id}`, {
       name: '', // name vazio
-      description: 'Descrição válida',
     });
 
     const params = { params: Promise.resolve({ id: map.id, pointId: point.id }) };
@@ -175,7 +146,6 @@ describe('PUT /api/maps/[id]/points/[pointId]', () => {
     // Tenta atualizar enviando latitude e longitude
     const request = testHelper.put(`/api/maps/${map.id}/points/${point.id}`, {
       name: 'Nome Atualizado',
-      description: 'Descrição atualizada',
       latitude: -22.9068,
       longitude: -43.1729,
     });

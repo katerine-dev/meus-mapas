@@ -5,7 +5,6 @@ import * as errors from './errors';
 interface CreatePointData {
   mapId: string;
   name: string;
-  description?: string;
   latitude: number;
   longitude: number;
 }
@@ -17,7 +16,6 @@ function mapRowToPoint(row: Record<string, unknown>): Point {
     id: row.id as string,
     mapId: row.map_id as string,
     name: row.name as string,
-    description: row.description as string | undefined,
     location: { longitude: location.x, latitude: location.y },
     createdAt: row.created_at as Date,
     updatedAt: row.updated_at as Date,
@@ -27,16 +25,16 @@ function mapRowToPoint(row: Record<string, unknown>): Point {
 
 // Função que cria um novo ponto no banco de dados
 export async function createPoint(data: CreatePointData): Promise<string> {
-  const { mapId: mapId, name, description, latitude, longitude } = data;
+  const { mapId: mapId, name, latitude, longitude } = data;
 
   try {
     // Insere o ponto usando a função POINT(longitude, latitude)
     // O PostgreSQL POINT usa formato (x, y) onde x=longitude, y=latitude
     const result = await connection.query(
-      `INSERT INTO points (map_id, name, description, location)
-       VALUES ($1, $2, $3, POINT($4, $5))
+      `INSERT INTO points (map_id, name, location)
+       VALUES ($1, $2, POINT($3, $4))
        RETURNING id`,
-      [mapId, name, description, longitude, latitude]
+      [mapId, name, longitude, latitude]
     );
 
     return result.rows[0].id;
@@ -85,19 +83,18 @@ export async function getPointById(id: string): Promise<Point | null> {
 interface UpdatePointData {
   id: string;
   name: string;
-  description?: string;
 }
 
-// Função que atualiza um ponto (apenas nome e descrição, não permite alterar localização)
+// Função que atualiza um ponto (apenas nome, não permite alterar localização)
 export async function updatePoint(data: UpdatePointData): Promise<Point | null> {
-  const { id, name, description } = data;
+  const { id, name } = data;
 
   const result = await connection.query(
     `UPDATE points
-     SET name = $2, description = $3, updated_at = NOW()
+     SET name = $2, updated_at = NOW()
      WHERE id = $1 AND deleted_at IS NULL
      RETURNING *`,
-    [id, name, description]
+    [id, name]
   );
 
   if (result.rows.length === 0) {
