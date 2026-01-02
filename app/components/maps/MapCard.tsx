@@ -14,6 +14,7 @@ interface MapCardProps {
   id: string;
   name: string;
   description?: string;
+  pointsCount: number;
   updatedAt: Date;
   createdAt: Date;
   onEdit: () => void;
@@ -25,6 +26,7 @@ interface MapCardProps {
 export default function MapCard({
   name,
   description,
+  pointsCount,
   updatedAt,
   onEdit,
   onOpen,
@@ -121,6 +123,7 @@ export default function MapCard({
       <div className="p-4">
         <h3 className="text-text-primary text-lg font-semibold">{name}</h3>
         <p className="text-text-muted text-sm">{description || 'Sem descrição'}</p>
+        <p className="text-primary mt-2 text-sm font-medium">Pontos cadastrados ({pointsCount})</p>
         <p className="text-text-placeholder mt-1 text-xs">Atualizado em {formattedDate}</p>
       </div>
     </div>

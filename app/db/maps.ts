@@ -20,6 +20,7 @@ function mapRowToMap(row: Record<string, unknown>): Map {
     id: row.id as string,
     name: row.name as string,
     description: row.description as string | undefined,
+    pointsCount: Number(row.points_count ?? 0),
     createdAt: row.created_at as Date,
     updatedAt: row.updated_at as Date,
     deletedAt: row.deleted_at as Date | null,
@@ -29,8 +30,13 @@ function mapRowToMap(row: Record<string, unknown>): Map {
 export async function getAllMaps(): Promise<Map[]> {
   // Ordenados por data de criação (mais recente primeiro)
   // Retorna apenas registros ativos (deleted_at IS NULL)
+  // Inclui contagem de pontos ativos de cada mapa
   const result = await connection.query(
-    `SELECT * FROM maps WHERE deleted_at IS NULL ORDER BY created_at DESC`
+    `SELECT *,
+       (SELECT COUNT(*) FROM points WHERE map_id = maps.id AND deleted_at IS NULL) AS points_count
+     FROM maps
+     WHERE deleted_at IS NULL
+     ORDER BY created_at DESC`
   );
 
   return result.rows.map(mapRowToMap);

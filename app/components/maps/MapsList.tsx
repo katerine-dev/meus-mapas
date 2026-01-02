@@ -190,6 +190,7 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
               id={map.id}
               name={map.name}
               description={map.description}
+              pointsCount={map.pointsCount}
               updatedAt={map.updatedAt}
               createdAt={map.createdAt}
               onEdit={() => openEditModal(map)}
