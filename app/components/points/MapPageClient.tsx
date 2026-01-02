@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import { PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { Point } from '@/app/model/point';
 import { Map } from '@/app/model/map';
 import PointsList from './PointsList';
@@ -15,7 +15,7 @@ const LeafletMap = dynamic(() => import('./LeafletMap'), {
   ssr: false,
   loading: () => (
     <div className="flex h-full items-center justify-center bg-gray-100">
-      <p className="text-purple-main">Carregando mapa...</p>
+      <ArrowPathIcon className="h-8 w-8 animate-spin text-purple-main" />
     </div>
   ),
 });
