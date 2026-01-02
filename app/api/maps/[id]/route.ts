@@ -4,15 +4,18 @@ import * as mapsDb from '@/app/db/maps';
 import { validateMapData } from '@/app/utils/validation';
 
 // Handler GET - Busca um mapa específico pelo ID
-// O _request é prefixado com _ pois não é utilizado, mas é obrigatório na assinatura
-export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   // Aguarda a resolução dos parâmetros da rota
   const { id } = await params;
 
-  // Busca o mapa no banco de dados pelo ID
-  const map = await mapsDb.getMapById(id);
+  // Verifica query param para incluir deletados
+  const url = new URL(request.url);
+  const includeDeleted = url.searchParams.get('include_deleted') === 'true';
 
-  // Se o mapa não existir, retorna 404 Not Found
+  // Busca o mapa no banco de dados pelo ID
+  const map = await mapsDb.getMapById(id, { includeDeleted });
+
+  // Se o mapa não existir (ou estiver deletado e include_deleted=false), retorna 404 Not Found
   if (!map) {
     return new Response(null, { status: 404 });
   }
@@ -37,6 +40,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   }
 
   // Atualiza o mapa no banco de dados com os novos valores
+  // updateMap retorna null se o mapa não existir ou estiver deletado
   const map = await mapsDb.updateMap({
     id,
     // Remove espaços em branco do início e fim do nome antes de salvar
@@ -44,7 +48,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     description: body.description,
   });
 
-  // Se o mapa não existir, retorna 404 Not Found
+  // Se o mapa não existir ou estiver deletado, retorna 404 Not Found
   if (!map) {
     return new Response(null, { status: 404 });
   }
@@ -53,20 +57,29 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   return new Response(null, { status: 204 });
 }
 
-// Handler DELETE - Remove um mapa pelo ID
-// O _request é prefixado com _ pois não é utilizado, mas é obrigatório na assinatura
+// Handler DELETE - Soft delete de um mapa pelo ID
+// Também faz soft delete de todos os pontos associados (cascade)
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   // Aguarda a resolução dos parâmetros da rota
   const { id } = await params;
 
-  // Tenta deletar o mapa do banco de dados
-  const deleted = await mapsDb.deleteMap(id);
+  // Tenta fazer soft delete do mapa (e seus pontos) no banco de dados
+  const deletedMap = await mapsDb.deleteMap(id);
 
-  // Se o mapa não existir, retorna 404 Not Found
-  if (!deleted) {
+  // Se o mapa não existir ou já estiver deletado, retorna 404 Not Found
+  if (!deletedMap) {
     return new Response(null, { status: 404 });
   }
 
-  // Retorna 204 No Content indicando exclusão bem-sucedida
-  return new Response(null, { status: 204 });
+  // Retorna 200 OK com os dados do mapa deletado, incluindo deleted_at
+  // Exemplo de resposta:
+  // {
+  //   "id": "uuid",
+  //   "name": "Mapa Exemplo",
+  //   "description": "Descrição",
+  //   "createdAt": "2026-01-02T10:00:00.000Z",
+  //   "updatedAt": "2026-01-02T10:00:00.000Z",
+  //   "deletedAt": "2026-01-02T12:30:45.123Z"
+  // }
+  return Response.json(deletedMap);
 }

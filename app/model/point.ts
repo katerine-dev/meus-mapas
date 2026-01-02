@@ -11,4 +11,5 @@ export interface Point {
   location: Location;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt: Date | null;
 }

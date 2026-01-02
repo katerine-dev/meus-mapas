@@ -54,7 +54,8 @@ describe('Buscando todos os mapas', () => {
 
   // Teste: deve retornar todos os mapas com os valores esperados
   it('deve retornar todos os mapas com os valores esperados', async () => {
-    const response = await GET();
+    const request = testHelper.get('/api/maps');
+    const response = await GET(request);
     expect(response.status).toBe(200);
 
     const maps = await response.json();
@@ -70,11 +71,39 @@ describe('Buscando todos os mapas', () => {
     expect(maps[2].name).toBe(map1.name);
     expect(maps[2].description).toBe(map1.description);
 
-    // Verifica se todos os mapas têm id e timestamps como strings
-    maps.forEach((map: { id: string; createdAt: string; updatedAt: string }) => {
+    // Verifica se todos os mapas têm id, timestamps e deletedAt null
+    maps.forEach((map: { id: string; createdAt: string; updatedAt: string; deletedAt: null }) => {
       expect(uuid.validate(map.id)).toBe(true);
       expect(typeof map.createdAt).toBe('string');
       expect(typeof map.updatedAt).toBe('string');
+      expect(map.deletedAt).toBeNull();
     });
+  });
+
+  // Teste: não deve retornar mapas deletados por padrão
+  it('não deve retornar mapas deletados por padrão', async () => {
+    // Faz soft delete de um mapa
+    await connection.query('UPDATE maps SET deleted_at = NOW() WHERE name = $1', [map1.name]);
+
+    const request = testHelper.get('/api/maps');
+    const response = await GET(request);
+    expect(response.status).toBe(200);
+
+    const maps = await response.json();
+    expect(maps).toHaveLength(2);
+    expect(maps.every((m: { name: string }) => m.name !== map1.name)).toBe(true);
+  });
+
+  // Teste: deve retornar mapas deletados quando include_deleted=true
+  it('deve retornar mapas deletados quando include_deleted=true', async () => {
+    const request = testHelper.get('/api/maps?include_deleted=true');
+    const response = await GET(request);
+    expect(response.status).toBe(200);
+
+    const maps = await response.json();
+    expect(maps).toHaveLength(3);
+    const deletedMap = maps.find((m: { name: string }) => m.name === map1.name);
+    expect(deletedMap).toBeDefined();
+    expect(deletedMap.deletedAt).not.toBeNull();
   });
 });

@@ -28,6 +28,7 @@ describe('GET /api/maps/[id]', () => {
     expect(body.id).toBe(mapId);
     expect(body.name).toBe(mapData.name);
     expect(body.description).toBe(mapData.description);
+    expect(body.deletedAt).toBeNull();
   });
 
   // Teste: deve retornar 404 quando o mapa não existe
@@ -40,6 +41,36 @@ describe('GET /api/maps/[id]', () => {
 
     const response = await GET(request, params);
     expect(response.status).toBe(404);
+  });
+
+  // Teste: deve retornar 404 para mapa deletado (soft delete)
+  it('deve retornar 404 para mapa deletado (soft delete)', async () => {
+    // Cria um mapa e faz soft delete
+    const mapId = await mapsDb.createMap({ name: 'Mapa Deletado', description: 'Será deletado' });
+    await mapsDb.deleteMap(mapId);
+
+    const params = { params: Promise.resolve({ id: mapId }) };
+    const request = new Request(`http://localhost/api/maps/${mapId}`);
+
+    const response = await GET(request, params);
+    expect(response.status).toBe(404);
+  });
+
+  // Teste: deve retornar mapa deletado quando include_deleted=true
+  it('deve retornar mapa deletado quando include_deleted=true', async () => {
+    // Cria um mapa e faz soft delete
+    const mapId = await mapsDb.createMap({ name: 'Mapa Deletado', description: 'Será deletado' });
+    await mapsDb.deleteMap(mapId);
+
+    const params = { params: Promise.resolve({ id: mapId }) };
+    const request = new Request(`http://localhost/api/maps/${mapId}?include_deleted=true`);
+
+    const response = await GET(request, params);
+    expect(response.status).toBe(200);
+
+    const body = await response.json();
+    expect(body.id).toBe(mapId);
+    expect(body.deletedAt).not.toBeNull();
   });
 });
 
@@ -111,6 +142,27 @@ describe('PUT /api/maps/[id]', () => {
     expect(result.rows[0].name).toBe(updatedData.name);
     expect(result.rows[0].description).toBe(updatedData.description);
   });
+
+  // Teste: não deve permitir atualizar mapa deletado (retorna 404)
+  it('não deve permitir atualizar mapa deletado (retorna 404)', async () => {
+    // Cria um mapa e faz soft delete
+    const mapId = await mapsDb.createMap({
+      name: 'Mapa Deletado',
+      description: 'Será deletado',
+    });
+    await mapsDb.deleteMap(mapId);
+
+    // Tenta atualizar o mapa deletado
+    const request = testHelper.put(`/api/maps/${mapId}`, {
+      name: 'Tentativa de Atualização',
+      description: 'Não deveria funcionar',
+    });
+
+    const params = { params: Promise.resolve({ id: mapId }) };
+
+    const response = await PUT(request, params);
+    expect(response.status).toBe(404);
+  });
 });
 
 describe('DELETE /api/maps/[id]', () => {
@@ -119,8 +171,8 @@ describe('DELETE /api/maps/[id]', () => {
     await testHelper.cleanDatabase();
   });
 
-  // Teste: deve deletar um mapa existente e retornar 204
-  it('deve deletar um mapa existente e retornar 204', async () => {
+  // Teste: deve fazer soft delete de um mapa existente e retornar 200 com dados
+  it('deve fazer soft delete de um mapa existente e retornar 200 com dados', async () => {
     // Primeiro cria um mapa no banco
     const mapId = await mapsDb.createMap({
       name: 'Mapa para Deletar',
@@ -133,11 +185,18 @@ describe('DELETE /api/maps/[id]', () => {
     const request = new Request(`http://localhost/api/maps/${mapId}`, { method: 'DELETE' });
 
     const response = await DELETE(request, params);
-    expect(response.status).toBe(204);
+    expect(response.status).toBe(200);
 
-    // Verifica se o mapa foi realmente deletado do banco
+    // Verifica o corpo da resposta
+    const body = await response.json();
+    expect(body.id).toBe(mapId);
+    expect(body.name).toBe('Mapa para Deletar');
+    expect(body.deletedAt).not.toBeNull();
+
+    // Verifica se o mapa ainda existe no banco mas com deleted_at preenchido
     const result = await connection.query('SELECT * FROM maps WHERE id = $1', [mapId]);
-    expect(result.rows).toHaveLength(0);
+    expect(result.rows).toHaveLength(1);
+    expect(result.rows[0].deleted_at).not.toBeNull();
   });
 
   // Teste: deve retornar 404 ao tentar deletar mapa inexistente
@@ -150,5 +209,54 @@ describe('DELETE /api/maps/[id]', () => {
 
     const response = await DELETE(request, params);
     expect(response.status).toBe(404);
+  });
+
+  // Teste: deve retornar 404 ao tentar deletar mapa já deletado
+  it('deve retornar 404 ao tentar deletar mapa já deletado', async () => {
+    // Cria um mapa e faz soft delete
+    const mapId = await mapsDb.createMap({
+      name: 'Mapa Deletado',
+      description: 'Já deletado',
+    });
+    await mapsDb.deleteMap(mapId);
+
+    const params = { params: Promise.resolve({ id: mapId }) };
+    const request = new Request(`http://localhost/api/maps/${mapId}`, { method: 'DELETE' });
+
+    const response = await DELETE(request, params);
+    expect(response.status).toBe(404);
+  });
+
+  // Teste: deve fazer soft delete dos pontos associados ao mapa (cascade)
+  it('deve fazer soft delete dos pontos associados ao mapa (cascade)', async () => {
+    // Cria um mapa
+    const mapId = await mapsDb.createMap({
+      name: 'Mapa com Pontos',
+      description: 'Tem pontos que serão deletados',
+    });
+
+    // Cria pontos associados ao mapa
+    await connection.query(
+      'INSERT INTO points (map_id, name, location) VALUES ($1, $2, POINT($3, $4))',
+      [mapId, 'Ponto 1', -46.6333, -23.5505]
+    );
+    await connection.query(
+      'INSERT INTO points (map_id, name, location) VALUES ($1, $2, POINT($3, $4))',
+      [mapId, 'Ponto 2', -43.1729, -22.9068]
+    );
+
+    // Faz soft delete do mapa
+    const params = { params: Promise.resolve({ id: mapId }) };
+    const request = new Request(`http://localhost/api/maps/${mapId}`, { method: 'DELETE' });
+
+    const response = await DELETE(request, params);
+    expect(response.status).toBe(200);
+
+    // Verifica se os pontos também foram soft deleted
+    const pointsResult = await connection.query('SELECT * FROM points WHERE map_id = $1', [mapId]);
+    expect(pointsResult.rows).toHaveLength(2);
+    pointsResult.rows.forEach((point) => {
+      expect(point.deleted_at).not.toBeNull();
+    });
   });
 });

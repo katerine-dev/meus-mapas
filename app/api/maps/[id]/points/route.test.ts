@@ -99,6 +99,41 @@ describe('Criando um novo ponto', () => {
     expect(body.error).toBe('name, latitude e longitude são obrigatórios');
   });
 
+  // Teste: deve retornar 404 se o mapa não existir
+  it('deve retornar 404 se o mapa não existir', async () => {
+    const fakeMapId = '00000000-0000-0000-0000-000000000000';
+    const request = testHelper.post(`/api/maps/${fakeMapId}/points`, {
+      name: 'Ponto X',
+      latitude: -23.5629,
+      longitude: -46.6544,
+    });
+
+    const params = { params: Promise.resolve({ id: fakeMapId }) };
+    const response = await POST(request, params);
+    expect(response.status).toBe(404);
+  });
+
+  // Teste: deve retornar 404 se o mapa estiver deletado
+  it('deve retornar 404 se o mapa estiver deletado', async () => {
+    // Cria um mapa e faz soft delete
+    const result = await connection.query(
+      'INSERT INTO maps (name, description) VALUES ($1, $2) RETURNING id',
+      ['Mapa Deletado', 'Será deletado']
+    );
+    const deletedMapId = result.rows[0].id;
+    await connection.query('UPDATE maps SET deleted_at = NOW() WHERE id = $1', [deletedMapId]);
+
+    const request = testHelper.post(`/api/maps/${deletedMapId}/points`, {
+      name: 'Ponto Y',
+      latitude: -23.5629,
+      longitude: -46.6544,
+    });
+
+    const params = { params: Promise.resolve({ id: deletedMapId }) };
+    const response = await POST(request, params);
+    expect(response.status).toBe(404);
+  });
+
   // Teste: deve aceitar latitude e longitude com valores negativos
   it('deve aceitar latitude e longitude com valores negativos', async () => {
     const request = testHelper.post(`/api/maps/${mapId}/points`, {
@@ -205,11 +240,13 @@ describe('Buscando todos os pontos', () => {
     expect(points[0].description).toBe(point2.description);
     expect(points[0].location.longitude).toBeCloseTo(point2.location.longitude, 4);
     expect(points[0].location.latitude).toBeCloseTo(point2.location.latitude, 4);
+    expect(points[0].deletedAt).toBeNull();
 
     expect(points[1].name).toBe(point1.name);
     expect(points[1].description).toBe(point1.description);
     expect(points[1].location.longitude).toBeCloseTo(point1.location.longitude, 4);
     expect(points[1].location.latitude).toBeCloseTo(point1.location.latitude, 4);
+    expect(points[1].deletedAt).toBeNull();
 
     points.forEach((point: { createdAt: string; updatedAt: string }) => {
       expect(typeof point.createdAt).toBe('string');
@@ -229,5 +266,64 @@ describe('Buscando todos os pontos', () => {
 
     const points = await response.json();
     expect(points).toHaveLength(0);
+  });
+
+  // Teste: não deve retornar pontos deletados por padrão
+  it('não deve retornar pontos deletados por padrão', async () => {
+    // Recria os pontos
+    const query =
+      'INSERT INTO points (map_id, name, description, location) VALUES ($1, $2, $3, POINT($4, $5)) RETURNING id';
+    await connection.query(query, [
+      mapId,
+      point1.name,
+      point1.description,
+      point1.location.longitude,
+      point1.location.latitude,
+    ]);
+    const result = await connection.query(query, [
+      mapId,
+      point2.name,
+      point2.description,
+      point2.location.longitude,
+      point2.location.latitude,
+    ]);
+
+    // Faz soft delete de um ponto
+    await connection.query('UPDATE points SET deleted_at = NOW() WHERE id = $1', [
+      result.rows[0].id,
+    ]);
+
+    const request = new Request(`http://localhost/api/maps/${mapId}/points`);
+    const params = { params: Promise.resolve({ id: mapId }) };
+    const response = await GET(request, params);
+    expect(response.status).toBe(200);
+
+    const points = await response.json();
+    expect(points).toHaveLength(1);
+    expect(points[0].name).toBe(point1.name);
+  });
+
+  // Teste: deve retornar pontos deletados quando include_deleted=true
+  it('deve retornar pontos deletados quando include_deleted=true', async () => {
+    const request = new Request(`http://localhost/api/maps/${mapId}/points?include_deleted=true`);
+    const params = { params: Promise.resolve({ id: mapId }) };
+    const response = await GET(request, params);
+    expect(response.status).toBe(200);
+
+    const points = await response.json();
+    expect(points).toHaveLength(2);
+
+    const deletedPoint = points.find((p: { name: string }) => p.name === point2.name);
+    expect(deletedPoint).toBeDefined();
+    expect(deletedPoint.deletedAt).not.toBeNull();
+  });
+
+  // Teste: deve retornar 404 se o mapa não existir
+  it('deve retornar 404 se o mapa não existir', async () => {
+    const fakeMapId = '00000000-0000-0000-0000-000000000000';
+    const request = new Request(`http://localhost/api/maps/${fakeMapId}/points`);
+    const params = { params: Promise.resolve({ id: fakeMapId }) };
+    const response = await GET(request, params);
+    expect(response.status).toBe(404);
   });
 });

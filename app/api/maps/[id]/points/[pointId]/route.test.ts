@@ -44,6 +44,7 @@ describe('GET /api/maps/[id]/points/[pointId]', () => {
     expect(body.description).toBe(pointData.description);
     expect(body.location.longitude).toBeCloseTo(pointData.longitude, 4);
     expect(body.location.latitude).toBeCloseTo(pointData.latitude, 4);
+    expect(body.deletedAt).toBeNull();
   });
 
   // Teste: deve retornar 404 quando o ponto não existe
@@ -56,6 +57,62 @@ describe('GET /api/maps/[id]/points/[pointId]', () => {
 
     const response = await GET(request, params);
     expect(response.status).toBe(404);
+  });
+
+  // Teste: deve retornar 404 para ponto deletado (soft delete)
+  it('deve retornar 404 para ponto deletado (soft delete)', async () => {
+    // Cria um mapa e um ponto
+    const mapId = await mapsDb.createMap({
+      name: 'Mapa Teste',
+      description: 'Descrição do mapa',
+    });
+    const pointId = await pointsDb.createPoint({
+      mapId,
+      name: 'Ponto Deletado',
+      description: 'Será deletado',
+      latitude: -23.5505,
+      longitude: -46.6333,
+    });
+
+    // Faz soft delete do ponto
+    await pointsDb.deletePoint(pointId);
+
+    const params = { params: Promise.resolve({ id: mapId, pointId }) };
+    const request = new Request(`http://localhost/api/maps/${mapId}/points/${pointId}`);
+
+    const response = await GET(request, params);
+    expect(response.status).toBe(404);
+  });
+
+  // Teste: deve retornar ponto deletado quando include_deleted=true
+  it('deve retornar ponto deletado quando include_deleted=true', async () => {
+    // Cria um mapa e um ponto
+    const mapId = await mapsDb.createMap({
+      name: 'Mapa Teste',
+      description: 'Descrição do mapa',
+    });
+    const pointId = await pointsDb.createPoint({
+      mapId,
+      name: 'Ponto Deletado',
+      description: 'Será deletado',
+      latitude: -23.5505,
+      longitude: -46.6333,
+    });
+
+    // Faz soft delete do ponto
+    await pointsDb.deletePoint(pointId);
+
+    const params = { params: Promise.resolve({ id: mapId, pointId }) };
+    const request = new Request(
+      `http://localhost/api/maps/${mapId}/points/${pointId}?include_deleted=true`
+    );
+
+    const response = await GET(request, params);
+    expect(response.status).toBe(200);
+
+    const body = await response.json();
+    expect(body.id).toBe(pointId);
+    expect(body.deletedAt).not.toBeNull();
   });
 });
 
@@ -157,6 +214,37 @@ describe('PUT /api/maps/[id]/points/[pointId]', () => {
     expect(result.rows[0].name).toBe(updatedData.name);
     expect(result.rows[0].description).toBe(updatedData.description);
   });
+  // Teste: não deve permitir atualizar ponto deletado (retorna 404)
+  it('não deve permitir atualizar ponto deletado (retorna 404)', async () => {
+    // Cria um mapa e um ponto
+    const mapId = await mapsDb.createMap({
+      name: 'Mapa Teste',
+      description: 'Descrição do mapa',
+    });
+    const pointId = await pointsDb.createPoint({
+      mapId,
+      name: 'Ponto Deletado',
+      description: 'Será deletado',
+      latitude: -23.5505,
+      longitude: -46.6333,
+    });
+
+    // Faz soft delete do ponto
+    await pointsDb.deletePoint(pointId);
+
+    // Tenta atualizar o ponto deletado
+    const request = testHelper.put(`/api/maps/${mapId}/points/${pointId}`, {
+      name: 'Tentativa de Atualização',
+      description: 'Não deveria funcionar',
+      latitude: -22.9068,
+      longitude: -43.1729,
+    });
+
+    const params = { params: Promise.resolve({ id: mapId, pointId }) };
+
+    const response = await PUT(request, params);
+    expect(response.status).toBe(404);
+  });
 });
 
 describe('DELETE /api/maps/[id]/points/[pointId]', () => {
@@ -165,8 +253,8 @@ describe('DELETE /api/maps/[id]/points/[pointId]', () => {
     await testHelper.cleanDatabase();
   });
 
-  // Teste: deve deletar um ponto existente e retornar 204
-  it('deve deletar um ponto existente e retornar 204', async () => {
+  // Teste: deve fazer soft delete de um ponto existente e retornar 200 com dados
+  it('deve fazer soft delete de um ponto existente e retornar 200 com dados', async () => {
     // Primeiro cria um mapa no banco
     const mapId = await mapsDb.createMap({
       name: 'Mapa Teste',
@@ -190,11 +278,18 @@ describe('DELETE /api/maps/[id]/points/[pointId]', () => {
     });
 
     const response = await DELETE(request, params);
-    expect(response.status).toBe(204);
+    expect(response.status).toBe(200);
 
-    // Verifica se o ponto foi realmente deletado do banco
+    // Verifica o corpo da resposta
+    const body = await response.json();
+    expect(body.id).toBe(pointId);
+    expect(body.name).toBe('Ponto para Deletar');
+    expect(body.deletedAt).not.toBeNull();
+
+    // Verifica se o ponto ainda existe no banco mas com deleted_at preenchido
     const result = await connection.query('SELECT * FROM points WHERE id = $1', [pointId]);
-    expect(result.rows).toHaveLength(0);
+    expect(result.rows).toHaveLength(1);
+    expect(result.rows[0].deleted_at).not.toBeNull();
   });
 
   // Teste: deve retornar 404 ao tentar deletar ponto inexistente
@@ -204,6 +299,33 @@ describe('DELETE /api/maps/[id]/points/[pointId]', () => {
     const params = { params: Promise.resolve({ id: fakeId, pointId: fakeId }) };
     // Cria uma requisição mock para o DELETE
     const request = new Request(`http://localhost/api/maps/${fakeId}/points/${fakeId}`, {
+      method: 'DELETE',
+    });
+
+    const response = await DELETE(request, params);
+    expect(response.status).toBe(404);
+  });
+
+  // Teste: deve retornar 404 ao tentar deletar ponto já deletado
+  it('deve retornar 404 ao tentar deletar ponto já deletado', async () => {
+    // Cria um mapa e um ponto
+    const mapId = await mapsDb.createMap({
+      name: 'Mapa Teste',
+      description: 'Descrição do mapa',
+    });
+    const pointId = await pointsDb.createPoint({
+      mapId,
+      name: 'Ponto Deletado',
+      description: 'Já deletado',
+      latitude: -23.5505,
+      longitude: -46.6333,
+    });
+
+    // Faz soft delete do ponto
+    await pointsDb.deletePoint(pointId);
+
+    const params = { params: Promise.resolve({ id: mapId, pointId }) };
+    const request = new Request(`http://localhost/api/maps/${mapId}/points/${pointId}`, {
       method: 'DELETE',
     });
 

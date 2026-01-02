@@ -4,4 +4,5 @@ export interface Map {
   description?: string;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt: Date | null;
 }
