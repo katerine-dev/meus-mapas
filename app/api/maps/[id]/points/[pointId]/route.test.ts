@@ -32,7 +32,7 @@ describe('GET /api/maps/[id]/points/[pointId]', () => {
     // Simula os params da rota dinâmica
     const params = { params: Promise.resolve({ id: mapId, pointId }) };
     // Cria uma requisição mock para o GET
-    const request = new Request(`http://localhost/api/maps/${mapId}/points/${pointId}`);
+    const request = testHelper.get(`/api/maps/${mapId}/points/${pointId}`);
 
     const response = await GET(request, params);
     expect(response.status).toBe(200);
@@ -53,7 +53,7 @@ describe('GET /api/maps/[id]/points/[pointId]', () => {
     const fakeId = '00000000-0000-0000-0000-000000000000';
     const params = { params: Promise.resolve({ id: fakeId, pointId: fakeId }) };
     // Cria uma requisição mock para o GET
-    const request = new Request(`http://localhost/api/maps/${fakeId}/points/${fakeId}`);
+    const request = testHelper.get(`/api/maps/${fakeId}/points/${fakeId}`);
 
     const response = await GET(request, params);
     expect(response.status).toBe(404);
@@ -78,41 +78,10 @@ describe('GET /api/maps/[id]/points/[pointId]', () => {
     await pointsDb.deletePoint(pointId);
 
     const params = { params: Promise.resolve({ id: mapId, pointId }) };
-    const request = new Request(`http://localhost/api/maps/${mapId}/points/${pointId}`);
+    const request = testHelper.get(`/api/maps/${mapId}/points/${pointId}`);
 
     const response = await GET(request, params);
     expect(response.status).toBe(404);
-  });
-
-  // Teste: deve retornar ponto deletado quando include_deleted=true
-  it('deve retornar ponto deletado quando include_deleted=true', async () => {
-    // Cria um mapa e um ponto
-    const mapId = await mapsDb.createMap({
-      name: 'Mapa Teste',
-      description: 'Descrição do mapa',
-    });
-    const pointId = await pointsDb.createPoint({
-      mapId,
-      name: 'Ponto Deletado',
-      description: 'Será deletado',
-      latitude: -23.5505,
-      longitude: -46.6333,
-    });
-
-    // Faz soft delete do ponto
-    await pointsDb.deletePoint(pointId);
-
-    const params = { params: Promise.resolve({ id: mapId, pointId }) };
-    const request = new Request(
-      `http://localhost/api/maps/${mapId}/points/${pointId}?include_deleted=true`
-    );
-
-    const response = await GET(request, params);
-    expect(response.status).toBe(200);
-
-    const body = await response.json();
-    expect(body.id).toBe(pointId);
-    expect(body.deletedAt).not.toBeNull();
   });
 });
 
@@ -253,8 +222,8 @@ describe('DELETE /api/maps/[id]/points/[pointId]', () => {
     await testHelper.cleanDatabase();
   });
 
-  // Teste: deve fazer soft delete de um ponto existente e retornar 200 com dados
-  it('deve fazer soft delete de um ponto existente e retornar 200 com dados', async () => {
+  // Teste: deve fazer soft delete de um ponto existente e retornar 204
+  it('deve fazer soft delete de um ponto existente e retornar 204', async () => {
     // Primeiro cria um mapa no banco
     const mapId = await mapsDb.createMap({
       name: 'Mapa Teste',
@@ -273,18 +242,10 @@ describe('DELETE /api/maps/[id]/points/[pointId]', () => {
     // Simula os params da rota dinâmica
     const params = { params: Promise.resolve({ id: mapId, pointId }) };
     // Cria uma requisição mock para o DELETE
-    const request = new Request(`http://localhost/api/maps/${mapId}/points/${pointId}`, {
-      method: 'DELETE',
-    });
+    const request = testHelper.del(`/api/maps/${mapId}/points/${pointId}`);
 
     const response = await DELETE(request, params);
-    expect(response.status).toBe(200);
-
-    // Verifica o corpo da resposta
-    const body = await response.json();
-    expect(body.id).toBe(pointId);
-    expect(body.name).toBe('Ponto para Deletar');
-    expect(body.deletedAt).not.toBeNull();
+    expect(response.status).toBe(204);
 
     // Verifica se o ponto ainda existe no banco mas com deleted_at preenchido
     const result = await connection.query('SELECT * FROM points WHERE id = $1', [pointId]);
@@ -298,9 +259,7 @@ describe('DELETE /api/maps/[id]/points/[pointId]', () => {
     const fakeId = '00000000-0000-0000-0000-000000000000';
     const params = { params: Promise.resolve({ id: fakeId, pointId: fakeId }) };
     // Cria uma requisição mock para o DELETE
-    const request = new Request(`http://localhost/api/maps/${fakeId}/points/${fakeId}`, {
-      method: 'DELETE',
-    });
+    const request = testHelper.del(`/api/maps/${fakeId}/points/${fakeId}`);
 
     const response = await DELETE(request, params);
     expect(response.status).toBe(404);
@@ -325,9 +284,7 @@ describe('DELETE /api/maps/[id]/points/[pointId]', () => {
     await pointsDb.deletePoint(pointId);
 
     const params = { params: Promise.resolve({ id: mapId, pointId }) };
-    const request = new Request(`http://localhost/api/maps/${mapId}/points/${pointId}`, {
-      method: 'DELETE',
-    });
+    const request = testHelper.del(`/api/maps/${mapId}/points/${pointId}`);
 
     const response = await DELETE(request, params);
     expect(response.status).toBe(404);

@@ -9,11 +9,6 @@ interface CreatePointData {
   longitude: number;
 }
 
-// Opções para consultas que podem incluir registros deletados
-interface QueryOptions {
-  includeDeleted?: boolean;
-}
-
 // Helper para mapear row do banco para objeto Point
 function mapRowToPoint(row: Record<string, unknown>): Point {
   const location = row.location as { x: number; y: number };
@@ -46,19 +41,10 @@ export async function createPoint(data: CreatePointData): Promise<string> {
 }
 
 // Função que busca todos os pontos de um mapa específico
-export async function getPointsByMapId(
-  mapId: string,
-  options: QueryOptions = {}
-): Promise<Point[]> {
-  const { includeDeleted = false } = options;
-
-  // Por padrão, retorna apenas registros ativos (deleted_at IS NULL)
-  const whereClause = includeDeleted
-    ? 'WHERE map_id = $1'
-    : 'WHERE map_id = $1 AND deleted_at IS NULL';
-
+export async function getPointsByMapId(mapId: string): Promise<Point[]> {
+  // Retorna apenas registros ativos (deleted_at IS NULL)
   const result = await connection.query(
-    `SELECT * FROM points ${whereClause} ORDER BY created_at DESC`,
+    `SELECT * FROM points WHERE map_id = $1 AND deleted_at IS NULL ORDER BY created_at DESC`,
     [mapId]
   );
 
@@ -66,24 +52,20 @@ export async function getPointsByMapId(
 }
 
 // Função que busca todos os pontos
-export async function getAllPoints(options: QueryOptions = {}): Promise<Point[]> {
-  const { includeDeleted = false } = options;
-
-  const whereClause = includeDeleted ? '' : 'WHERE deleted_at IS NULL';
+export async function getAllPoints(): Promise<Point[]> {
   const result = await connection.query(
-    `SELECT * FROM points ${whereClause} ORDER BY created_at DESC`
+    `SELECT * FROM points WHERE deleted_at IS NULL ORDER BY created_at DESC`
   );
 
   return result.rows.map(mapRowToPoint);
 }
 
 // Função que busca um ponto específico pelo ID
-export async function getPointById(id: string, options: QueryOptions = {}): Promise<Point | null> {
-  const { includeDeleted = false } = options;
-
-  const whereClause = includeDeleted ? 'WHERE id = $1' : 'WHERE id = $1 AND deleted_at IS NULL';
-
-  const result = await connection.query(`SELECT * FROM points ${whereClause}`, [id]);
+export async function getPointById(id: string): Promise<Point | null> {
+  const result = await connection.query(
+    `SELECT * FROM points WHERE id = $1 AND deleted_at IS NULL`,
+    [id]
+  );
 
   if (result.rows.length === 0) {
     return null;

@@ -13,11 +13,6 @@ interface UpdateMapData {
   description?: string;
 }
 
-// Opções para consultas que podem incluir registros deletados
-interface QueryOptions {
-  includeDeleted?: boolean;
-}
-
 // Helper para mapear row do banco para objeto Map
 function mapRowToMap(row: Record<string, unknown>): Map {
   return {
@@ -30,14 +25,11 @@ function mapRowToMap(row: Record<string, unknown>): Map {
   };
 }
 
-export async function getAllMaps(options: QueryOptions = {}): Promise<Map[]> {
-  const { includeDeleted = false } = options;
-
+export async function getAllMaps(): Promise<Map[]> {
   // Ordenados por data de criação (mais recente primeiro)
-  // Por padrão, retorna apenas registros ativos (deleted_at IS NULL)
-  const whereClause = includeDeleted ? '' : 'WHERE deleted_at IS NULL';
+  // Retorna apenas registros ativos (deleted_at IS NULL)
   const result = await connection.query(
-    `SELECT * FROM maps ${whereClause} ORDER BY created_at DESC`
+    `SELECT * FROM maps WHERE deleted_at IS NULL ORDER BY created_at DESC`
   );
 
   return result.rows.map(mapRowToMap);
@@ -123,13 +115,11 @@ export async function deleteMap(id: string): Promise<Map | null> {
   }
 }
 
-export async function getMapById(id: string, options: QueryOptions = {}): Promise<Map | null> {
-  const { includeDeleted = false } = options;
-
-  // Por padrão, retorna apenas registros ativos
-  const whereClause = includeDeleted ? 'WHERE id = $1' : 'WHERE id = $1 AND deleted_at IS NULL';
-
-  const result = await connection.query(`SELECT * FROM maps ${whereClause}`, [id]);
+export async function getMapById(id: string): Promise<Map | null> {
+  // Retorna apenas registros ativos
+  const result = await connection.query(`SELECT * FROM maps WHERE id = $1 AND deleted_at IS NULL`, [
+    id,
+  ]);
 
   // Retorna o mapa encontrado ou null se não existir (ou estiver deletado)
   if (result.rows.length === 0) {

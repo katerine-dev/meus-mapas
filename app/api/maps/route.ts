@@ -20,11 +20,7 @@ export async function POST(request: Request) {
   return Response.json({ id }, { status: 201 });
 }
 
-export async function GET(request: Request) {
-  // Verifica query param para incluir deletados
-  const url = new URL(request.url);
-  const includeDeleted = url.searchParams.get('include_deleted') === 'true';
-
-  const maps = await mapsDb.getAllMaps({ includeDeleted });
+export async function GET(_request: Request) {
+  const maps = await mapsDb.getAllMaps();
   return Response.json(maps);
 }

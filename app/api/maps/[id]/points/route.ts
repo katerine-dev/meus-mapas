@@ -11,11 +11,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     return new Response(null, { status: 404 });
   }
 
-  // Verifica query param para incluir deletados
-  const url = new URL(request.url);
-  const includeDeleted = url.searchParams.get('include_deleted') === 'true';
-
-  const points = await pointsDb.getPointsByMapId(id, { includeDeleted });
+  const points = await pointsDb.getPointsByMapId(id);
   return Response.json(points);
 }
 

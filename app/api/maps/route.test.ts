@@ -91,19 +91,6 @@ describe('Buscando todos os mapas', () => {
 
     const maps = await response.json();
     expect(maps).toHaveLength(2);
-    expect(maps.every((m: { name: string }) => m.name !== map1.name)).toBe(true);
-  });
-
-  // Teste: deve retornar mapas deletados quando include_deleted=true
-  it('deve retornar mapas deletados quando include_deleted=true', async () => {
-    const request = testHelper.get('/api/maps?include_deleted=true');
-    const response = await GET(request);
-    expect(response.status).toBe(200);
-
-    const maps = await response.json();
-    expect(maps).toHaveLength(3);
-    const deletedMap = maps.find((m: { name: string }) => m.name === map1.name);
-    expect(deletedMap).toBeDefined();
-    expect(deletedMap.deletedAt).not.toBeNull();
+    expect(maps.every((map: { name: string }) => map.name !== map1.name)).toBe(true);
   });
 });

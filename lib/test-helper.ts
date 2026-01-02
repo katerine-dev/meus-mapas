@@ -25,6 +25,13 @@ export function get(url: string) {
   });
 }
 
+// Função auxiliar para criar uma requisição DELETE para testes
+export function del(url: string) {
+  return new Request(`http://localhost${url}`, {
+    method: 'DELETE',
+  });
+}
+
 // Função para limpar todas as tabelas do banco de dados de teste
 export async function cleanDatabase() {
   // Consulta todas as tabelas do schema 'public', excluindo a tabela de migrações

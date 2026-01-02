@@ -2,16 +2,12 @@ import * as pointsDb from '@/app/db/points';
 
 // Handler GET - Busca um ponto específico pelo ID
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string; pointId: string }> }
 ) {
   const { pointId } = await params;
 
-  // Verifica query param para incluir deletados
-  const url = new URL(request.url);
-  const includeDeleted = url.searchParams.get('include_deleted') === 'true';
-
-  const point = await pointsDb.getPointById(pointId, { includeDeleted });
+  const point = await pointsDb.getPointById(pointId);
 
   if (!point) {
     return new Response(null, { status: 404 });
@@ -60,17 +56,5 @@ export async function DELETE(
     return new Response(null, { status: 404 });
   }
 
-  // Retorna 200 OK com os dados do ponto deletado, incluindo deleted_at
-  // Exemplo de resposta:
-  // {
-  //   "id": "uuid",
-  //   "mapId": "uuid",
-  //   "name": "Ponto Exemplo",
-  //   "description": "Descrição",
-  //   "location": { "longitude": -46.6333, "latitude": -23.5505 },
-  //   "createdAt": "2026-01-02T10:00:00.000Z",
-  //   "updatedAt": "2026-01-02T10:00:00.000Z",
-  //   "deletedAt": "2026-01-02T12:30:45.123Z"
-  // }
-  return Response.json(deletedPoint);
+  return new Response(null, { status: 204 });
 }
