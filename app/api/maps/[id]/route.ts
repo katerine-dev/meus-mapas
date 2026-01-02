@@ -1,7 +1,7 @@
 // Importa as funções de acesso ao banco de dados de mapas
 import * as mapsDb from '@/app/db/maps';
 // Importa a função de validação e tipos de erro do utilitário de validação
-import { validateMapData } from '@/app/utils/validation';
+import { validateMapData } from '@/app/validation/map';
 
 // Handler GET - Busca um mapa específico pelo ID
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {

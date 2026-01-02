@@ -1,7 +1,7 @@
 import * as pointsDb from '@/app/db/points';
 import * as mapsDb from '@/app/db/maps';
 import { DuplicateNameError } from '@/app/db/errors';
-import { validatePointData } from '@/app/utils/validation';
+import { validatePointData } from '@/app/validation/point';
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

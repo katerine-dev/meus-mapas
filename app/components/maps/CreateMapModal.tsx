@@ -5,7 +5,8 @@ import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import TextArea from '../ui/TextArea';
-import { validateMapData, ValidationError } from '@/app/utils/validation';
+import { validateMapData } from '@/app/validation/map';
+import type { ValidationError } from '@/app/validation/types';
 
 interface CreateMapModalProps {
   isOpen: boolean;
@@ -45,7 +46,7 @@ export default function CreateMapModal({ isOpen, onClose, onSubmit }: CreateMapM
       <div className="flex flex-col gap-4">
         {/* Título */}
         <div className="flex justify-center">
-          <h1 className="text-purple-main text-2xl font-semibold">Criar Novo Mapa</h1>
+          <h1 className="text-2xl font-semibold text-purple-main">Criar Novo Mapa</h1>
         </div>
 
         <div>

@@ -1,6 +1,6 @@
 import * as mapsDb from '@/app/db/maps';
 import { DuplicateNameError } from '@/app/db/errors';
-import { validateMapData } from '@/app/utils/validation';
+import { validateMapData } from '@/app/validation/map';
 
 export async function POST(request: Request) {
   const body = await request.json();
