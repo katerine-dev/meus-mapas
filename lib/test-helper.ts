@@ -74,6 +74,7 @@ export async function insertMap(overrides: { deletedAt?: Date } = {}): Promise<M
     id: row.id,
     name: row.name,
     description: row.description,
+    pointsCount: 0,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     deletedAt: row.deleted_at,

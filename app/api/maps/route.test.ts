@@ -120,3 +120,49 @@ describe('Buscando todos os mapas', () => {
     expect(maps.every((map: { id: string }) => map.id !== map1.id)).toBe(true);
   });
 });
+
+describe('Contagem de pontos no mapa (pointsCount)', () => {
+  // Limpa o banco antes de cada teste
+  beforeEach(async () => {
+    await testHelper.cleanDatabase();
+  });
+
+  // Teste: mapa sem pontos deve ter pointsCount = 0
+  it('mapa sem pontos deve ter pointsCount = 0', async () => {
+    await testHelper.insertMap();
+
+    const request = testHelper.get('/api/maps');
+    const response = await GET(request);
+    const maps = await response.json();
+
+    expect(maps[0].pointsCount).toBe(0);
+  });
+
+  // Teste: mapa com pontos deve ter pointsCount correto
+  it('mapa com pontos deve ter pointsCount correto', async () => {
+    const map = await testHelper.insertMap();
+    await testHelper.insertPoint(map.id);
+    await testHelper.insertPoint(map.id);
+    await testHelper.insertPoint(map.id);
+
+    const request = testHelper.get('/api/maps');
+    const response = await GET(request);
+    const maps = await response.json();
+
+    expect(maps[0].pointsCount).toBe(3);
+  });
+
+  // Teste: pontos deletados não devem ser contados
+  it('pontos deletados não devem ser contados', async () => {
+    const map = await testHelper.insertMap();
+    await testHelper.insertPoint(map.id);
+    await testHelper.insertPoint(map.id);
+    await testHelper.insertPoint(map.id, { deletedAt: new Date() });
+
+    const request = testHelper.get('/api/maps');
+    const response = await GET(request);
+    const maps = await response.json();
+
+    expect(maps[0].pointsCount).toBe(2);
+  });
+});
