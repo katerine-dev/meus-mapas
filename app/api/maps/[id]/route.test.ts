@@ -190,14 +190,8 @@ describe('DELETE /api/maps/[id]', () => {
     const map = await testHelper.insertMap();
 
     // Cria pontos associados ao mapa
-    await connection.query(
-      'INSERT INTO points (map_id, name, location) VALUES ($1, $2, POINT($3, $4))',
-      [map.id, 'Ponto 1', -46.6333, -23.5505]
-    );
-    await connection.query(
-      'INSERT INTO points (map_id, name, location) VALUES ($1, $2, POINT($3, $4))',
-      [map.id, 'Ponto 2', -43.1729, -22.9068]
-    );
+    const point1 = await testHelper.insertPoint(map.id);
+    const point2 = await testHelper.insertPoint(map.id);
 
     // Faz soft delete do mapa
     const params = { params: Promise.resolve({ id: map.id }) };
@@ -207,7 +201,9 @@ describe('DELETE /api/maps/[id]', () => {
     expect(response.status).toBe(204);
 
     // Verifica se os pontos também foram soft deleted
-    const pointsResult = await connection.query('SELECT * FROM points WHERE map_id = $1', [map.id]);
+    const pointsResult = await connection.query('SELECT * FROM points WHERE id = ANY($1)', [
+      [point1.id, point2.id],
+    ]);
     expect(pointsResult.rows).toHaveLength(2);
     pointsResult.rows.forEach((point) => {
       expect(point.deleted_at).not.toBeNull();

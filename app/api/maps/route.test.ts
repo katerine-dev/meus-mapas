@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
 import { POST, GET } from './route';
 import * as testHelper from '@/lib/test-helper';
 import connection from '@/app/db/connection';
+import { Map } from '@/app/model/map';
 import * as uuid from 'uuid';
 
 describe('Criando um novo mapa', () => {
@@ -40,16 +41,15 @@ describe('Criando um novo mapa', () => {
 
 /* Antes de executar os testes é necessário ter mapas no banco de dados */
 describe('Buscando todos os mapas', () => {
-  const map1 = { name: 'Mapa 1', description: 'Descrição do mapa 1' };
-  const map2 = { name: 'Mapa 2', description: 'Descrição do mapa 2' };
-  const map3 = { name: 'Mapa 3', description: null };
+  let map1: Map;
+  let map2: Map;
+  let map3: Map;
 
   beforeAll(async () => {
     await testHelper.cleanDatabase();
-    const query = 'INSERT INTO maps (name, description) VALUES ($1, $2)';
-    await connection.query(query, [map1.name, map1.description]);
-    await connection.query(query, [map2.name, map2.description]);
-    await connection.query(query, [map3.name, map3.description]);
+    map1 = await testHelper.insertMap();
+    map2 = await testHelper.insertMap();
+    map3 = await testHelper.insertMap();
   });
 
   // Teste: deve retornar todos os mapas com os valores esperados
@@ -83,7 +83,7 @@ describe('Buscando todos os mapas', () => {
   // Teste: não deve retornar mapas deletados por padrão
   it('não deve retornar mapas deletados por padrão', async () => {
     // Faz soft delete de um mapa
-    await connection.query('UPDATE maps SET deleted_at = NOW() WHERE name = $1', [map1.name]);
+    await connection.query('UPDATE maps SET deleted_at = NOW() WHERE id = $1', [map1.id]);
 
     const request = testHelper.get('/api/maps');
     const response = await GET(request);
@@ -91,6 +91,6 @@ describe('Buscando todos os mapas', () => {
 
     const maps = await response.json();
     expect(maps).toHaveLength(2);
-    expect(maps.every((map: { name: string }) => map.name !== map1.name)).toBe(true);
+    expect(maps.every((map: { id: string }) => map.id !== map1.id)).toBe(true);
   });
 });
