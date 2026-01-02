@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import MapCard from './MapCard';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import CreateMapModal from './CreateMapModal';
@@ -17,6 +18,7 @@ interface MapsListProps {
 }
 
 export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: MapsListProps) {
+  const router = useRouter();
   const [maps, setMaps] = useState<Map[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOption, setSortOption] = useState('recent');
@@ -130,8 +132,7 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
   }
 
   function handleOpenMap(map: Map) {
-    console.log('Abrindo mapa:', map.id);
-    // TODO: Implementar navegação para página do mapa
+    router.push(`/maps/${map.id}`);
   }
 
   if (loading) {

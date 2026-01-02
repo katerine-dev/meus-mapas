@@ -27,7 +27,7 @@ export default function Input({
       placeholder={placeholder}
       disabled={disabled}
       onKeyDown={onKeyDown}
-      className={`border-purple-light text-purple-darkest placeholder:text-purple-light focus:border-purple-main w-full rounded-lg border px-4 py-3 focus:outline-none ${className} `}
+      className={`border-border bg-surface text-text-primary placeholder:text-text-placeholder focus:border-primary focus:ring-focus-ring/30 w-full rounded-lg border px-4 py-3 focus:outline-none focus:ring-2 ${className} `}
     />
   );
 }

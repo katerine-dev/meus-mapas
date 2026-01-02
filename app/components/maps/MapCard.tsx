@@ -56,15 +56,21 @@ export default function MapCard({
   }, []);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-purple-lightest bg-white shadow-xl transition-all hover:shadow-2xl">
+    <div
+      onClick={onOpen}
+      className="card-interactive border-border bg-surface relative cursor-pointer overflow-hidden rounded-2xl border shadow-lg transition-all hover:shadow-xl"
+    >
       {/* Preview roxo com ícone de mapa */}
-      <div className="relative flex h-32 items-center justify-center bg-gradient-to-br from-purple-main to-purple-light">
+      <div className="bg-primary relative flex h-32 items-center justify-center">
         <MapIcon className="h-12 w-12 text-white/50" strokeWidth={1.5} />
 
         {/* Botão de menu */}
         <div className="absolute right-3 top-3" ref={menuRef}>
           <button
-            onClick={() => setMenuOpen(!menuOpen)}
+            onClick={(e) => {
+              e.stopPropagation();
+              setMenuOpen(!menuOpen);
+            }}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30"
           >
             <EllipsisVerticalIcon className="h-5 w-5" />
@@ -72,33 +78,36 @@ export default function MapCard({
 
           {/* Menu dropdown */}
           {menuOpen && (
-            <div className="absolute right-0 top-10 z-10 w-48 rounded-xl bg-white py-2 shadow-xl">
+            <div className="border-border bg-surface absolute right-0 top-10 z-10 w-48 rounded-xl border py-2 shadow-xl">
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   onEdit();
                   setMenuOpen(false);
                 }}
-                className="hover:bg-purple-lightest/50 flex w-full items-center gap-3 px-4 py-2 text-left text-purple-darkest"
+                className="text-text-primary hover:bg-surface-hover flex w-full items-center gap-3 px-4 py-2 text-left"
               >
-                <DocumentTextIcon className="h-4 w-4 text-purple-light" />
+                <DocumentTextIcon className="text-text-muted h-4 w-4" />
                 Editar
               </button>
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   onOpen();
                   setMenuOpen(false);
                 }}
-                className="hover:bg-purple-lightest/50 flex w-full items-center gap-3 px-4 py-2 text-left text-purple-darkest"
+                className="text-text-primary hover:bg-surface-hover flex w-full items-center gap-3 px-4 py-2 text-left"
               >
-                <ArrowTopRightOnSquareIcon className="h-4 w-4 text-purple-light" />
+                <ArrowTopRightOnSquareIcon className="text-text-muted h-4 w-4" />
                 Abrir
               </button>
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   onDelete();
                   setMenuOpen(false);
                 }}
-                className="flex w-full items-center gap-3 px-4 py-2 text-left text-red-500 hover:bg-red-50"
+                className="text-destructive hover:bg-destructive-light flex w-full items-center gap-3 px-4 py-2 text-left"
               >
                 <TrashIcon className="h-4 w-4" />
                 Excluir
@@ -110,9 +119,9 @@ export default function MapCard({
 
       {/* Informações do mapa */}
       <div className="p-4">
-        <h3 className="text-lg font-semibold text-purple-darkest">{name}</h3>
-        <p className="text-sm text-purple-light">{description || 'Sem descrição'}</p>
-        <p className="mt-1 text-xs text-purple-lightest">Atualizado em {formattedDate}</p>
+        <h3 className="text-text-primary text-lg font-semibold">{name}</h3>
+        <p className="text-text-muted text-sm">{description || 'Sem descrição'}</p>
+        <p className="text-text-placeholder mt-1 text-xs">Atualizado em {formattedDate}</p>
       </div>
     </div>
   );

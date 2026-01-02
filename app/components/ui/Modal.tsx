@@ -14,13 +14,13 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
   if (!isOpen) return null;
 
   return (
-    // Container fixo que cobre toda a tela com z-index alto
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    // Container fixo que cobre toda a tela com z-index maior que o Leaflet (que usa 400+)
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center">
       {/* Overlay escuro semi-transparente - fecha o modal ao clicar */}
-      <div className="bg-purple-darkest/70 absolute inset-0" onClick={onClose} />
+      <div className="modal-overlay bg-text-primary/60 absolute inset-0" onClick={onClose} />
 
       {/* Container do conteúdo do modal - centralizado sobre o overlay */}
-      <div className="relative z-10 w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+      <div className="modal-content border-border bg-surface relative z-10 w-full max-w-md rounded-2xl border p-6 shadow-xl">
         {children}
       </div>
     </div>

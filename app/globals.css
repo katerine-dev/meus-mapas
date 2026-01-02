@@ -3,30 +3,279 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Variáveis CSS globais - Tema claro (padrão) */
-:root {
-  --background: #f8f6fc; /* Cor de fundo principal - lilás bem claro */
-  --foreground: #1a0a2e; /* Cor do texto principal - roxo escuro */
+/* ========================================
+   Design Tokens - Paleta Acessível WCAG AA
+   Inspirada na NerdMonster, porém minimalista
+   ======================================== */
 
-  /* Paleta de cores roxa - Do mais escuro ao mais claro */
-  --purple-darkest: #1a0a2e; /* Roxo mais escuro - usado em textos e footer */
-  --purple-dark: #2d1b4e; /* Roxo escuro - usado em hovers */
-  --purple-main: #5c30bd; /* Roxo principal - cor primária da marca */
-  --purple-light: #9b7dd4; /* Roxo claro - textos secundários e bordas */
-  --purple-lightest: #c9b8e8; /* Roxo mais claro - backgrounds e hovers suaves */
+:root {
+  /* === Backgrounds === */
+  --bg: #f8fafc; /* Fundo principal - branco levemente frio */
+  --surface: #ffffff; /* Cards e superfícies */
+  --surface-hover: #f1f5f9; /* Hover em superfícies */
+
+  /* === Bordas === */
+  --border: #e2e8f0; /* Borda neutra padrão */
+  --border-light: #f1f5f9; /* Borda bem sutil */
+
+  /* === Texto === */
+  --text-primary: #1e293b; /* Texto principal - contraste 12.6:1 em branco */
+  --text-secondary: #475569; /* Texto secundário - contraste 7:1 em branco */
+  --text-muted: #64748b; /* Texto auxiliar - contraste 4.6:1 em branco */
+  --text-placeholder: #94a3b8; /* Placeholder - contraste 3:1 (apenas decorativo) */
+
+  /* === Primary (Roxo Acessível) === */
+  --primary: #7c3aed; /* Roxo principal - contraste 4.5:1 em branco */
+  --primary-hover: #6d28d9; /* Hover - mais escuro */
+  --primary-active: #5b21b6; /* Active/pressed */
+  --primary-light: #ede9fe; /* Background roxo suave */
+  --primary-muted: #ddd6fe; /* Borda/indicador roxo suave */
+
+  /* === Focus Ring === */
+  --focus-ring: #8b5cf6; /* Ring visível para foco */
+  --focus-ring-offset: #ffffff;
+
+  /* === Destructive (Vermelho) === */
+  --destructive: #dc2626; /* Vermelho acessível */
+  --destructive-hover: #b91c1c;
+  --destructive-light: #fef2f2;
+  --destructive-border: #fecaca;
+
+  /* === Success === */
+  --success: #16a34a;
+  --success-light: #f0fdf4;
+
+  /* === Warning === */
+  --warning: #d97706;
+  --warning-light: #fffbeb;
+
+  /* === Selection (item selecionado na lista) === */
+  --selection-bg: #f5f3ff; /* Fundo roxo bem claro */
+  --selection-border: #7c3aed; /* Indicador lateral roxo */
+
+  /* === Legacy (compatibilidade) === */
+  --background: var(--bg);
+  --foreground: var(--text-primary);
+  --purple-darkest: var(--text-primary);
+  --purple-dark: var(--primary-hover);
+  --purple-main: var(--primary);
+  --purple-light: var(--text-muted);
+  --purple-lightest: var(--primary-light);
 }
 
-/* Tema escuro - Ativado automaticamente pela preferência do sistema */
+/* Tema escuro - mantém light por enquanto */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #1a0a2e; /* Inverte: fundo escuro */
-    --foreground: #f8f6fc; /* Inverte: texto claro */
+    --background: var(--bg);
+    --foreground: var(--text-primary);
   }
 }
 
 /* Estilos base do body */
 body {
-  background: var(--background); /* Aplica a cor de fundo */
-  color: var(--foreground); /* Aplica a cor do texto */
-  font-family: Arial, Helvetica, sans-serif; /* Fonte fallback */
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* ========================================
+   Sistema de Tipografia - 3 níveis
+   ======================================== */
+
+/* Nível 1: Título - 20-24px, bold */
+.text-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+
+/* Nível 2: Subtítulo - 14-16px, medium */
+.text-subtitle {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+/* Nível 3: Texto auxiliar - 12-14px, regular */
+.text-helper {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+/* ========================================
+   Customização dos controles do Leaflet
+   ======================================== */
+
+/* Container do mapa - garante cantos arredondados */
+.leaflet-container {
+  font-family: inherit;
+  background: #f8fafc; /* Fundo mais clean enquanto carrega tiles */
+}
+
+/* Controles de zoom mais modernos */
+.leaflet-control-zoom {
+  border: none !important;
+  border-radius: 12px !important;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.leaflet-control-zoom a {
+  width: 36px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  font-size: 18px !important;
+  color: var(--primary) !important;
+  background: white !important;
+  border: none !important;
+  transition: all 0.15s ease;
+}
+
+.leaflet-control-zoom a:hover {
+  background: var(--primary-light) !important;
+  color: var(--primary-hover) !important;
+}
+
+.leaflet-control-zoom-in {
+  border-bottom: 1px solid #e5e7eb !important;
+  border-radius: 12px 12px 0 0 !important;
+}
+
+.leaflet-control-zoom-out {
+  border-radius: 0 0 12px 12px !important;
+}
+
+/* Atribuição mais discreta */
+.leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.85) !important;
+  padding: 2px 8px !important;
+  font-size: 10px !important;
+  border-radius: 8px 0 0 0 !important;
+  color: var(--text-muted) !important;
+}
+
+.leaflet-control-attribution a {
+  color: var(--primary) !important;
+}
+
+/* Popup mais moderno */
+.leaflet-popup-content-wrapper {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+  padding: 0 !important;
+}
+
+.leaflet-popup-content {
+  margin: 12px 14px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--text-primary) !important;
+}
+
+.leaflet-popup-tip {
+  box-shadow: none !important;
+}
+
+/* Animação para marker selecionado */
+.leaflet-marker-icon.selected-marker {
+  filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.6));
+  animation: marker-pulse 1.5s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+@keyframes marker-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 8px rgba(239, 68, 68, 0.6));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(239, 68, 68, 0.8));
+  }
+}
+
+/* ========================================
+   Micro-interações e Transições
+   ======================================== */
+
+/* Card com hover suave - sombra aumenta */
+.card-interactive {
+  transition:
+    box-shadow 150ms ease,
+    transform 150ms ease;
+}
+
+.card-interactive:hover {
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+/* Item de lista com transição suave */
+.list-item-interactive {
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+/* Botão com transição padrão */
+.btn-interactive {
+  transition:
+    background-color 150ms ease,
+    color 150ms ease,
+    border-color 150ms ease,
+    transform 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.btn-interactive:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Ícone de ação com transição */
+.icon-interactive {
+  transition:
+    opacity 150ms ease,
+    background-color 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+  cursor: pointer;
+}
+
+.icon-interactive:hover {
+  transform: scale(1.05);
+}
+
+/* Animação de entrada do modal */
+@keyframes modal-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modal-overlay {
+  animation: modal-fade-in 150ms ease-out;
+}
+
+.modal-content {
+  animation: modal-slide-up 200ms ease-out;
 }

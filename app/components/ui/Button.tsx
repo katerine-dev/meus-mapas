@@ -15,10 +15,14 @@ interface ButtonProps {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: 'bg-purple-main hover:bg-purple-dark text-white',
-  secondary: 'border border-purple-light text-purple-darkest hover:bg-purple-lightest',
-  danger: 'bg-red-500 hover:bg-red-600 text-white',
-  outlined: 'border-2 border-purple-light text-purple-main hover:bg-purple-light hover:text-white',
+  primary:
+    'bg-primary hover:bg-primary-hover text-white focus:ring-2 focus:ring-focus-ring focus:ring-offset-2',
+  secondary:
+    'border border-border text-text-primary hover:bg-surface-hover focus:ring-2 focus:ring-focus-ring',
+  danger:
+    'bg-destructive hover:bg-destructive-hover text-white focus:ring-2 focus:ring-destructive',
+  outlined:
+    'border-2 border-primary text-primary hover:bg-primary-light focus:ring-2 focus:ring-focus-ring',
 };
 
 export default function Button({
@@ -35,7 +39,7 @@ export default function Button({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`rounded-lg px-4 py-3 font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${variantStyles[variant]} ${fullWidth ? 'w-full' : ''} ${className} `}
+      className={`btn-interactive cursor-pointer rounded-lg px-4 py-3 font-medium focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${variantStyles[variant]} ${fullWidth ? 'w-full' : ''} ${className} `}
     >
       {children}
     </button>
