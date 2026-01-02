@@ -1,4 +1,6 @@
 import connection from '@/app/db/connection';
+import { faker } from '@faker-js/faker';
+import type { Map } from '@/app/model/map';
 
 // Função auxiliar para criar uma requisição POST para testes
 export function post(url: string, body: object) {
@@ -49,4 +51,28 @@ export async function cleanDatabase() {
     // CASCADE remove dados de tabelas relacionadas
     await connection.query(`TRUNCATE ${tables} RESTART IDENTITY CASCADE`);
   }
+}
+// ============================================
+// Helpers para geração de massa de dados - Maps
+// ============================================
+
+// Insere um mapa no banco via SQL e retorna os dados gerados
+// Use { deletedAt: new Date() } para criar um mapa já deletado
+export async function insertMap(overrides: { deletedAt?: Date } = {}): Promise<Map> {
+  const deletedAt = overrides.deletedAt ?? null;
+
+  const result = await connection.query(
+    'INSERT INTO maps (name, description, deleted_at) VALUES ($1, $2, $3) RETURNING *',
+    [faker.location.city(), faker.lorem.sentence(), deletedAt]
+  );
+
+  const row = result.rows[0];
+  return {
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    deletedAt: row.deleted_at,
+  };
 }
