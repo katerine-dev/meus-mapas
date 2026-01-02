@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { ValidationError, zodErrorToValidationErrors } from './types';
 
 export const MAP_VALIDATION = {
-  NAME_MIN_LENGTH: 3,
+  NAME_MIN_LENGTH: 1,
   NAME_MAX_LENGTH: 100,
   DESCRIPTION_MAX_LENGTH: 500,
 };
@@ -23,8 +23,7 @@ export const MapSchema = z.object({
     .max(MAP_VALIDATION.DESCRIPTION_MAX_LENGTH, {
       message: `Descrição deve ter no máximo ${MAP_VALIDATION.DESCRIPTION_MAX_LENGTH} caracteres`,
     })
-    .optional()
-    .default(''),
+    .optional(),
 });
 
 export function validateMapData(name: string, description: string): ValidationError[] {

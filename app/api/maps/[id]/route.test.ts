@@ -133,6 +133,24 @@ describe('PUT /api/maps/[id]', () => {
     const response = await PUT(request, params);
     expect(response.status).toBe(404);
   });
+
+  // Teste: deve retornar 400 quando name está vazio (validação Zod)
+  it('deve retornar 400 quando name está vazio na atualização', async () => {
+    const map = await testHelper.insertMap();
+
+    const request = testHelper.put(`/api/maps/${map.id}`, {
+      name: '', // name vazio
+      description: 'Descrição válida',
+    });
+
+    const params = { params: Promise.resolve({ id: map.id }) };
+
+    const response = await PUT(request, params);
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.errors).toBeDefined();
+    expect(body.errors[0].field).toBe('name');
+  });
 });
 
 describe('DELETE /api/maps/[id]', () => {

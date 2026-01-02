@@ -49,6 +49,20 @@ describe('Criando um novo mapa', () => {
     const response = await POST(request);
     expect(response.status).toBe(409); // 409 = Conflict
   });
+
+  // Teste: deve retornar 400 quando name está vazio (validação Zod)
+  it('deve retornar 400 quando name está vazio', async () => {
+    const request = testHelper.post('/api/maps', {
+      name: '', // name vazio
+      description: 'Descrição válida',
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.errors).toBeDefined();
+    expect(body.errors[0].field).toBe('name');
+  });
 });
 
 /* Antes de executar os testes é necessário ter mapas no banco de dados */

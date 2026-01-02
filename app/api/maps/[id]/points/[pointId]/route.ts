@@ -1,4 +1,5 @@
 import * as pointsDb from '@/app/db/points';
+import { validateUpdatePointData } from '@/app/validation/point';
 
 // Handler GET - Busca um ponto específico pelo ID
 export async function GET(
@@ -25,13 +26,17 @@ export async function PUT(
   const { pointId } = await params;
   const body = await request.json();
 
+  const errors = validateUpdatePointData(body);
+
+  if (errors.length > 0) {
+    return Response.json({ errors }, { status: 400 });
+  }
+
   // updatePoint retorna null se o ponto não existir ou estiver deletado
   const updatedPoint = await pointsDb.updatePoint({
     id: pointId,
-    name: body.name,
+    name: body.name.trim(),
     description: body.description,
-    latitude: body.latitude,
-    longitude: body.longitude,
   });
 
   if (!updatedPoint) {

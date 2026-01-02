@@ -75,8 +75,6 @@ describe('PUT /api/maps/[id]/points/[pointId]', () => {
     const updatedData = {
       name: 'Ponto Atualizado',
       description: 'Nova descrição',
-      latitude: -22.9068,
-      longitude: -43.1729,
     };
     const request = testHelper.put(`/api/maps/${map.id}/points/${point.id}`, updatedData);
 
@@ -100,8 +98,6 @@ describe('PUT /api/maps/[id]/points/[pointId]', () => {
     const request = testHelper.put(`/api/maps/${fakeId}/points/${fakeId}`, {
       name: 'Ponto Inexistente',
       description: 'Descrição',
-      latitude: -23.5505,
-      longitude: -46.6333,
     });
 
     const params = { params: Promise.resolve({ id: fakeId, pointId: fakeId }) };
@@ -120,8 +116,6 @@ describe('PUT /api/maps/[id]/points/[pointId]', () => {
     const updatedData = {
       name: 'Ponto Sem Descrição',
       description: '',
-      latitude: -23.5505,
-      longitude: -46.6333,
     };
     const request = testHelper.put(`/api/maps/${map.id}/points/${point.id}`, updatedData);
 
@@ -145,6 +139,43 @@ describe('PUT /api/maps/[id]/points/[pointId]', () => {
     const request = testHelper.put(`/api/maps/${map.id}/points/${point.id}`, {
       name: 'Tentativa de Atualização',
       description: 'Não deveria funcionar',
+    });
+
+    const params = { params: Promise.resolve({ id: map.id, pointId: point.id }) };
+
+    const response = await PUT(request, params);
+    expect(response.status).toBe(404);
+  });
+
+  // Teste: deve retornar 400 quando name está vazio (validação Zod)
+  it('deve retornar 400 quando name está vazio na atualização', async () => {
+    const map = await testHelper.insertMap();
+    const point = await testHelper.insertPoint(map.id);
+
+    const request = testHelper.put(`/api/maps/${map.id}/points/${point.id}`, {
+      name: '', // name vazio
+      description: 'Descrição válida',
+    });
+
+    const params = { params: Promise.resolve({ id: map.id, pointId: point.id }) };
+
+    const response = await PUT(request, params);
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.errors).toBeDefined();
+    expect(body.errors[0].field).toBe('name');
+  });
+
+  // Teste: não deve permitir alterar a localização do ponto
+  it('deve retornar 400 ao tentar alterar a localização do ponto', async () => {
+    // Cria um mapa e um ponto no banco
+    const map = await testHelper.insertMap();
+    const point = await testHelper.insertPoint(map.id);
+
+    // Tenta atualizar enviando latitude e longitude
+    const request = testHelper.put(`/api/maps/${map.id}/points/${point.id}`, {
+      name: 'Nome Atualizado',
+      description: 'Descrição atualizada',
       latitude: -22.9068,
       longitude: -43.1729,
     });
@@ -152,7 +183,12 @@ describe('PUT /api/maps/[id]/points/[pointId]', () => {
     const params = { params: Promise.resolve({ id: map.id, pointId: point.id }) };
 
     const response = await PUT(request, params);
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(400);
+
+    const body = await response.json();
+    expect(body.errors).toHaveLength(2);
+    expect(body.errors[0].field).toBe('latitude');
+    expect(body.errors[1].field).toBe('longitude');
   });
 });
 

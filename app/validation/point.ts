@@ -11,7 +11,7 @@ export const POINT_VALIDATION = {
   LONGITUDE_MAX: 180,
 };
 
-export const PointSchema = z.object({
+export const CreatePointSchema = z.object({
   name: z
     .string()
     .transform((val) => val.trim())
@@ -27,8 +27,7 @@ export const PointSchema = z.object({
     .max(POINT_VALIDATION.DESCRIPTION_MAX_LENGTH, {
       message: `Descrição deve ter no máximo ${POINT_VALIDATION.DESCRIPTION_MAX_LENGTH} caracteres`,
     })
-    .optional()
-    .default(''),
+    .optional(),
   latitude: z
     .number({
       message: 'Latitude é obrigatória e deve ser um número',
@@ -51,13 +50,44 @@ export const PointSchema = z.object({
     }),
 });
 
+export const UpdatePointSchema = z.object({
+  name: z
+    .string()
+    .transform((val) => val.trim())
+    .refine((val) => val.length > 0, { message: 'Nome é obrigatório' })
+    .refine((val) => val.length >= POINT_VALIDATION.NAME_MIN_LENGTH, {
+      message: `Nome deve ter pelo menos ${POINT_VALIDATION.NAME_MIN_LENGTH} caracteres`,
+    })
+    .refine((val) => val.length <= POINT_VALIDATION.NAME_MAX_LENGTH, {
+      message: `Nome deve ter no máximo ${POINT_VALIDATION.NAME_MAX_LENGTH} caracteres`,
+    }),
+  description: z
+    .string()
+    .max(POINT_VALIDATION.DESCRIPTION_MAX_LENGTH, {
+      message: `Descrição deve ter no máximo ${POINT_VALIDATION.DESCRIPTION_MAX_LENGTH} caracteres`,
+    })
+    .optional(),
+  latitude: z.undefined({ message: 'Não é permitido alterar a latitude do ponto' }),
+  longitude: z.undefined({ message: 'Não é permitido alterar a longitude do ponto' }),
+});
+
 export function validatePointData(data: {
   name?: string;
   description?: string;
   latitude?: number;
   longitude?: number;
 }): ValidationError[] {
-  const result = PointSchema.safeParse(data);
+  const result = CreatePointSchema.safeParse(data);
+
+  if (result.success) {
+    return [];
+  }
+
+  return zodErrorToValidationErrors(result.error);
+}
+
+export function validateUpdatePointData(data: Record<string, unknown>): ValidationError[] {
+  const result = UpdatePointSchema.safeParse(data);
 
   if (result.success) {
     return [];

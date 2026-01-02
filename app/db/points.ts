@@ -86,20 +86,18 @@ interface UpdatePointData {
   id: string;
   name: string;
   description?: string;
-  latitude: number;
-  longitude: number;
 }
 
-// Função que atualiza um ponto (apenas se não estiver deletado)
+// Função que atualiza um ponto (apenas nome e descrição, não permite alterar localização)
 export async function updatePoint(data: UpdatePointData): Promise<Point | null> {
-  const { id, name, description, latitude, longitude } = data;
+  const { id, name, description } = data;
 
   const result = await connection.query(
     `UPDATE points
-     SET name = $2, description = $3, location = POINT($4, $5), updated_at = NOW()
+     SET name = $2, description = $3, updated_at = NOW()
      WHERE id = $1 AND deleted_at IS NULL
      RETURNING *`,
-    [id, name, description, longitude, latitude]
+    [id, name, description]
   );
 
   if (result.rows.length === 0) {
