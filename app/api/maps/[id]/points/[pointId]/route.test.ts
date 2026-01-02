@@ -2,8 +2,6 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { GET, PUT, DELETE } from './route';
 import * as testHelper from '@/lib/test-helper';
 import connection from '@/app/db/connection';
-import * as mapsDb from '@/app/db/maps';
-import * as pointsDb from '@/app/db/points';
 
 describe('GET /api/maps/[id]/points/[pointId]', () => {
   // Limpa o banco antes de cada teste
@@ -13,37 +11,25 @@ describe('GET /api/maps/[id]/points/[pointId]', () => {
 
   // Teste: deve retornar um ponto existente com status 200
   it('deve retornar um ponto existente com status 200', async () => {
-    // Primeiro cria um mapa no banco
-    const mapId = await mapsDb.createMap({
-      name: 'Mapa Teste',
-      description: 'Descrição do mapa',
-    });
-
-    // Cria um ponto no banco
-    const pointData = {
-      mapId: mapId,
-      name: 'Ponto Teste',
-      description: 'Descrição do ponto',
-      latitude: -23.5505,
-      longitude: -46.6333,
-    };
-    const pointId = await pointsDb.createPoint(pointData);
+    // Primeiro cria um mapa e um ponto no banco
+    const map = await testHelper.insertMap();
+    const point = await testHelper.insertPoint(map.id);
 
     // Simula os params da rota dinâmica
-    const params = { params: Promise.resolve({ id: mapId, pointId }) };
+    const params = { params: Promise.resolve({ id: map.id, pointId: point.id }) };
     // Cria uma requisição mock para o GET
-    const request = new Request(`http://localhost/api/maps/${mapId}/points/${pointId}`);
+    const request = testHelper.get(`/api/maps/${map.id}/points/${point.id}`);
 
     const response = await GET(request, params);
     expect(response.status).toBe(200);
 
     const body = await response.json();
-    expect(body.id).toBe(pointId);
-    expect(body.mapId).toBe(mapId);
-    expect(body.name).toBe(pointData.name);
-    expect(body.description).toBe(pointData.description);
-    expect(body.location.longitude).toBeCloseTo(pointData.longitude, 4);
-    expect(body.location.latitude).toBeCloseTo(pointData.latitude, 4);
+    expect(body.id).toBe(point.id);
+    expect(body.mapId).toBe(map.id);
+    expect(body.name).toBe(point.name);
+    expect(body.description).toBe(point.description);
+    expect(body.location.longitude).toBeCloseTo(point.location.longitude, 4);
+    expect(body.location.latitude).toBeCloseTo(point.location.latitude, 4);
     expect(body.deletedAt).toBeNull();
   });
 
@@ -53,7 +39,7 @@ describe('GET /api/maps/[id]/points/[pointId]', () => {
     const fakeId = '00000000-0000-0000-0000-000000000000';
     const params = { params: Promise.resolve({ id: fakeId, pointId: fakeId }) };
     // Cria uma requisição mock para o GET
-    const request = new Request(`http://localhost/api/maps/${fakeId}/points/${fakeId}`);
+    const request = testHelper.get(`/api/maps/${fakeId}/points/${fakeId}`);
 
     const response = await GET(request, params);
     expect(response.status).toBe(404);
@@ -61,58 +47,15 @@ describe('GET /api/maps/[id]/points/[pointId]', () => {
 
   // Teste: deve retornar 404 para ponto deletado (soft delete)
   it('deve retornar 404 para ponto deletado (soft delete)', async () => {
-    // Cria um mapa e um ponto
-    const mapId = await mapsDb.createMap({
-      name: 'Mapa Teste',
-      description: 'Descrição do mapa',
-    });
-    const pointId = await pointsDb.createPoint({
-      mapId,
-      name: 'Ponto Deletado',
-      description: 'Será deletado',
-      latitude: -23.5505,
-      longitude: -46.6333,
-    });
+    // Cria um mapa e um ponto já deletado
+    const map = await testHelper.insertMap();
+    const point = await testHelper.insertPoint(map.id, { deletedAt: new Date() });
 
-    // Faz soft delete do ponto
-    await pointsDb.deletePoint(pointId);
-
-    const params = { params: Promise.resolve({ id: mapId, pointId }) };
-    const request = new Request(`http://localhost/api/maps/${mapId}/points/${pointId}`);
+    const params = { params: Promise.resolve({ id: map.id, pointId: point.id }) };
+    const request = testHelper.get(`/api/maps/${map.id}/points/${point.id}`);
 
     const response = await GET(request, params);
     expect(response.status).toBe(404);
-  });
-
-  // Teste: deve retornar ponto deletado quando include_deleted=true
-  it('deve retornar ponto deletado quando include_deleted=true', async () => {
-    // Cria um mapa e um ponto
-    const mapId = await mapsDb.createMap({
-      name: 'Mapa Teste',
-      description: 'Descrição do mapa',
-    });
-    const pointId = await pointsDb.createPoint({
-      mapId,
-      name: 'Ponto Deletado',
-      description: 'Será deletado',
-      latitude: -23.5505,
-      longitude: -46.6333,
-    });
-
-    // Faz soft delete do ponto
-    await pointsDb.deletePoint(pointId);
-
-    const params = { params: Promise.resolve({ id: mapId, pointId }) };
-    const request = new Request(
-      `http://localhost/api/maps/${mapId}/points/${pointId}?include_deleted=true`
-    );
-
-    const response = await GET(request, params);
-    expect(response.status).toBe(200);
-
-    const body = await response.json();
-    expect(body.id).toBe(pointId);
-    expect(body.deletedAt).not.toBeNull();
   });
 });
 
@@ -124,38 +67,25 @@ describe('PUT /api/maps/[id]/points/[pointId]', () => {
 
   // Teste: deve atualizar um ponto existente e retornar 204
   it('deve atualizar um ponto existente e retornar 204', async () => {
-    // Primeiro cria um mapa no banco
-    const mapId = await mapsDb.createMap({
-      name: 'Mapa Teste',
-      description: 'Descrição do mapa',
-    });
-
-    // Cria um ponto no banco
-    const pointId = await pointsDb.createPoint({
-      mapId: mapId,
-      name: 'Ponto Original',
-      description: 'Descrição original',
-      latitude: -23.5505,
-      longitude: -46.6333,
-    });
+    // Cria um mapa e um ponto no banco
+    const map = await testHelper.insertMap();
+    const point = await testHelper.insertPoint(map.id);
 
     // Cria a requisição PUT com os novos dados
     const updatedData = {
       name: 'Ponto Atualizado',
       description: 'Nova descrição',
-      latitude: -22.9068,
-      longitude: -43.1729,
     };
-    const request = testHelper.put(`/api/maps/${mapId}/points/${pointId}`, updatedData);
+    const request = testHelper.put(`/api/maps/${map.id}/points/${point.id}`, updatedData);
 
     // Simula os params da rota dinâmica
-    const params = { params: Promise.resolve({ id: mapId, pointId }) };
+    const params = { params: Promise.resolve({ id: map.id, pointId: point.id }) };
 
     const response = await PUT(request, params);
     expect(response.status).toBe(204);
 
     // Verifica se o ponto foi realmente atualizado no banco
-    const result = await connection.query('SELECT * FROM points WHERE id = $1', [pointId]);
+    const result = await connection.query('SELECT * FROM points WHERE id = $1', [point.id]);
     expect(result.rows[0].name).toBe(updatedData.name);
     expect(result.rows[0].description).toBe(updatedData.description);
   });
@@ -168,8 +98,6 @@ describe('PUT /api/maps/[id]/points/[pointId]', () => {
     const request = testHelper.put(`/api/maps/${fakeId}/points/${fakeId}`, {
       name: 'Ponto Inexistente',
       description: 'Descrição',
-      latitude: -23.5505,
-      longitude: -46.6333,
     });
 
     const params = { params: Promise.resolve({ id: fakeId, pointId: fakeId }) };
@@ -180,70 +108,87 @@ describe('PUT /api/maps/[id]/points/[pointId]', () => {
 
   // Teste: deve atualizar um ponto com descrição vazia
   it('deve atualizar um ponto com descrição vazia', async () => {
-    // Primeiro cria um mapa no banco
-    const mapId = await mapsDb.createMap({
-      name: 'Mapa Teste',
-      description: 'Descrição do mapa',
-    });
-
-    // Cria um ponto com descrição
-    const pointId = await pointsDb.createPoint({
-      mapId: mapId,
-      name: 'Ponto com Descrição',
-      description: 'Descrição que será removida',
-      latitude: -23.5505,
-      longitude: -46.6333,
-    });
+    // Cria um mapa e um ponto com descrição
+    const map = await testHelper.insertMap();
+    const point = await testHelper.insertPoint(map.id);
 
     // Atualiza com descrição vazia
     const updatedData = {
       name: 'Ponto Sem Descrição',
       description: '',
-      latitude: -23.5505,
-      longitude: -46.6333,
     };
-    const request = testHelper.put(`/api/maps/${mapId}/points/${pointId}`, updatedData);
+    const request = testHelper.put(`/api/maps/${map.id}/points/${point.id}`, updatedData);
 
-    const params = { params: Promise.resolve({ id: mapId, pointId }) };
+    const params = { params: Promise.resolve({ id: map.id, pointId: point.id }) };
 
     const response = await PUT(request, params);
     expect(response.status).toBe(204);
 
     // Verifica se a descrição foi atualizada para vazio
-    const result = await connection.query('SELECT * FROM points WHERE id = $1', [pointId]);
+    const result = await connection.query('SELECT * FROM points WHERE id = $1', [point.id]);
     expect(result.rows[0].name).toBe(updatedData.name);
     expect(result.rows[0].description).toBe(updatedData.description);
   });
   // Teste: não deve permitir atualizar ponto deletado (retorna 404)
   it('não deve permitir atualizar ponto deletado (retorna 404)', async () => {
-    // Cria um mapa e um ponto
-    const mapId = await mapsDb.createMap({
-      name: 'Mapa Teste',
-      description: 'Descrição do mapa',
-    });
-    const pointId = await pointsDb.createPoint({
-      mapId,
-      name: 'Ponto Deletado',
-      description: 'Será deletado',
-      latitude: -23.5505,
-      longitude: -46.6333,
-    });
-
-    // Faz soft delete do ponto
-    await pointsDb.deletePoint(pointId);
+    // Cria um mapa e um ponto já deletado
+    const map = await testHelper.insertMap();
+    const point = await testHelper.insertPoint(map.id, { deletedAt: new Date() });
 
     // Tenta atualizar o ponto deletado
-    const request = testHelper.put(`/api/maps/${mapId}/points/${pointId}`, {
+    const request = testHelper.put(`/api/maps/${map.id}/points/${point.id}`, {
       name: 'Tentativa de Atualização',
       description: 'Não deveria funcionar',
+    });
+
+    const params = { params: Promise.resolve({ id: map.id, pointId: point.id }) };
+
+    const response = await PUT(request, params);
+    expect(response.status).toBe(404);
+  });
+
+  // Teste: deve retornar 400 quando name está vazio (validação Zod)
+  it('deve retornar 400 quando name está vazio na atualização', async () => {
+    const map = await testHelper.insertMap();
+    const point = await testHelper.insertPoint(map.id);
+
+    const request = testHelper.put(`/api/maps/${map.id}/points/${point.id}`, {
+      name: '', // name vazio
+      description: 'Descrição válida',
+    });
+
+    const params = { params: Promise.resolve({ id: map.id, pointId: point.id }) };
+
+    const response = await PUT(request, params);
+    expect(response.status).toBe(400);
+    const body = await response.json();
+    expect(body.errors).toBeDefined();
+    expect(body.errors[0].field).toBe('name');
+  });
+
+  // Teste: não deve permitir alterar a localização do ponto
+  it('deve retornar 400 ao tentar alterar a localização do ponto', async () => {
+    // Cria um mapa e um ponto no banco
+    const map = await testHelper.insertMap();
+    const point = await testHelper.insertPoint(map.id);
+
+    // Tenta atualizar enviando latitude e longitude
+    const request = testHelper.put(`/api/maps/${map.id}/points/${point.id}`, {
+      name: 'Nome Atualizado',
+      description: 'Descrição atualizada',
       latitude: -22.9068,
       longitude: -43.1729,
     });
 
-    const params = { params: Promise.resolve({ id: mapId, pointId }) };
+    const params = { params: Promise.resolve({ id: map.id, pointId: point.id }) };
 
     const response = await PUT(request, params);
-    expect(response.status).toBe(404);
+    expect(response.status).toBe(400);
+
+    const body = await response.json();
+    expect(body.errors).toHaveLength(2);
+    expect(body.errors[0].field).toBe('latitude');
+    expect(body.errors[1].field).toBe('longitude');
   });
 });
 
@@ -253,41 +198,22 @@ describe('DELETE /api/maps/[id]/points/[pointId]', () => {
     await testHelper.cleanDatabase();
   });
 
-  // Teste: deve fazer soft delete de um ponto existente e retornar 200 com dados
-  it('deve fazer soft delete de um ponto existente e retornar 200 com dados', async () => {
-    // Primeiro cria um mapa no banco
-    const mapId = await mapsDb.createMap({
-      name: 'Mapa Teste',
-      description: 'Descrição do mapa',
-    });
-
-    // Cria um ponto no banco
-    const pointId = await pointsDb.createPoint({
-      mapId: mapId,
-      name: 'Ponto para Deletar',
-      description: 'Será deletado',
-      latitude: -23.5505,
-      longitude: -46.6333,
-    });
+  // Teste: deve fazer soft delete de um ponto existente e retornar 204
+  it('deve fazer soft delete de um ponto existente e retornar 204', async () => {
+    // Cria um mapa e um ponto no banco
+    const map = await testHelper.insertMap();
+    const point = await testHelper.insertPoint(map.id);
 
     // Simula os params da rota dinâmica
-    const params = { params: Promise.resolve({ id: mapId, pointId }) };
+    const params = { params: Promise.resolve({ id: map.id, pointId: point.id }) };
     // Cria uma requisição mock para o DELETE
-    const request = new Request(`http://localhost/api/maps/${mapId}/points/${pointId}`, {
-      method: 'DELETE',
-    });
+    const request = testHelper.del(`/api/maps/${map.id}/points/${point.id}`);
 
     const response = await DELETE(request, params);
-    expect(response.status).toBe(200);
-
-    // Verifica o corpo da resposta
-    const body = await response.json();
-    expect(body.id).toBe(pointId);
-    expect(body.name).toBe('Ponto para Deletar');
-    expect(body.deletedAt).not.toBeNull();
+    expect(response.status).toBe(204);
 
     // Verifica se o ponto ainda existe no banco mas com deleted_at preenchido
-    const result = await connection.query('SELECT * FROM points WHERE id = $1', [pointId]);
+    const result = await connection.query('SELECT * FROM points WHERE id = $1', [point.id]);
     expect(result.rows).toHaveLength(1);
     expect(result.rows[0].deleted_at).not.toBeNull();
   });
@@ -298,9 +224,7 @@ describe('DELETE /api/maps/[id]/points/[pointId]', () => {
     const fakeId = '00000000-0000-0000-0000-000000000000';
     const params = { params: Promise.resolve({ id: fakeId, pointId: fakeId }) };
     // Cria uma requisição mock para o DELETE
-    const request = new Request(`http://localhost/api/maps/${fakeId}/points/${fakeId}`, {
-      method: 'DELETE',
-    });
+    const request = testHelper.del(`/api/maps/${fakeId}/points/${fakeId}`);
 
     const response = await DELETE(request, params);
     expect(response.status).toBe(404);
@@ -308,26 +232,12 @@ describe('DELETE /api/maps/[id]/points/[pointId]', () => {
 
   // Teste: deve retornar 404 ao tentar deletar ponto já deletado
   it('deve retornar 404 ao tentar deletar ponto já deletado', async () => {
-    // Cria um mapa e um ponto
-    const mapId = await mapsDb.createMap({
-      name: 'Mapa Teste',
-      description: 'Descrição do mapa',
-    });
-    const pointId = await pointsDb.createPoint({
-      mapId,
-      name: 'Ponto Deletado',
-      description: 'Já deletado',
-      latitude: -23.5505,
-      longitude: -46.6333,
-    });
+    // Cria um mapa e um ponto já deletado
+    const map = await testHelper.insertMap();
+    const point = await testHelper.insertPoint(map.id, { deletedAt: new Date() });
 
-    // Faz soft delete do ponto
-    await pointsDb.deletePoint(pointId);
-
-    const params = { params: Promise.resolve({ id: mapId, pointId }) };
-    const request = new Request(`http://localhost/api/maps/${mapId}/points/${pointId}`, {
-      method: 'DELETE',
-    });
+    const params = { params: Promise.resolve({ id: map.id, pointId: point.id }) };
+    const request = testHelper.del(`/api/maps/${map.id}/points/${point.id}`);
 
     const response = await DELETE(request, params);
     expect(response.status).toBe(404);

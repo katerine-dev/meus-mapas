@@ -1,19 +1,15 @@
 // Importa as funções de acesso ao banco de dados de mapas
 import * as mapsDb from '@/app/db/maps';
 // Importa a função de validação e tipos de erro do utilitário de validação
-import { validateMapData } from '@/app/utils/validation';
+import { validateMapData } from '@/app/validation/map';
 
 // Handler GET - Busca um mapa específico pelo ID
-export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   // Aguarda a resolução dos parâmetros da rota
   const { id } = await params;
 
-  // Verifica query param para incluir deletados
-  const url = new URL(request.url);
-  const includeDeleted = url.searchParams.get('include_deleted') === 'true';
-
   // Busca o mapa no banco de dados pelo ID
-  const map = await mapsDb.getMapById(id, { includeDeleted });
+  const map = await mapsDb.getMapById(id);
 
   // Se o mapa não existir (ou estiver deletado e include_deleted=false), retorna 404 Not Found
   if (!map) {
@@ -71,15 +67,5 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
     return new Response(null, { status: 404 });
   }
 
-  // Retorna 200 OK com os dados do mapa deletado, incluindo deleted_at
-  // Exemplo de resposta:
-  // {
-  //   "id": "uuid",
-  //   "name": "Mapa Exemplo",
-  //   "description": "Descrição",
-  //   "createdAt": "2026-01-02T10:00:00.000Z",
-  //   "updatedAt": "2026-01-02T10:00:00.000Z",
-  //   "deletedAt": "2026-01-02T12:30:45.123Z"
-  // }
-  return Response.json(deletedMap);
+  return new Response(null, { status: 204 });
 }

@@ -5,7 +5,8 @@ import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import TextArea from '../ui/TextArea';
-import { validateMapData, ValidationError } from '@/app/utils/validation';
+import { validateMapData } from '@/app/validation/map';
+import type { ValidationError } from '@/app/validation/types';
 
 interface EditMapModalInnerProps {
   onClose: () => void;
@@ -48,7 +49,7 @@ function EditMapModalInner({
     <>
       <div className="flex flex-col gap-4">
         <div className="flex justify-center">
-          <h1 className="text-purple-main text-2xl font-semibold">Editar Mapa</h1>
+          <h1 className="text-2xl font-semibold text-purple-main">Editar Mapa</h1>
         </div>
         <div>
           <Input placeholder="NOME" value={name} onChange={setName} />

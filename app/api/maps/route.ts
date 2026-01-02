@@ -1,5 +1,6 @@
 import * as mapsDb from '@/app/db/maps';
-import { validateMapData } from '@/app/utils/validation';
+import { DuplicateNameError } from '@/app/db/errors';
+import { validateMapData } from '@/app/validation/map';
 
 export async function POST(request: Request) {
   const body = await request.json();
@@ -12,19 +13,22 @@ export async function POST(request: Request) {
     return Response.json({ errors }, { status: 400 });
   }
 
-  const id = await mapsDb.createMap({
-    name: body.name.trim(),
-    description: body.description,
-  });
+  try {
+    const id = await mapsDb.createMap({
+      name: body.name.trim(),
+      description: body.description,
+    });
 
-  return Response.json({ id }, { status: 201 });
+    return Response.json({ id }, { status: 201 });
+  } catch (error) {
+    if (error instanceof DuplicateNameError) {
+      return Response.json({ error: error.message }, { status: 409 });
+    }
+    throw error;
+  }
 }
 
-export async function GET(request: Request) {
-  // Verifica query param para incluir deletados
-  const url = new URL(request.url);
-  const includeDeleted = url.searchParams.get('include_deleted') === 'true';
-
-  const maps = await mapsDb.getAllMaps({ includeDeleted });
+export async function GET(_request: Request) {
+  const maps = await mapsDb.getAllMaps();
   return Response.json(maps);
 }
