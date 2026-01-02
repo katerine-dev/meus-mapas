@@ -91,14 +91,13 @@ export async function insertPoint(
   overrides: { deletedAt?: Date } = {}
 ): Promise<Point> {
   const name = faker.location.street();
-  const description = faker.lorem.sentence();
   const latitude = faker.location.latitude();
   const longitude = faker.location.longitude();
   const deletedAt = overrides.deletedAt ?? null;
 
   const result = await connection.query(
-    'INSERT INTO points (map_id, name, description, location, deleted_at) VALUES ($1, $2, $3, POINT($4, $5), $6) RETURNING *',
-    [mapId, name, description, longitude, latitude, deletedAt]
+    'INSERT INTO points (map_id, name, location, deleted_at) VALUES ($1, $2, POINT($3, $4), $5) RETURNING *',
+    [mapId, name, longitude, latitude, deletedAt]
   );
 
   const row = result.rows[0];
@@ -107,7 +106,6 @@ export async function insertPoint(
     id: row.id,
     mapId: row.map_id,
     name: row.name,
-    description: row.description,
     location: { longitude: location.x, latitude: location.y },
     createdAt: row.created_at,
     updatedAt: row.updated_at,

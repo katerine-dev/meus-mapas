@@ -70,53 +70,6 @@ describe('validatePointData (criação)', () => {
     });
   });
 
-  describe('campo description', () => {
-    it('deve aceitar description vazia', () => {
-      const errors = validatePointData({
-        name: 'Ponto',
-        description: '',
-        latitude: -23.5505,
-        longitude: -46.6333,
-      });
-
-      expect(errors).toHaveLength(0);
-    });
-
-    it('deve aceitar sem description', () => {
-      const errors = validatePointData({
-        name: 'Ponto',
-        latitude: -23.5505,
-        longitude: -46.6333,
-      });
-
-      expect(errors).toHaveLength(0);
-    });
-
-    it('deve retornar erro quando description tem mais de 500 caracteres', () => {
-      const errors = validatePointData({
-        name: 'Ponto',
-        description: 'a'.repeat(501),
-        latitude: -23.5505,
-        longitude: -46.6333,
-      });
-
-      expect(errors).toHaveLength(1);
-      expect(errors[0].field).toBe('description');
-      expect(errors[0].message).toContain('no máximo 500 caracteres');
-    });
-
-    it('deve aceitar description com exatamente 500 caracteres', () => {
-      const errors = validatePointData({
-        name: 'Ponto',
-        description: 'a'.repeat(500),
-        latitude: -23.5505,
-        longitude: -46.6333,
-      });
-
-      expect(errors).toHaveLength(0);
-    });
-  });
-
   describe('campo latitude', () => {
     it('deve retornar erro quando latitude não é informada', () => {
       const errors = validatePointData({
@@ -233,14 +186,12 @@ describe('validatePointData (criação)', () => {
     it('deve retornar múltiplos erros quando vários campos são inválidos', () => {
       const errors = validatePointData({
         name: '',
-        description: 'a'.repeat(501),
         latitude: -91,
         longitude: 181,
       });
 
-      expect(errors.length).toBeGreaterThanOrEqual(4);
+      expect(errors.length).toBeGreaterThanOrEqual(3);
       expect(errors.map((e) => e.field)).toContain('name');
-      expect(errors.map((e) => e.field)).toContain('description');
       expect(errors.map((e) => e.field)).toContain('latitude');
       expect(errors.map((e) => e.field)).toContain('longitude');
     });
@@ -248,7 +199,6 @@ describe('validatePointData (criação)', () => {
     it('deve aceitar dados válidos', () => {
       const errors = validatePointData({
         name: 'Meu Ponto',
-        description: 'Uma descrição válida',
         latitude: -23.5505,
         longitude: -46.6333,
       });
@@ -260,16 +210,7 @@ describe('validatePointData (criação)', () => {
 
 describe('validateUpdatePointData (atualização)', () => {
   describe('campos permitidos', () => {
-    it('deve aceitar atualização com name e description válidos', () => {
-      const errors = validateUpdatePointData({
-        name: 'Novo Nome',
-        description: 'Nova descrição',
-      });
-
-      expect(errors).toHaveLength(0);
-    });
-
-    it('deve aceitar atualização apenas com name', () => {
+    it('deve aceitar atualização com name válido', () => {
       const errors = validateUpdatePointData({
         name: 'Novo Nome',
       });

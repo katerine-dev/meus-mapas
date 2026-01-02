@@ -26,7 +26,6 @@ describe('Criando um novo ponto', () => {
     // Cria uma requisição POST com todos os campos obrigatórios
     const request = testHelper.post(`/api/maps/${map.id}/points`, {
       name: 'Ponto A',
-      description: 'Descrição do ponto A',
       latitude: -23.5505199,
       longitude: -46.6333094,
     });
@@ -36,21 +35,6 @@ describe('Criando um novo ponto', () => {
     expect(response.status).toBe(201);
     const body = await response.json();
     // Verifica se o id retornado é um UUID válido
-    expect(uuid.validate(body.id)).toBe(true);
-  });
-
-  // Teste: deve criar um ponto sem descrição (campo opcional)
-  it('deve criar um ponto sem descrição', async () => {
-    const request = testHelper.post(`/api/maps/${map.id}/points`, {
-      name: 'Ponto B',
-      latitude: -23.5629,
-      longitude: -46.6544,
-    });
-
-    const params = { params: Promise.resolve({ id: map.id }) };
-    const response = await POST(request, params);
-    expect(response.status).toBe(201);
-    const body = await response.json();
     expect(uuid.validate(body.id)).toBe(true);
   });
 
@@ -209,13 +193,11 @@ describe('Buscando todos os pontos', () => {
 
     // Ordenado por created_at DESC, então point2 vem primeiro
     expect(points[0].name).toBe(point2.name);
-    expect(points[0].description).toBe(point2.description);
     expect(points[0].location.longitude).toBeCloseTo(point2.location.longitude, 4);
     expect(points[0].location.latitude).toBeCloseTo(point2.location.latitude, 4);
     expect(points[0].deletedAt).toBeNull();
 
     expect(points[1].name).toBe(point1.name);
-    expect(points[1].description).toBe(point1.description);
     expect(points[1].location.longitude).toBeCloseTo(point1.location.longitude, 4);
     expect(points[1].location.latitude).toBeCloseTo(point1.location.latitude, 4);
     expect(points[1].deletedAt).toBeNull();

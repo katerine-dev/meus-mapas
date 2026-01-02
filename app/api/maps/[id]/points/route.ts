@@ -29,7 +29,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   // Validação
   const errors = validatePointData({
     name: body.name || '',
-    description: body.description || '',
     latitude: body.latitude,
     longitude: body.longitude,
   });
@@ -43,7 +42,6 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const pointId = await pointsDb.createPoint({
       mapId: id,
       name: body.name.trim(),
-      description: body.description,
       latitude: body.latitude,
       longitude: body.longitude,
     });

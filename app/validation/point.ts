@@ -4,7 +4,6 @@ import { ValidationError, zodErrorToValidationErrors } from './types';
 export const POINT_VALIDATION = {
   NAME_MIN_LENGTH: 1,
   NAME_MAX_LENGTH: 100,
-  DESCRIPTION_MAX_LENGTH: 500,
   LATITUDE_MIN: -90,
   LATITUDE_MAX: 90,
   LONGITUDE_MIN: -180,
@@ -22,12 +21,6 @@ export const CreatePointSchema = z.object({
     .refine((val) => val.length <= POINT_VALIDATION.NAME_MAX_LENGTH, {
       message: `Nome deve ter no máximo ${POINT_VALIDATION.NAME_MAX_LENGTH} caracteres`,
     }),
-  description: z
-    .string()
-    .max(POINT_VALIDATION.DESCRIPTION_MAX_LENGTH, {
-      message: `Descrição deve ter no máximo ${POINT_VALIDATION.DESCRIPTION_MAX_LENGTH} caracteres`,
-    })
-    .optional(),
   latitude: z
     .number({
       message: 'Latitude é obrigatória e deve ser um número',
@@ -61,19 +54,12 @@ export const UpdatePointSchema = z.object({
     .refine((val) => val.length <= POINT_VALIDATION.NAME_MAX_LENGTH, {
       message: `Nome deve ter no máximo ${POINT_VALIDATION.NAME_MAX_LENGTH} caracteres`,
     }),
-  description: z
-    .string()
-    .max(POINT_VALIDATION.DESCRIPTION_MAX_LENGTH, {
-      message: `Descrição deve ter no máximo ${POINT_VALIDATION.DESCRIPTION_MAX_LENGTH} caracteres`,
-    })
-    .optional(),
   latitude: z.undefined({ message: 'Não é permitido alterar a latitude do ponto' }),
   longitude: z.undefined({ message: 'Não é permitido alterar a longitude do ponto' }),
 });
 
 export function validatePointData(data: {
   name?: string;
-  description?: string;
   latitude?: number;
   longitude?: number;
 }): ValidationError[] {

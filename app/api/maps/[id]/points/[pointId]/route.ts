@@ -36,7 +36,6 @@ export async function PUT(
   const updatedPoint = await pointsDb.updatePoint({
     id: pointId,
     name: body.name.trim(),
-    description: body.description,
   });
 
   if (!updatedPoint) {
