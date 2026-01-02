@@ -1,4 +1,5 @@
 import * as mapsDb from '@/app/db/maps';
+import { DuplicateNameError } from '@/app/db/errors';
 import { validateMapData } from '@/app/utils/validation';
 
 export async function POST(request: Request) {
@@ -12,12 +13,19 @@ export async function POST(request: Request) {
     return Response.json({ errors }, { status: 400 });
   }
 
-  const id = await mapsDb.createMap({
-    name: body.name.trim(),
-    description: body.description,
-  });
+  try {
+    const id = await mapsDb.createMap({
+      name: body.name.trim(),
+      description: body.description,
+    });
 
-  return Response.json({ id }, { status: 201 });
+    return Response.json({ id }, { status: 201 });
+  } catch (error) {
+    if (error instanceof DuplicateNameError) {
+      return Response.json({ error: error.message }, { status: 409 });
+    }
+    throw error;
+  }
 }
 
 export async function GET(_request: Request) {

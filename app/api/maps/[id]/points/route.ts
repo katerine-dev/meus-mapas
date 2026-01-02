@@ -1,5 +1,6 @@
 import * as pointsDb from '@/app/db/points';
 import * as mapsDb from '@/app/db/maps';
+import { DuplicateNameError } from '@/app/db/errors';
 import { validatePointData } from '@/app/utils/validation';
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -37,15 +38,22 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return Response.json({ errors }, { status: 400 });
   }
 
-  // Cria o ponto no banco de dados
-  const pointId = await pointsDb.createPoint({
-    mapId: id,
-    name: body.name.trim(),
-    description: body.description,
-    latitude: body.latitude,
-    longitude: body.longitude,
-  });
+  try {
+    // Cria o ponto no banco de dados
+    const pointId = await pointsDb.createPoint({
+      mapId: id,
+      name: body.name.trim(),
+      description: body.description,
+      latitude: body.latitude,
+      longitude: body.longitude,
+    });
 
-  // Retorna o ID do ponto criado com status 201 (Created)
-  return Response.json({ id: pointId }, { status: 201 });
+    // Retorna o ID do ponto criado com status 201 (Created)
+    return Response.json({ id: pointId }, { status: 201 });
+  } catch (error) {
+    if (error instanceof DuplicateNameError) {
+      return Response.json({ error: error.message }, { status: 409 });
+    }
+    throw error;
+  }
 }

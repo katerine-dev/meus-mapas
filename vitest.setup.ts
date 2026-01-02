@@ -1,20 +1,20 @@
 import { Pool } from 'pg';
 import { config } from 'dotenv';
+import { DatabaseError, PG_DATABASE_EXISTS } from '@/app/db/errors';
 
 config({ path: '.env.test' });
-
 // Função de setup global executada uma vez antes de todos os testes
 export default async function setup() {
-  // Cria um pool de conexões com o banco de dados de teste
+  // Conecta ao banco postgres (padrão) para criar o banco de teste
   const adminPool = new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: process.env.DATABASE_URL?.replace(/\/[^/]+$/, '/postgres'), // substitui a base pela do postgres
   });
   try {
     await adminPool.query('CREATE DATABASE meusmapas_test');
-  } catch (e: any) {
+  } catch (e) {
     // Se o erro for '42P04' (banco de dados já existe), ignora
     // Qualquer outro erro é propagado
-    if (e.code !== '42P04') throw e;
+    if ((e as DatabaseError).code !== PG_DATABASE_EXISTS) throw e;
   }
 
   await adminPool.end();

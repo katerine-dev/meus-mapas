@@ -7,7 +7,8 @@ CREATE TABLE points (
   location POINT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMPTZ NULL
+  deleted_at TIMESTAMPTZ NULL,
+  UNIQUE(map_id, name)
 );
 
 -- Cria índice na coluna map_id para otimizar consultas de pontos por mapa

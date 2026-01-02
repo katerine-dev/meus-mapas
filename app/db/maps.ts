@@ -1,5 +1,6 @@
 import connection from './connection';
 import { Map } from '../model/map';
+import * as errors from './errors';
 
 interface CreateMapData {
   name: string;
@@ -38,15 +39,22 @@ export async function getAllMaps(): Promise<Map[]> {
 export async function createMap(data: CreateMapData): Promise<string> {
   const { name, description } = data;
 
-  const result = await connection.query(
-    `INSERT INTO maps (name, description)
-     VALUES ($1, $2)
-     RETURNING id`,
-    [name, description]
-  );
+  try {
+    const result = await connection.query(
+      `INSERT INTO maps (name, description)
+       VALUES ($1, $2)
+       RETURNING id`,
+      [name, description]
+    );
 
-  // Retorna o ID do mapa recém-criado
-  return result.rows[0].id;
+    // Retorna o ID do mapa recém-criado
+    return result.rows[0].id;
+  } catch (error) {
+    if ((error as errors.DatabaseError).code === errors.PG_UNIQUE_VIOLATION) {
+      throw new errors.DuplicateNameError();
+    }
+    throw error;
+  }
 }
 
 export async function updateMap(data: UpdateMapData): Promise<Map | null> {

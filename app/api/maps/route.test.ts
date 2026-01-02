@@ -37,6 +37,18 @@ describe('Criando um novo mapa', () => {
     const body = await response.json();
     expect(uuid.validate(body.id)).toBe(true);
   });
+
+  // Teste: deve retornar 409 se o nome do mapa já existir
+  it('deve retornar 409 se o nome do mapa já existir', async () => {
+    const map = await testHelper.insertMap();
+
+    const request = testHelper.post('/api/maps', {
+      name: map.name,
+    });
+
+    const response = await POST(request);
+    expect(response.status).toBe(409); // 409 = Conflict
+  });
 });
 
 /* Antes de executar os testes é necessário ter mapas no banco de dados */

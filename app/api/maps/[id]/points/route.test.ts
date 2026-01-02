@@ -54,6 +54,21 @@ describe('Criando um novo ponto', () => {
     expect(uuid.validate(body.id)).toBe(true);
   });
 
+  // Teste: deve retornar 409 se o nome do ponto já existir no mesmo mapa
+  it('deve retornar 409 se o nome do ponto já existir no mesmo mapa', async () => {
+    const point = await testHelper.insertPoint(map.id);
+
+    const request = testHelper.post(`/api/maps/${map.id}/points`, {
+      name: point.name,
+      latitude: -23.5629,
+      longitude: -46.6544,
+    });
+
+    const params = { params: Promise.resolve({ id: map.id }) };
+    const response = await POST(request, params);
+    expect(response.status).toBe(409); // 409 = Conflict
+  });
+
   // Teste: deve retornar 400 se name estiver faltando
   it('deve retornar 400 se name estiver faltando', async () => {
     const request = testHelper.post(`/api/maps/${map.id}/points`, {

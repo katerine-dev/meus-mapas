@@ -1,5 +1,6 @@
 import connection from './connection';
 import { Point } from '../model/point';
+import * as errors from './errors';
 
 interface CreatePointData {
   mapId: string;
@@ -28,16 +29,23 @@ function mapRowToPoint(row: Record<string, unknown>): Point {
 export async function createPoint(data: CreatePointData): Promise<string> {
   const { mapId: mapId, name, description, latitude, longitude } = data;
 
-  // Insere o ponto usando a função POINT(longitude, latitude)
-  // O PostgreSQL POINT usa formato (x, y) onde x=longitude, y=latitude
-  const result = await connection.query(
-    `INSERT INTO points (map_id, name, description, location)
-     VALUES ($1, $2, $3, POINT($4, $5))
-     RETURNING id`,
-    [mapId, name, description, longitude, latitude]
-  );
+  try {
+    // Insere o ponto usando a função POINT(longitude, latitude)
+    // O PostgreSQL POINT usa formato (x, y) onde x=longitude, y=latitude
+    const result = await connection.query(
+      `INSERT INTO points (map_id, name, description, location)
+       VALUES ($1, $2, $3, POINT($4, $5))
+       RETURNING id`,
+      [mapId, name, description, longitude, latitude]
+    );
 
-  return result.rows[0].id;
+    return result.rows[0].id;
+  } catch (error) {
+    if ((error as errors.DatabaseError).code === errors.PG_UNIQUE_VIOLATION) {
+      throw new errors.DuplicateNameError();
+    }
+    throw error;
+  }
 }
 
 // Função que busca todos os pontos de um mapa específico
