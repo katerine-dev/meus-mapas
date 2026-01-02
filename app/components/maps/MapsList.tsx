@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import MapCard from './MapCard';
-import { PlusIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import CreateMapModal from './CreateMapModal';
 import EditMapModal from './EditMapModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
@@ -138,7 +138,7 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <p className="text-purple-light">Carregando...</p>
+        <ArrowPathIcon className="h-8 w-8 animate-spin text-purple-main" />
       </div>
     );
   }

@@ -202,7 +202,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
   if (loading) {
     return (
       <div className="flex h-96 items-center justify-center">
-        <p className="text-purple-main">Carregando...</p>
+        <ArrowPathIcon className="h-8 w-8 animate-spin text-purple-main" />
       </div>
     );
   }
