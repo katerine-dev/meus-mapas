@@ -1,5 +1,6 @@
 import * as pointsDb from '@/app/db/points';
 import * as mapsDb from '@/app/db/maps';
+import { validatePointData } from '@/app/utils/validation';
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -28,9 +29,16 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     return new Response(null, { status: 404 });
   }
 
-  // Validação básica dos campos obrigatórios
-  if (!body.name || body.latitude === undefined || body.longitude === undefined) {
-    return Response.json({ error: 'name, latitude e longitude são obrigatórios' }, { status: 400 });
+  // Validação
+  const errors = validatePointData({
+    name: body.name || '',
+    description: body.description || '',
+    latitude: body.latitude,
+    longitude: body.longitude,
+  });
+
+  if (errors.length > 0) {
+    return Response.json({ errors }, { status: 400 });
   }
 
   // Cria o ponto no banco de dados

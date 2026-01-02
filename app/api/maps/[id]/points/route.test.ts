@@ -68,7 +68,8 @@ describe('Criando um novo ponto', () => {
     const response = await POST(request, params);
     expect(response.status).toBe(400);
     const body = await response.json();
-    expect(body.error).toBe('name, latitude e longitude são obrigatórios');
+    expect(body.errors).toBeDefined();
+    expect(body.errors.some((e: { field: string }) => e.field === 'name')).toBe(true);
   });
 
   // Teste: deve retornar 400 se latitude estiver faltando
@@ -82,7 +83,8 @@ describe('Criando um novo ponto', () => {
     const response = await POST(request, params);
     expect(response.status).toBe(400);
     const body = await response.json();
-    expect(body.error).toBe('name, latitude e longitude são obrigatórios');
+    expect(body.errors).toBeDefined();
+    expect(body.errors.some((e: { field: string }) => e.field === 'latitude')).toBe(true);
   });
 
   // Teste: deve retornar 400 se longitude estiver faltando
@@ -96,7 +98,8 @@ describe('Criando um novo ponto', () => {
     const response = await POST(request, params);
     expect(response.status).toBe(400);
     const body = await response.json();
-    expect(body.error).toBe('name, latitude e longitude são obrigatórios');
+    expect(body.errors).toBeDefined();
+    expect(body.errors.some((e: { field: string }) => e.field === 'longitude')).toBe(true);
   });
 
   // Teste: deve retornar 404 se o mapa não existir
