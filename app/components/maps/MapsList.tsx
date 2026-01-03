@@ -213,7 +213,7 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
 
       {filteredMaps.length === 0 ? (
         <div className="flex items-center justify-center py-12">
-          <p className="text-purple-light">Nenhum mapa encontrado.</p>
+          <p className="text-text-muted">Nenhum mapa encontrado.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

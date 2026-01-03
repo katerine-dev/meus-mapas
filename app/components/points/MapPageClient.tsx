@@ -17,7 +17,7 @@ import Spinner from '@/app/components/ui/Spinner';
 const LeafletMap = dynamic(() => import('./LeafletMap'), {
   ssr: false,
   loading: () => (
-    <div className="flex h-full items-center justify-center bg-gray-100">
+    <div className="flex h-full items-center justify-center bg-surface-hover">
       <Spinner />
     </div>
   ),
@@ -416,7 +416,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
           className="mx-auto flex w-full items-center justify-center rounded-t-2xl bg-white px-4 py-2 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]"
         >
           <div className="flex items-center gap-2">
-            <div className="h-1 w-10 rounded-full bg-gray-300" />
+            <div className="h-1 w-10 rounded-full bg-border" />
           </div>
         </button>
 

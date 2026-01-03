@@ -6,7 +6,7 @@ interface GitHubLinkProps {
 
 export default function GitHubLink({
   href,
-  className = 'text-purple-light hover:text-purple-main transition-colors',
+  className = 'text-text-muted hover:text-primary transition-colors',
   iconClassName = 'h-4 w-4',
 }: GitHubLinkProps) {
   return (

@@ -101,7 +101,7 @@ export default function MapFormModal({
       <div className="flex flex-col gap-4">
         {/* Título */}
         <div className="flex justify-center">
-          <h1 id="map-form-modal-title" className="text-2xl font-semibold text-purple-main">
+          <h1 id="map-form-modal-title" className="text-2xl font-semibold text-primary">
             {title}
           </h1>
         </div>

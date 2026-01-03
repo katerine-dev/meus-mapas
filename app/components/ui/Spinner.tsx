@@ -21,7 +21,7 @@ const sizeClasses = {
 
 // Mapeamento de variantes de cor
 const variantClasses = {
-  default: 'text-purple-main',
+  default: 'text-primary',
   white: 'text-white',
 };
 

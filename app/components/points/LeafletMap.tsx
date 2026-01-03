@@ -148,7 +148,7 @@ export default function LeafletMap({
           <Popup autoPan={false}>
             <div className="text-center">
               <p className="font-medium">{tempPoint.name}</p>
-              <p className="text-xs text-gray-500">Clique para adicionar ao mapa</p>
+              <p className="text-xs text-text-muted">Clique para adicionar ao mapa</p>
             </div>
           </Popup>
         </Marker>
