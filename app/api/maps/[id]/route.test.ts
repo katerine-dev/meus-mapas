@@ -151,6 +151,26 @@ describe('PUT /api/maps/[id]', () => {
     expect(body.errors).toBeDefined();
     expect(body.errors[0].field).toBe('name');
   });
+
+  // Teste: deve retornar 409 ao atualizar para nome que já existe em outro mapa
+  it('deve retornar 409 ao atualizar para nome que já existe em outro mapa', async () => {
+    // Cria dois mapas
+    await testHelper.insertMap({ name: 'Mapa Original' });
+    const map2 = await testHelper.insertMap({ name: 'Outro Mapa' });
+
+    // Tenta atualizar map2 para ter o mesmo nome do primeiro mapa
+    const request = testHelper.put(`/api/maps/${map2.id}`, {
+      name: 'Mapa Original', // Nome já existe
+      description: 'Descrição',
+    });
+
+    const params = { params: Promise.resolve({ id: map2.id }) };
+
+    const response = await PUT(request, params);
+    expect(response.status).toBe(409);
+    const body = await response.json();
+    expect(body.error).toBeDefined();
+  });
 });
 
 describe('DELETE /api/maps/[id]', () => {

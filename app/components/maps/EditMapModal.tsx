@@ -10,7 +10,7 @@ import type { ValidationError } from '@/app/validation/types';
 
 interface EditMapModalInnerProps {
   onClose: () => void;
-  onSubmit: (name: string, description: string) => void;
+  onSubmit: (name: string, description: string) => Promise<{ error?: string } | void>;
   initialName: string;
   initialDescription: string;
 }
@@ -24,22 +24,41 @@ function EditMapModalInner({
   const [name, setName] = useState(initialName);
   const [description, setDescription] = useState(initialDescription);
   const [errors, setErrors] = useState<ValidationError[]>([]);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   // Função executada ao submeter o formulário
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Executa a validação dos dados inseridos pelo usuário
     const validationErrors = validateMapData(name, description);
     // Se houver erros, atualiza o estado de erros e interrompe o submit
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
+      setApiError(null);
       return;
     }
 
     // Se passou na validação, limpa os erros e prossegue com o submit
     setErrors([]);
-    // Envia o nome já com trim aplicado para remover espaços em branco
-    onSubmit(name.trim(), description);
-    onClose();
+    setApiError(null);
+    setLoading(true);
+
+    try {
+      // Envia o nome já com trim aplicado para remover espaços em branco
+      const result = await onSubmit(name.trim(), description);
+
+      if (result?.error) {
+        setApiError(result.error);
+        setLoading(false);
+        return;
+      }
+
+      onClose();
+    } catch {
+      setApiError('Erro ao editar mapa. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Função auxiliar para buscar a mensagem de erro de um campo específico
@@ -51,6 +70,14 @@ function EditMapModalInner({
         <div className="flex justify-center">
           <h1 className="text-2xl font-semibold text-purple-main">Editar Mapa</h1>
         </div>
+
+        {/* Erro da API */}
+        {apiError && (
+          <div className="rounded-lg border border-destructive-border bg-destructive-light p-3 text-sm text-destructive">
+            {apiError}
+          </div>
+        )}
+
         <div>
           <Input placeholder="NOME*" value={name} onChange={setName} />
           {/* Exibe a mensagem de erro abaixo do input se houver erro no campo 'name' */}
@@ -68,8 +95,8 @@ function EditMapModalInner({
           )}
         </div>
 
-        <Button onClick={handleSubmit} fullWidth>
-          Editar
+        <Button onClick={handleSubmit} fullWidth disabled={loading}>
+          {loading ? 'Salvando...' : 'Editar'}
         </Button>
       </div>
     </>
@@ -79,7 +106,7 @@ function EditMapModalInner({
 interface EditMapModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (name: string, description: string) => void;
+  onSubmit: (name: string, description: string) => Promise<{ error?: string } | void>;
   initialName: string;
   initialDescription: string;
 }

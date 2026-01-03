@@ -11,7 +11,7 @@ import type { ValidationError } from '@/app/validation/types';
 interface CreateMapModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (name: string, description: string) => void;
+  onSubmit: (name: string, description: string) => Promise<{ error?: string } | void>;
 }
 
 // Componente modal para criar um novo mapa
@@ -19,22 +19,49 @@ export default function CreateMapModal({ isOpen, onClose, onSubmit }: CreateMapM
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [errors, setErrors] = useState<ValidationError[]>([]);
+  const [apiError, setApiError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Executa a validação dos dados inseridos pelo usuário
     const validationErrors = validateMapData(name, description);
     // Se houver erros, atualiza o estado de erros e interrompe o submit
     if (validationErrors.length > 0) {
       setErrors(validationErrors);
+      setApiError(null);
       return;
     }
 
     // Se passou na validação, limpa os erros e prossegue com o submit
     setErrors([]);
-    // Envia o nome já com trim aplicado para remover espaços em branco
-    onSubmit(name.trim(), description);
+    setApiError(null);
+    setLoading(true);
+
+    try {
+      // Envia o nome já com trim aplicado para remover espaços em branco
+      const result = await onSubmit(name.trim(), description);
+
+      if (result?.error) {
+        setApiError(result.error);
+        setLoading(false);
+        return;
+      }
+
+      setName('');
+      setDescription('');
+      onClose();
+    } catch {
+      setApiError('Erro ao criar mapa. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClose = () => {
     setName('');
     setDescription('');
+    setErrors([]);
+    setApiError(null);
     onClose();
   };
 
@@ -42,12 +69,19 @@ export default function CreateMapModal({ isOpen, onClose, onSubmit }: CreateMapM
   const getError = (field: string) => errors.find((e) => e.field === field)?.message;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={handleClose}>
       <div className="flex flex-col gap-4">
         {/* Título */}
         <div className="flex justify-center">
           <h1 className="text-2xl font-semibold text-purple-main">Criar Novo Mapa</h1>
         </div>
+
+        {/* Erro da API */}
+        {apiError && (
+          <div className="rounded-lg border border-destructive-border bg-destructive-light p-3 text-sm text-destructive">
+            {apiError}
+          </div>
+        )}
 
         <div>
           <Input placeholder="NOME*" value={name} onChange={setName} />
@@ -68,8 +102,8 @@ export default function CreateMapModal({ isOpen, onClose, onSubmit }: CreateMapM
           )}
         </div>
 
-        <Button onClick={handleSubmit} fullWidth>
-          Criar
+        <Button onClick={handleSubmit} fullWidth disabled={loading}>
+          {loading ? 'Criando...' : 'Criar'}
         </Button>
       </div>
     </Modal>

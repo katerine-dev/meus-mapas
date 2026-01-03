@@ -66,21 +66,28 @@ export async function createMap(data: CreateMapData): Promise<string> {
 export async function updateMap(data: UpdateMapData): Promise<Map | null> {
   const { id, name, description } = data;
 
-  // Só permite atualizar registros que não foram deletados
-  const result = await connection.query(
-    `UPDATE maps
-     SET name = $2, description = $3, updated_at = NOW()
-     WHERE id = $1 AND deleted_at IS NULL
-     RETURNING *`,
-    [id, name, description]
-  );
+  try {
+    // Só permite atualizar registros que não foram deletados
+    const result = await connection.query(
+      `UPDATE maps
+       SET name = $2, description = $3, updated_at = NOW()
+       WHERE id = $1 AND deleted_at IS NULL
+       RETURNING *`,
+      [id, name, description]
+    );
 
-  // Retorna o mapa atualizado ou null se não encontrado (ou já deletado)
-  if (result.rows.length === 0) {
-    return null;
+    // Retorna o mapa atualizado ou null se não encontrado (ou já deletado)
+    if (result.rows.length === 0) {
+      return null;
+    }
+
+    return mapRowToMap(result.rows[0]);
+  } catch (error) {
+    if ((error as errors.DatabaseError).code === errors.PG_UNIQUE_VIOLATION) {
+      throw new errors.DuplicateNameError();
+    }
+    throw error;
   }
-
-  return mapRowToMap(result.rows[0]);
 }
 
 /**

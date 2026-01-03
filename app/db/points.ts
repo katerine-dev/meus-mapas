@@ -89,19 +89,26 @@ interface UpdatePointData {
 export async function updatePoint(data: UpdatePointData): Promise<Point | null> {
   const { id, name } = data;
 
-  const result = await connection.query(
-    `UPDATE points
-     SET name = $2, updated_at = NOW()
-     WHERE id = $1 AND deleted_at IS NULL
-     RETURNING *`,
-    [id, name]
-  );
+  try {
+    const result = await connection.query(
+      `UPDATE points
+       SET name = $2, updated_at = NOW()
+       WHERE id = $1 AND deleted_at IS NULL
+       RETURNING *`,
+      [id, name]
+    );
 
-  if (result.rows.length === 0) {
-    return null;
+    if (result.rows.length === 0) {
+      return null;
+    }
+
+    return mapRowToPoint(result.rows[0]);
+  } catch (error) {
+    if ((error as errors.DatabaseError).code === errors.PG_UNIQUE_VIOLATION) {
+      throw new errors.DuplicateNameError();
+    }
+    throw error;
   }
-
-  return mapRowToPoint(result.rows[0]);
 }
 
 /**

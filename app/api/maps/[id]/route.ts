@@ -1,5 +1,6 @@
 // Importa as funções de acesso ao banco de dados de mapas
 import * as mapsDb from '@/app/db/maps';
+import { DuplicateNameError } from '@/app/db/errors';
 // Importa a função de validação e tipos de erro do utilitário de validação
 import { validateMapData } from '@/app/validation/map';
 
@@ -35,22 +36,29 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     return Response.json({ errors }, { status: 400 });
   }
 
-  // Atualiza o mapa no banco de dados com os novos valores
-  // updateMap retorna null se o mapa não existir ou estiver deletado
-  const map = await mapsDb.updateMap({
-    id,
-    // Remove espaços em branco do início e fim do nome antes de salvar
-    name: body.name.trim(),
-    description: body.description,
-  });
+  try {
+    // Atualiza o mapa no banco de dados com os novos valores
+    // updateMap retorna null se o mapa não existir ou estiver deletado
+    const map = await mapsDb.updateMap({
+      id,
+      // Remove espaços em branco do início e fim do nome antes de salvar
+      name: body.name.trim(),
+      description: body.description,
+    });
 
-  // Se o mapa não existir ou estiver deletado, retorna 404 Not Found
-  if (!map) {
-    return new Response(null, { status: 404 });
+    // Se o mapa não existir ou estiver deletado, retorna 404 Not Found
+    if (!map) {
+      return new Response(null, { status: 404 });
+    }
+
+    // Retorna 204 No Content indicando sucesso sem corpo de resposta
+    return new Response(null, { status: 204 });
+  } catch (error) {
+    if (error instanceof DuplicateNameError) {
+      return Response.json({ error: error.message }, { status: 409 });
+    }
+    throw error;
   }
-
-  // Retorna 204 No Content indicando sucesso sem corpo de resposta
-  return new Response(null, { status: 204 });
 }
 
 // Handler DELETE - Soft delete de um mapa pelo ID

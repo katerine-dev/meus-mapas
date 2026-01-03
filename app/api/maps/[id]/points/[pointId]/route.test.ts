@@ -160,6 +160,26 @@ describe('PUT /api/maps/[id]/points/[pointId]', () => {
     expect(body.errors[0].field).toBe('latitude');
     expect(body.errors[1].field).toBe('longitude');
   });
+
+  // Teste: deve retornar 409 ao atualizar para nome que já existe em outro ponto do mesmo mapa
+  it('deve retornar 409 ao atualizar para nome que já existe no mesmo mapa', async () => {
+    // Cria um mapa e dois pontos
+    const map = await testHelper.insertMap();
+    await testHelper.insertPoint(map.id, { name: 'Ponto Original' });
+    const point2 = await testHelper.insertPoint(map.id, { name: 'Outro Ponto' });
+
+    // Tenta atualizar point2 para ter o mesmo nome do primeiro ponto
+    const request = testHelper.put(`/api/maps/${map.id}/points/${point2.id}`, {
+      name: 'Ponto Original', // Nome já existe
+    });
+
+    const params = { params: Promise.resolve({ id: map.id, pointId: point2.id }) };
+
+    const response = await PUT(request, params);
+    expect(response.status).toBe(409);
+    const body = await response.json();
+    expect(body.error).toBeDefined();
+  });
 });
 
 describe('DELETE /api/maps/[id]/points/[pointId]', () => {

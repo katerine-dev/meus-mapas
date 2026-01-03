@@ -59,10 +59,10 @@ export async function cleanDatabase() {
 
 // Insere um mapa no banco via SQL e retorna os dados gerados
 // Use { deletedAt: new Date() } para criar um mapa já deletado
-export async function insertMap(overrides: { deletedAt?: Date } = {}): Promise<Map> {
+// Use { name: 'Nome' } para especificar o nome do mapa
+export async function insertMap(overrides: { deletedAt?: Date; name?: string } = {}): Promise<Map> {
   const deletedAt = overrides.deletedAt ?? null;
-
-  const name = faker.location.city();
+  const name = overrides.name ?? faker.location.city();
   const description = faker.lorem.sentence();
   const result = await connection.query(
     'INSERT INTO maps (name, description, deleted_at) VALUES ($1, $2, $3) RETURNING *',
@@ -87,11 +87,12 @@ export async function insertMap(overrides: { deletedAt?: Date } = {}): Promise<M
 
 // Insere um ponto no banco via SQL e retorna os dados gerados
 // Use { deletedAt: new Date() } para criar um ponto já deletado
+// Use { name: 'Nome' } para especificar o nome do ponto
 export async function insertPoint(
   mapId: string,
-  overrides: { deletedAt?: Date } = {}
+  overrides: { deletedAt?: Date; name?: string } = {}
 ): Promise<Point> {
-  const name = faker.location.street();
+  const name = overrides.name ?? faker.location.street();
   const latitude = faker.location.latitude();
   const longitude = faker.location.longitude();
   const deletedAt = overrides.deletedAt ?? null;

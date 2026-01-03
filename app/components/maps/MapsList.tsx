@@ -74,23 +74,37 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
     });
 
   // Função assíncrona para criar um novo mapa
-  async function handleCreateMap(name: string, description: string) {
+  async function handleCreateMap(
+    name: string,
+    description: string
+  ): Promise<{ error?: string } | void> {
     try {
       const response = await fetch('/api/maps', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, description }),
       });
+
+      if (response.status === 409) {
+        const data = await response.json();
+        return { error: data.error || 'Já existe um mapa com este nome' };
+      }
+
       if (response.ok) {
         fetchMaps(); // Recarrega a lista após criar
+        setIsCreateModalOpen(false);
       }
     } catch (err) {
       console.error('Erro ao criar mapa:', err);
+      return { error: 'Erro ao criar mapa. Tente novamente.' };
     }
   }
 
   // Função assíncrona para editar nome e descrição de um mapa
-  async function handleEditDescription(name: string, description: string) {
+  async function handleEditDescription(
+    name: string,
+    description: string
+  ): Promise<{ error?: string } | void> {
     if (!selectedMap) return;
     try {
       const response = await fetch(`/api/maps/${selectedMap.id}`, {
@@ -98,11 +112,20 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, description }),
       });
+
+      if (response.status === 409) {
+        const data = await response.json();
+        return { error: data.error || 'Já existe um mapa com este nome' };
+      }
+
       if (response.ok) {
         fetchMaps();
+        setIsEditModalOpen(false);
+        setSelectedMap(null);
       }
     } catch (err) {
       console.error('Erro ao editar descrição:', err);
+      return { error: 'Erro ao editar mapa. Tente novamente.' };
     }
   }
 

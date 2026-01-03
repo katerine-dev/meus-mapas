@@ -232,7 +232,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
   };
 
   // Salvar ponto (criar ou editar)
-  const handleSavePoint = async (name: string) => {
+  const handleSavePoint = async (name: string): Promise<{ error?: string } | void> => {
     try {
       if (pointModalMode === 'create') {
         const res = await fetch(`/api/maps/${mapId}/points`, {
@@ -244,9 +244,16 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
             longitude: pointModalData.longitude,
           }),
         });
+
+        if (res.status === 409) {
+          const data = await res.json();
+          return { error: data.error || 'Já existe um ponto com este nome' };
+        }
+
         if (res.ok) {
           await fetchData();
           setTempPoint(null); // Limpar ponto temporário após salvar
+          setPointModalOpen(false);
         }
       } else {
         const res = await fetch(`/api/maps/${mapId}/points/${selectedPointId}`, {
@@ -258,14 +265,21 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
             longitude: pointModalData.longitude,
           }),
         });
+
+        if (res.status === 409) {
+          const data = await res.json();
+          return { error: data.error || 'Já existe um ponto com este nome' };
+        }
+
         if (res.ok) {
           await fetchData();
+          setPointModalOpen(false);
         }
       }
     } catch (error) {
       console.error('Erro ao salvar ponto:', error);
+      return { error: 'Erro ao salvar ponto. Tente novamente.' };
     }
-    setPointModalOpen(false);
   };
 
   // Confirmar exclusão

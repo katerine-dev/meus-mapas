@@ -1,4 +1,5 @@
 import * as pointsDb from '@/app/db/points';
+import { DuplicateNameError } from '@/app/db/errors';
 import { validateUpdatePointData } from '@/app/validation/point';
 
 // Handler GET - Busca um ponto específico pelo ID
@@ -32,17 +33,24 @@ export async function PUT(
     return Response.json({ errors }, { status: 400 });
   }
 
-  // updatePoint retorna null se o ponto não existir ou estiver deletado
-  const updatedPoint = await pointsDb.updatePoint({
-    id: pointId,
-    name: body.name.trim(),
-  });
+  try {
+    // updatePoint retorna null se o ponto não existir ou estiver deletado
+    const updatedPoint = await pointsDb.updatePoint({
+      id: pointId,
+      name: body.name.trim(),
+    });
 
-  if (!updatedPoint) {
-    return new Response(null, { status: 404 });
+    if (!updatedPoint) {
+      return new Response(null, { status: 404 });
+    }
+
+    return new Response(null, { status: 204 });
+  } catch (error) {
+    if (error instanceof DuplicateNameError) {
+      return Response.json({ error: error.message }, { status: 409 });
+    }
+    throw error;
   }
-
-  return new Response(null, { status: 204 });
 }
 
 // Handler DELETE - Soft delete de um ponto pelo ID
