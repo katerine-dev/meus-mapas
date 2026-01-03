@@ -52,7 +52,7 @@ function EditMapModalInner({
           <h1 className="text-2xl font-semibold text-purple-main">Editar Mapa</h1>
         </div>
         <div>
-          <Input placeholder="NOME" value={name} onChange={setName} />
+          <Input placeholder="NOME*" value={name} onChange={setName} />
           {/* Exibe a mensagem de erro abaixo do input se houver erro no campo 'name' */}
           {getError('name') && <p className="mt-1 text-sm text-red-500">{getError('name')}</p>}
         </div>
