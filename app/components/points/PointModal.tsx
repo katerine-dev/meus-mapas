@@ -76,14 +76,13 @@ function PointModalContent({
           />
         </div>
 
-        {/* Coordenadas (readOnly) */}
+        {/* Coordenadas */}
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="mb-1 block text-sm font-medium text-text-secondary">Latitude</label>
             <input
               type="text"
               value={latitude.toFixed(6)}
-              readOnly
               disabled
               className="w-full rounded-lg border border-border bg-surface-hover px-4 py-3 text-text-muted"
             />
@@ -93,7 +92,6 @@ function PointModalContent({
             <input
               type="text"
               value={longitude.toFixed(6)}
-              readOnly
               disabled
               className="w-full rounded-lg border border-border bg-surface-hover px-4 py-3 text-text-muted"
             />
