@@ -38,12 +38,26 @@ const selectedIcon = new L.Icon({
   className: 'selected-marker',
 });
 
+// Ícone do marker temporário (verde para indicar novo local)
+const tempIcon = new L.Icon({
+  iconUrl:
+    'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+  className: 'temp-marker',
+});
+
 interface LeafletMapProps {
   center: [number, number];
   points: Point[];
   selectedPointId: string | null;
   onMapClick: (lat: number, lng: number) => void;
   onMarkerClick: (pointId: string) => void;
+  tempPoint?: { name: string; latitude: number; longitude: number } | null;
+  onTempPointClick?: () => void;
 }
 
 // Componente para capturar cliques no mapa
@@ -83,6 +97,8 @@ export default function LeafletMap({
   selectedPointId,
   onMapClick,
   onMarkerClick,
+  tempPoint,
+  onTempPointClick,
 }: LeafletMapProps) {
   return (
     <MapContainer
@@ -120,6 +136,24 @@ export default function LeafletMap({
           </Marker>
         );
       })}
+
+      {/* Marcador temporário para localização buscada */}
+      {tempPoint && (
+        <Marker
+          position={[tempPoint.latitude, tempPoint.longitude]}
+          icon={tempIcon}
+          eventHandlers={{
+            click: () => onTempPointClick?.(),
+          }}
+        >
+          <Popup autoPan={false}>
+            <div className="text-center">
+              <p className="font-medium">{tempPoint.name}</p>
+              <p className="text-xs text-gray-500">Clique para adicionar ao mapa</p>
+            </div>
+          </Popup>
+        </Marker>
+      )}
     </MapContainer>
   );
 }

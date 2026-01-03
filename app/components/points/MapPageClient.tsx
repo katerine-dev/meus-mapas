@@ -69,6 +69,13 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
   const [geoLocationLoading, setGeoLocationLoading] = useState(false);
   const [geoLocationAttempted, setGeoLocationAttempted] = useState(false);
 
+  // Estado para ponto temporário (buscado mas ainda não salvo)
+  const [tempPoint, setTempPoint] = useState<{
+    name: string;
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+
   // Handler para usar localização do usuário
   const handleUseMyLocation = useCallback(() => {
     if (geoLocationLoading) return;
@@ -153,12 +160,42 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
     setPointModalOpen(true);
   }, []);
 
-  const handleLocationFound = (lat: number, lng: number) => {
+  const handleLocationFound = (
+    lat: number,
+    lng: number,
+    name?: string,
+    isExistingPoint?: boolean
+  ) => {
     setMapCenter([lat, lng]);
+
+    // Se for um local buscado (não um ponto existente), cria ponto temporário
+    if (name && !isExistingPoint) {
+      setTempPoint({ name, latitude: lat, longitude: lng });
+      setSelectedPointId(null); // Limpa seleção de pontos existentes
+    }
+
+    // Se for um ponto existente, seleciona ele
+    if (isExistingPoint) {
+      setTempPoint(null); // Limpa ponto temporário
+      const point = points.find((p) => p.name === name);
+      if (point) {
+        setSelectedPointId(point.id);
+      }
+    }
   };
+
+  // Handler para clicar no ponto temporário
+  const handleTempPointClick = useCallback(() => {
+    if (tempPoint) {
+      setPointModalMode('create');
+      setPointModalData(tempPoint);
+      setPointModalOpen(true);
+    }
+  }, [tempPoint]);
 
   // Handlers de pontos
   const handleSelectPoint = (pointId: string) => {
+    setTempPoint(null); // Limpar ponto temporário ao selecionar um ponto existente
     if (pointId === selectedPointId) {
       setSelectedPointId(null);
     } else {
@@ -208,6 +245,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
         });
         if (res.ok) {
           await fetchData();
+          setTempPoint(null); // Limpar ponto temporário após salvar
         }
       } else {
         const res = await fetch(`/api/maps/${mapId}/points/${selectedPointId}`, {
@@ -311,6 +349,8 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
           selectedPointId={selectedPointId}
           onMapClick={handleMapClick}
           onMarkerClick={handleSelectPoint}
+          tempPoint={tempPoint}
+          onTempPointClick={handleTempPointClick}
         />
       </div>
 
@@ -343,7 +383,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
       >
         <div className="rounded-xl bg-white shadow-lg">
           <div className="p-2">
-            <LocationSearch onLocationFound={handleLocationFound} />
+            <LocationSearch onLocationFound={handleLocationFound} points={points} />
           </div>
         </div>
       </div>
@@ -505,7 +545,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
 
               {/* Busca de localização no mobile */}
               <div className="border-b border-border p-3">
-                <LocationSearch onLocationFound={handleLocationFound} />
+                <LocationSearch onLocationFound={handleLocationFound} points={points} />
               </div>
 
               {/* Lista de pontos */}
@@ -541,7 +581,10 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
       {/* Modal de ponto */}
       <PointModal
         isOpen={pointModalOpen}
-        onClose={() => setPointModalOpen(false)}
+        onClose={() => {
+          setPointModalOpen(false);
+          // Não limpa tempPoint ao fechar - permite clicar novamente no marcador
+        }}
         mode={pointModalMode}
         initialName={pointModalData.name}
         latitude={pointModalData.latitude}
