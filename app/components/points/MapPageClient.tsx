@@ -477,7 +477,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
 
         {/* Conteúdo do drawer */}
         <div
-          className={`bg-white transition-all duration-300 ease-in-out ${mobileDrawerOpen ? 'max-h-[70vh]' : 'max-h-32'} overflow-hidden`}
+          className={`bg-white transition-all duration-300 ease-in-out ${mobileDrawerOpen ? 'max-h-[50vh]' : 'max-h-14'} overflow-hidden`}
         >
           {/* Header do mapa - sempre visível */}
           <div
@@ -500,7 +500,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
 
           {/* Conteúdo expandido */}
           {mobileDrawerOpen && (
-            <div className="flex max-h-[calc(70vh-48px)] flex-col overflow-hidden">
+            <div className="flex max-h-[calc(50vh-48px)] flex-col overflow-hidden">
               {/* Descrição */}
               <div className="border-b border-border p-3">
                 {!editingDescription ? (

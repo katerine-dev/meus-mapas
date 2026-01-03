@@ -284,3 +284,11 @@ body {
 .leaflet-control-attribution {
   display: none !important;
 }
+
+/* Ajustar posição do zoom control no mobile para não ser coberto pelo drawer */
+@media (max-width: 767px) {
+  .leaflet-control-zoom {
+    bottom: 80px !important;
+    right: 10px !important;
+  }
+}

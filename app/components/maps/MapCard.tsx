@@ -94,8 +94,8 @@ export default function MapCard({ map, onEdit, onOpen, onDelete }: MapCardProps)
 
       {/* Informações do mapa */}
       <div className="p-4">
-        <h3 className="text-lg font-semibold text-text-primary">{name}</h3>
-        <p className="text-sm text-text-muted">{description || 'Sem descrição'}</p>
+        <h3 className="truncate text-lg font-semibold text-text-primary">{name}</h3>
+        <p className="line-clamp-2 text-sm text-text-muted">{description || 'Sem descrição'}</p>
         <p className="mt-2 text-sm font-medium text-primary">Pontos cadastrados ({pointsCount})</p>
         <p className="mt-1 text-xs text-text-placeholder">Atualizado em {formattedDate}</p>
       </div>

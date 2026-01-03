@@ -91,9 +91,9 @@ export default function LocationSearch({ onLocationFound, points = [] }: Locatio
     };
   }, [query]);
 
-  // Combinar sugestões (pontos primeiro, depois API)
+  // Combinar sugestões (pontos primeiro, depois API) - limitado a 4 para caber no mobile
   const allSuggestions = useMemo(() => {
-    return [...pointSuggestions, ...apiSuggestions].slice(0, 6);
+    return [...pointSuggestions, ...apiSuggestions].slice(0, 4);
   }, [pointSuggestions, apiSuggestions]);
 
   // Fechar sugestões ao clicar fora
@@ -217,7 +217,7 @@ export default function LocationSearch({ onLocationFound, points = [] }: Locatio
 
       {/* Lista de sugestões */}
       {showSuggestions && allSuggestions.length > 0 && (
-        <div className="absolute top-12 z-50 w-full rounded-xl border border-border bg-surface shadow-lg">
+        <div className="absolute top-12 z-[1000] max-h-64 w-full overflow-auto rounded-xl border border-border bg-surface shadow-lg">
           <ul className="divide-y divide-border py-1">
             {allSuggestions.map((suggestion, index) => (
               <li key={`${suggestion.type}-${index}`}>
