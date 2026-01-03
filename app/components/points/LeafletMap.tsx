@@ -60,12 +60,17 @@ function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number
 // Componente para atualizar o centro do mapa
 function MapCenterUpdater({ center }: { center: [number, number] }) {
   const map = useMap();
-  const prevCenter = useRef(center);
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
-    if (prevCenter.current[0] !== center[0] || prevCenter.current[1] !== center[1]) {
-      map.setView(center, 13);
-      prevCenter.current = center;
+    // Sempre atualiza o centro (flyTo para animação suave)
+    if (isFirstRender.current) {
+      // Na primeira renderização, apenas seta a view sem animação
+      map.setView(center, map.getZoom());
+      isFirstRender.current = false;
+    } else {
+      // Nas atualizações seguintes, usa flyTo para animação suave
+      map.flyTo(center, map.getZoom(), { duration: 0.5 });
     }
   }, [center, map]);
 
