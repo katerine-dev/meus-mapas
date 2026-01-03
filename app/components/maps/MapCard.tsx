@@ -4,29 +4,18 @@ import { useState, useRef, useEffect } from 'react';
 
 import { MapIcon, DocumentTextIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
+import { Map } from '@/app/model/map';
 
 interface MapCardProps {
-  id: string;
-  name: string;
-  description?: string;
-  pointsCount: number;
-  updatedAt: Date;
-  createdAt: Date;
+  map: Map;
   onEdit: () => void;
   onOpen: () => void;
   onDelete: () => void;
 }
 
 // Componente card que exibe um mapa na lista
-export default function MapCard({
-  name,
-  description,
-  pointsCount,
-  updatedAt,
-  onEdit,
-  onOpen,
-  onDelete,
-}: MapCardProps) {
+export default function MapCard({ map, onEdit, onOpen, onDelete }: MapCardProps) {
+  const { name, description, pointsCount, updatedAt } = map;
   const [menuOpen, setMenuOpen] = useState(false);
   // Ref para o container do menu, usado para detectar cliques fora
   const menuRef = useRef<HTMLDivElement>(null);
@@ -55,10 +44,10 @@ export default function MapCard({
   return (
     <div
       onClick={onOpen}
-      className="card-interactive border-border bg-surface relative cursor-pointer overflow-hidden rounded-2xl border shadow-lg transition-all hover:shadow-xl"
+      className="card-interactive relative cursor-pointer overflow-hidden rounded-2xl border border-border bg-surface shadow-lg transition-all hover:shadow-xl"
     >
       {/* Preview roxo com ícone de mapa */}
-      <div className="bg-primary relative flex h-32 items-center justify-center">
+      <div className="relative flex h-32 items-center justify-center bg-primary">
         <MapIcon className="h-12 w-12 text-white/50" strokeWidth={1.5} />
 
         {/* Botão de menu */}
@@ -75,16 +64,16 @@ export default function MapCard({
 
           {/* Menu dropdown */}
           {menuOpen && (
-            <div className="border-border bg-surface absolute right-0 top-10 z-10 w-48 rounded-xl border py-2 shadow-xl">
+            <div className="absolute right-0 top-10 z-10 w-48 rounded-xl border border-border bg-surface py-2 shadow-xl">
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onEdit();
                   setMenuOpen(false);
                 }}
-                className="text-text-primary hover:bg-surface-hover flex w-full items-center gap-3 px-4 py-2 text-left"
+                className="flex w-full items-center gap-3 px-4 py-2 text-left text-text-primary hover:bg-surface-hover"
               >
-                <DocumentTextIcon className="text-text-muted h-4 w-4" />
+                <DocumentTextIcon className="h-4 w-4 text-text-muted" />
                 Editar
               </button>
               <button
@@ -93,7 +82,7 @@ export default function MapCard({
                   onDelete();
                   setMenuOpen(false);
                 }}
-                className="text-destructive hover:bg-destructive-light flex w-full items-center gap-3 px-4 py-2 text-left"
+                className="flex w-full items-center gap-3 px-4 py-2 text-left text-destructive hover:bg-destructive-light"
               >
                 <TrashIcon className="h-4 w-4" />
                 Excluir
@@ -105,10 +94,10 @@ export default function MapCard({
 
       {/* Informações do mapa */}
       <div className="p-4">
-        <h3 className="text-text-primary text-lg font-semibold">{name}</h3>
-        <p className="text-text-muted text-sm">{description || 'Sem descrição'}</p>
-        <p className="text-primary mt-2 text-sm font-medium">Pontos cadastrados ({pointsCount})</p>
-        <p className="text-text-placeholder mt-1 text-xs">Atualizado em {formattedDate}</p>
+        <h3 className="text-lg font-semibold text-text-primary">{name}</h3>
+        <p className="text-sm text-text-muted">{description || 'Sem descrição'}</p>
+        <p className="mt-2 text-sm font-medium text-primary">Pontos cadastrados ({pointsCount})</p>
+        <p className="mt-1 text-xs text-text-placeholder">Atualizado em {formattedDate}</p>
       </div>
     </div>
   );

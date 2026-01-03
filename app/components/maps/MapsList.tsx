@@ -46,8 +46,8 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
   }
 
   useEffect(() => {
-    fetchMaps();
-  }, []); // Array vazio = executa apenas uma vez
+    fetchMaps(); // Busca os mapas da API
+  }, []); // [] = só executa quando o componente monta
 
   // Calcula a lista filtrada e ordenada diretamente
   const filteredMaps = maps
@@ -187,12 +187,7 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
           {filteredMaps.map((map) => (
             <MapCard
               key={map.id}
-              id={map.id}
-              name={map.name}
-              description={map.description}
-              pointsCount={map.pointsCount}
-              updatedAt={map.updatedAt}
-              createdAt={map.createdAt}
+              map={map}
               onEdit={() => openEditModal(map)}
               onOpen={() => handleOpenMap(map)}
               onDelete={() => openDeleteModal(map)}
