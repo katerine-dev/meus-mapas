@@ -6,9 +6,12 @@ CREATE TABLE points (
   location POINT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  deleted_at TIMESTAMPTZ NULL,
-  UNIQUE(map_id, name)
+  deleted_at TIMESTAMPTZ NULL
 );
+
+-- Índice parcial único que só considera pontos ativos (não deletados)
+-- Permite reutilizar nomes de pontos que foram deletados
+CREATE UNIQUE INDEX idx_points_map_name_unique_active ON points(map_id, name) WHERE deleted_at IS NULL;
 
 -- Cria índice na coluna map_id para otimizar consultas de pontos por mapa
 CREATE INDEX idx_points_map_id ON points(map_id);
