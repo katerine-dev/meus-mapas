@@ -279,3 +279,8 @@ body {
 .modal-content {
   animation: modal-slide-up 200ms ease-out;
 }
+
+/* Ocultar atribuição do Leaflet/OpenStreetMap */
+.leaflet-control-attribution {
+  display: none !important;
+}

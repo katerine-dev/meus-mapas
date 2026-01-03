@@ -1,7 +1,15 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from 'react-leaflet';
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  Popup,
+  useMapEvents,
+  useMap,
+  ZoomControl,
+} from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Point } from '@/app/model/point';
@@ -77,12 +85,14 @@ export default function LeafletMap({
       zoom={13}
       style={{ height: '100%', width: '100%' }}
       scrollWheelZoom={true}
+      zoomControl={false}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
+      <ZoomControl position="bottomright" />
       <MapClickHandler onMapClick={onMapClick} />
       <MapCenterUpdater center={center} />
 

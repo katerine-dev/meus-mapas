@@ -225,13 +225,33 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
   }
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-120px)] max-w-7xl gap-6 p-8">
-      {/* Coluna esquerda - Dados do mapa e lista de pontos */}
-      <div className="flex w-80 flex-shrink-0 flex-col gap-4">
+    <div className="relative h-full">
+      {/* Mapa em tela cheia */}
+      <div className="absolute inset-0">
+        <LeafletMap
+          center={mapCenter}
+          points={points}
+          selectedPointId={selectedPointId}
+          onMapClick={handleMapClick}
+          onMarkerClick={handleSelectPoint}
+        />
+      </div>
+
+      {/* Busca de localização - flutuante no topo */}
+      <div className="absolute left-1/2 top-4 z-[1000] w-full max-w-md -translate-x-1/2 px-4">
+        <div className="rounded-xl bg-white shadow-lg">
+          <div className="p-2">
+            <LocationSearch onLocationFound={handleLocationFound} />
+          </div>
+        </div>
+      </div>
+
+      {/* Painel lateral flutuante */}
+      <div className="absolute bottom-4 left-4 top-4 z-[1000] flex w-80 flex-col gap-4 overflow-hidden">
         {/* Info do mapa */}
-        <div className="card-interactive border-border bg-surface overflow-hidden rounded-2xl border shadow-lg">
+        <div className="card-interactive overflow-hidden rounded-2xl border border-border bg-surface shadow-lg">
           {/* Header com roxo sólido */}
-          <div className="bg-primary flex items-center justify-between px-5 py-4">
+          <div className="flex items-center justify-between bg-primary px-5 py-4">
             <h1 className="text-lg font-semibold text-white">{map.name}</h1>
             {!editingDescription && (
               <button
@@ -247,13 +267,13 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
           {/* Conteúdo */}
           <div className="p-4">
             {!editingDescription ? (
-              <p className="text-text-muted text-sm">{map.description || 'Sem descrição'}</p>
+              <p className="text-sm text-text-muted">{map.description || 'Sem descrição'}</p>
             ) : (
               <div>
                 <textarea
                   value={descriptionValue}
                   onChange={(e) => setDescriptionValue(e.target.value)}
-                  className="border-border text-text-primary placeholder:text-text-placeholder focus:border-primary focus:ring-focus-ring/30 w-full rounded-xl border p-2.5 text-sm focus:outline-none focus:ring-2"
+                  className="focus:ring-focus-ring/30 w-full rounded-xl border border-border p-2.5 text-sm text-text-primary placeholder:text-text-placeholder focus:border-primary focus:outline-none focus:ring-2"
                   rows={2}
                   placeholder="Adicione uma descrição..."
                 />
@@ -263,13 +283,13 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
                       setEditingDescription(false);
                       setDescriptionValue(map.description || '');
                     }}
-                    className="btn-interactive text-text-secondary hover:bg-surface-hover rounded-lg px-3 py-1.5 text-sm"
+                    className="btn-interactive rounded-lg px-3 py-1.5 text-sm text-text-secondary hover:bg-surface-hover"
                   >
                     Cancelar
                   </button>
                   <button
                     onClick={handleSaveDescription}
-                    className="btn-interactive bg-primary hover:bg-primary-hover rounded-lg px-3 py-1.5 text-sm text-white"
+                    className="btn-interactive rounded-lg bg-primary px-3 py-1.5 text-sm text-white hover:bg-primary-hover"
                   >
                     Salvar
                   </button>
@@ -280,7 +300,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
         </div>
 
         {/* Lista de pontos */}
-        <div className="card-interactive border-border bg-surface min-h-0 flex-1 overflow-hidden rounded-2xl border shadow-lg">
+        <div className="card-interactive min-h-0 flex-1 overflow-hidden rounded-2xl border border-border bg-surface shadow-lg">
           <PointsList
             points={points}
             selectedPointId={selectedPointId}
@@ -294,30 +314,11 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
         <button
           onClick={handleDeleteAllPoints}
           disabled={points.length === 0}
-          className="btn-interactive border-destructive-border bg-surface text-destructive hover:bg-destructive-light focus:ring-destructive/30 disabled:border-border disabled:text-text-muted disabled:hover:bg-surface flex cursor-pointer items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-sm shadow-sm hover:shadow-md focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-sm"
+          className="btn-interactive focus:ring-destructive/30 flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-destructive-border bg-surface px-3 py-2.5 text-sm text-destructive shadow-sm hover:bg-destructive-light hover:shadow-md focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:border-border disabled:text-text-muted disabled:opacity-50 disabled:hover:bg-surface disabled:hover:shadow-sm"
         >
           <TrashIcon className="h-4 w-4" />
           <span>Excluir todos</span>
         </button>
-      </div>
-
-      {/* Área do mapa */}
-      <div className="card-interactive border-border bg-surface flex min-w-0 flex-1 flex-col overflow-hidden rounded-2xl border shadow-lg">
-        {/* Busca de localização - integrada ao card */}
-        <div className="border-border-light border-b p-3">
-          <LocationSearch onLocationFound={handleLocationFound} />
-        </div>
-
-        {/* Mapa */}
-        <div className="h-full min-h-[400px] flex-1 overflow-hidden">
-          <LeafletMap
-            center={mapCenter}
-            points={points}
-            selectedPointId={selectedPointId}
-            onMapClick={handleMapClick}
-            onMarkerClick={handleSelectPoint}
-          />
-        </div>
       </div>
 
       {/* Modal de ponto */}

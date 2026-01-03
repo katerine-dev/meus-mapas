@@ -10,9 +10,9 @@ export default async function MapPage({ params }: MapPageProps) {
   const { id } = await params;
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex h-screen flex-col overflow-hidden">
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 overflow-hidden">
         <MapPageClient mapId={id} />
       </main>
       <Footer />
