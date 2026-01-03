@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Modal from './Modal';
 import Button from './Button';
 import ErrorMessage from './ErrorMessage';
+import Spinner from './Spinner';
 
 interface ConfirmModalProps {
   isOpen: boolean;
@@ -74,7 +75,7 @@ export default function ConfirmModal({
             Cancelar
           </Button>
           <Button variant="danger" onClick={handleConfirm} fullWidth disabled={loading}>
-            {loading ? 'Aguarde...' : 'Confirmar'}
+            {loading ? <Spinner size="sm" variant="white" /> : 'Confirmar'}
           </Button>
         </div>
       </div>
