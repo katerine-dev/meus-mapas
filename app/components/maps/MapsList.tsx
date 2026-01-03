@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import MapCard from './MapCard';
 import { PlusIcon } from '@heroicons/react/24/outline';
 import MapFormModal from './MapFormModal';
-import DeleteConfirmModal from './DeleteConfirmModal';
+import ConfirmModal from '@/app/components/ui/ConfirmModal';
 import SearchBar from './SearchBar';
 import Button from '../ui/Button';
 import ErrorState from '../ui/ErrorState';
@@ -248,13 +248,15 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
       />
 
       {/* Modal de confirmação de exclusão */}
-      <DeleteConfirmModal
+      <ConfirmModal
         isOpen={isDeleteModalOpen}
         onClose={() => {
           setIsDeleteModalOpen(false);
           setSelectedMap(null);
         }}
         onConfirm={handleDeleteMap}
+        title="Excluir mapa"
+        message="Esta ação não pode ser desfeita. Deseja continuar?"
       />
     </div>
   );

@@ -13,7 +13,7 @@ import { Point } from '@/app/model/point';
 import { Map } from '@/app/model/map';
 import PointsList from './PointsList';
 import PointModal from './PointModal';
-import ConfirmModal from './ConfirmModal';
+import ConfirmModal from '@/app/components/ui/ConfirmModal';
 import LocationSearch from './LocationSearch';
 import ErrorState from '../ui/ErrorState';
 import Spinner from '../ui/Spinner';
