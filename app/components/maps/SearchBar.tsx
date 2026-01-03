@@ -57,7 +57,7 @@ export default function SearchBar({ onSearch, onSortChange }: SearchBarProps) {
         {/* Dropdown de ordenação */}
         {sortOpen && (
           <div className="absolute right-0 top-10 z-10 w-48 rounded-xl bg-white py-2 shadow-xl">
-            {Object.keys(SORT_OPTIONS).map((key) => (
+            {(Object.keys(SORT_OPTIONS) as SortKey[]).map((key) => (
               <button
                 key={key}
                 onClick={() => handleSortSelect(key)}
