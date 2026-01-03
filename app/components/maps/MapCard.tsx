@@ -18,6 +18,9 @@ interface MapCardProps {
 export default function MapCard({ map, onEdit, onOpen, onDelete }: MapCardProps) {
   const { name, description, pointsCount, updatedAt, previewLocation } = map;
   const [menuOpen, setMenuOpen] = useState(false);
+  // Estado para controlar se a imagem do tile falhou ao carregar
+  // Quando true, exibe o fallback roxo com ícone ao invés da imagem
+  const [tileImageError, setTileImageError] = useState(false);
   // Ref para o container do menu, usado para detectar cliques fora
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -108,14 +111,20 @@ export default function MapCard({ map, onEdit, onOpen, onDelete }: MapCardProps)
 
       {/* Preview: tile do mapa ou fallback roxo com ícone */}
       <div className="relative h-32 overflow-hidden rounded-t-2xl bg-primary">
-        {tileUrl ? (
+        {tileUrl && !tileImageError ? (
+          // Tenta carregar a imagem do tile do OpenStreetMap
+          // Se falhar (servidor offline, rate limit, coordenadas inválidas, etc),
+          // o onError dispara e muda para o fallback
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={tileUrl}
             alt={`Preview do mapa ${name}`}
+            onError={() => setTileImageError(true)}
             className="h-full w-full object-cover"
           />
         ) : (
+          // Fallback: fundo roxo com ícone de mapa
+          // Exibido quando não há previewLocation ou quando a imagem falha ao carregar
           <div className="flex h-full items-center justify-center">
             <MapIcon className="h-12 w-12 text-white/50" strokeWidth={1.5} />
           </div>
