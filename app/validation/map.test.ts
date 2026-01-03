@@ -49,17 +49,17 @@ describe('validateMapData', () => {
       expect(errors).toHaveLength(0);
     });
 
-    it('deve retornar erro quando description tem mais de 500 caracteres', () => {
-      const longDescription = 'a'.repeat(501);
+    it('deve retornar erro quando description tem mais de 40 caracteres', () => {
+      const longDescription = 'a'.repeat(41);
       const errors = validateMapData('Meu Mapa', longDescription);
 
       expect(errors).toHaveLength(1);
       expect(errors[0].field).toBe('description');
-      expect(errors[0].message).toContain('no máximo 500 caracteres');
+      expect(errors[0].message).toContain('no máximo 40 caracteres');
     });
 
-    it('deve aceitar description com exatamente 500 caracteres', () => {
-      const description = 'a'.repeat(500);
+    it('deve aceitar description com exatamente 40 caracteres', () => {
+      const description = 'a'.repeat(40);
       const errors = validateMapData('Meu Mapa', description);
 
       expect(errors).toHaveLength(0);
@@ -68,7 +68,7 @@ describe('validateMapData', () => {
 
   describe('validação completa', () => {
     it('deve retornar múltiplos erros quando name e description são inválidos', () => {
-      const errors = validateMapData('', 'a'.repeat(501));
+      const errors = validateMapData('', 'a'.repeat(41));
 
       expect(errors).toHaveLength(2);
       expect(errors.map((e) => e.field)).toContain('name');
