@@ -110,7 +110,7 @@ export default function MapFormModal({
         <div>
           <Input placeholder="NOME*" value={name} onChange={setName} />
           {/* Exibe a mensagem de erro abaixo do input se houver erro no campo 'name' */}
-          {getError('name') && <p className="mt-1 text-sm text-red-500">{getError('name')}</p>}
+          <ErrorMessage message={getError('name') ?? null} />
         </div>
 
         <div>
@@ -121,9 +121,7 @@ export default function MapFormModal({
             rows={3}
           />
           {/* Exibe a mensagem de erro abaixo do textarea se houver erro no campo 'description' */}
-          {getError('description') && (
-            <p className="mt-1 text-sm text-red-500">{getError('description')}</p>
-          )}
+          <ErrorMessage message={getError('description') ?? null} />
         </div>
 
         <Button onClick={handleSubmit} fullWidth disabled={loading}>
