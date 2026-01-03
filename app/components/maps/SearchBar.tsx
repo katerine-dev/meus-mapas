@@ -2,7 +2,13 @@
 
 import { useState } from 'react';
 import { MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
-import { SORT_OPTIONS } from '../../constants/sort';
+
+const SORT_OPTIONS: Record<string, string> = {
+  recent: 'Mais recentes',
+  oldest: 'Mais antigos',
+  az: 'A-Z',
+  za: 'Z-A',
+};
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
