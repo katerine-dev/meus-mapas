@@ -7,6 +7,7 @@ import Input from '@/app/components/ui/Input';
 import TextArea from '@/app/components/ui/TextArea';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import { validateMapData } from '@/app/validation/map';
+import { MapSchema } from '@/app/validation/map';
 import type { ValidationError } from '@/app/validation/types';
 
 type MapFormMode = 'create' | 'edit';
@@ -126,7 +127,11 @@ export default function MapFormModal({
           <ErrorMessage message={getError('description') ?? null} />
         </div>
 
-        <Button onClick={handleSubmit} fullWidth disabled={loading}>
+        <Button
+          onClick={handleSubmit}
+          fullWidth
+          disabled={!MapSchema.safeParse({ name }).success || loading}
+        >
           {loading ? loadingLabel : submitLabel}
         </Button>
       </div>
