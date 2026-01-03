@@ -58,11 +58,13 @@ export default function ConfirmModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} ariaLabelledBy="confirm-modal-title">
       <div className="flex flex-col gap-4">
         {/* Título e mensagem */}
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-text-primary">{title}</h2>
+          <h2 id="confirm-modal-title" className="text-xl font-semibold text-text-primary">
+            {title}
+          </h2>
           <p className="mt-2 text-sm text-text-muted">{message}</p>
         </div>
 

@@ -55,7 +55,7 @@ function PointModalContent({
 
   return (
     <>
-      <h2 className="mb-4 text-xl font-bold text-text-primary">
+      <h2 id="point-modal-title" className="mb-4 text-xl font-bold text-text-primary">
         {mode === 'create' ? 'Novo ponto' : 'Editar ponto'}
       </h2>
 
@@ -124,7 +124,7 @@ export default function PointModal({
   onSave,
 }: PointModalProps) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} ariaLabelledBy="point-modal-title">
       {isOpen && (
         <PointModalContent
           mode={mode}

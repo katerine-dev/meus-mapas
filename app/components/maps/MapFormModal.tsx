@@ -97,11 +97,13 @@ export default function MapFormModal({
   if (!isOpen) return null;
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} ariaLabelledBy="map-form-modal-title">
       <div className="flex flex-col gap-4">
         {/* Título */}
         <div className="flex justify-center">
-          <h1 className="text-2xl font-semibold text-purple-main">{title}</h1>
+          <h1 id="map-form-modal-title" className="text-2xl font-semibold text-purple-main">
+            {title}
+          </h1>
         </div>
 
         {/* Erro da API */}

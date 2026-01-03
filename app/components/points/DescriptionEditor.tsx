@@ -55,6 +55,7 @@ export default function DescriptionEditor({
               ? 'ml-2 rounded-full p-1 text-text-muted hover:bg-surface-hover hover:text-primary'
               : 'ml-2 rounded-full p-1 text-text-muted hover:bg-surface-hover hover:text-primary'
           }
+          aria-label="Editar descrição"
           title="Editar descrição"
         >
           <PencilIcon className="h-4 w-4" />

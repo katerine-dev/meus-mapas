@@ -69,6 +69,9 @@ export default function MapCard({ map, onEdit, onOpen, onDelete }: MapCardProps)
             e.stopPropagation();
             setMenuOpen(!menuOpen);
           }}
+          aria-label="Opções do mapa"
+          aria-expanded={menuOpen}
+          aria-haspopup="menu"
           className="flex h-8 w-8 items-center justify-center rounded-full bg-black/30 text-white shadow-lg transition-colors hover:bg-black/70"
         >
           <EllipsisVerticalIcon className="h-5 w-5" />
