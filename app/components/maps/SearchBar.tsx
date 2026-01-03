@@ -12,7 +12,7 @@ interface SearchBarProps {
 export default function SearchBar({ onSearch, onSortChange }: SearchBarProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOpen, setSortOpen] = useState(false);
-  const [currentSort, setCurrentSort] = useState(SORT_OPTIONS.recent);
+  const [currentSort, setCurrentSort] = useState('recent');
 
   const handleSortSelect = (key: string) => {
     setCurrentSort(key);
