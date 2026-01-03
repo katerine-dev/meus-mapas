@@ -2,17 +2,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import {
-  PencilIcon,
-  TrashIcon,
-  ChevronUpIcon,
-  ChevronDownIcon,
-  MapPinIcon,
-} from '@heroicons/react/24/outline';
+import { TrashIcon, ChevronUpIcon, ChevronDownIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { Point, Location } from '@/app/model/point';
 import { Map } from '@/app/model/map';
 import PointsList from './PointsList';
 import PointModal from './PointModal';
+import DescriptionEditor from './DescriptionEditor';
 import ConfirmModal from '@/app/components/ui/ConfirmModal';
 import LocationSearch from './LocationSearch';
 import ErrorState from '@/app/components/ui/ErrorState';
@@ -364,49 +359,23 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
           {/* Header com roxo sólido */}
           <div className="flex items-center justify-between bg-primary px-5 py-4">
             <h1 className="text-lg font-semibold text-white">{map.name}</h1>
-            {!editingDescription && (
-              <button
-                onClick={() => setEditingDescription(true)}
-                className="icon-interactive rounded-full p-2 text-white/70 hover:bg-white/20 hover:text-white"
-                title="Editar descrição"
-              >
-                <PencilIcon className="h-4 w-4" />
-              </button>
-            )}
           </div>
 
           {/* Conteúdo */}
           <div className="p-4">
-            {!editingDescription ? (
-              <p className="text-sm text-text-muted">{map.description || 'Sem descrição'}</p>
-            ) : (
-              <div>
-                <textarea
-                  value={descriptionValue}
-                  onChange={(e) => setDescriptionValue(e.target.value)}
-                  className="focus:ring-focus-ring/30 w-full rounded-xl border border-border p-2.5 text-sm text-text-primary placeholder:text-text-placeholder focus:border-primary focus:outline-none focus:ring-2"
-                  rows={2}
-                  placeholder="Adicione uma descrição..."
-                />
-                <div className="mt-2 flex justify-end gap-2">
-                  <button
-                    onClick={() => {
-                      setEditingDescription(false);
-                      setDescriptionValue(map.description || '');
-                    }}
-                    className="btn-interactive rounded-lg px-3 py-1.5 text-sm text-text-secondary hover:bg-surface-hover"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleSaveDescription}
-                    className="btn-interactive rounded-lg bg-primary px-3 py-1.5 text-sm text-white hover:bg-primary-hover"
-                  >
-                    Salvar
-                  </button>
-                </div>
-              </div>
-            )}
+            <DescriptionEditor
+              description={map.description || ''}
+              isEditing={editingDescription}
+              value={descriptionValue}
+              onValueChange={setDescriptionValue}
+              onEdit={() => setEditingDescription(true)}
+              onCancel={() => {
+                setEditingDescription(false);
+                setDescriptionValue(map.description || '');
+              }}
+              onSave={handleSaveDescription}
+              variant="desktop"
+            />
           </div>
         </div>
 
@@ -472,44 +441,19 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
             <div className="flex max-h-[calc(50vh-48px)] flex-col overflow-hidden">
               {/* Descrição */}
               <div className="border-b border-border p-3">
-                {!editingDescription ? (
-                  <div className="flex items-start justify-between">
-                    <p className="text-sm text-text-muted">{map.description || 'Sem descrição'}</p>
-                    <button
-                      onClick={() => setEditingDescription(true)}
-                      className="ml-2 rounded-full p-1 text-text-muted hover:bg-surface-hover hover:text-primary"
-                    >
-                      <PencilIcon className="h-4 w-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div>
-                    <textarea
-                      value={descriptionValue}
-                      onChange={(e) => setDescriptionValue(e.target.value)}
-                      className="w-full rounded-lg border border-border p-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                      rows={2}
-                      placeholder="Adicione uma descrição..."
-                    />
-                    <div className="mt-2 flex justify-end gap-2">
-                      <button
-                        onClick={() => {
-                          setEditingDescription(false);
-                          setDescriptionValue(map.description || '');
-                        }}
-                        className="rounded-lg px-3 py-1.5 text-sm text-text-secondary hover:bg-surface-hover"
-                      >
-                        Cancelar
-                      </button>
-                      <button
-                        onClick={handleSaveDescription}
-                        className="rounded-lg bg-primary px-3 py-1.5 text-sm text-white hover:bg-primary-hover"
-                      >
-                        Salvar
-                      </button>
-                    </div>
-                  </div>
-                )}
+                <DescriptionEditor
+                  description={map.description || ''}
+                  isEditing={editingDescription}
+                  value={descriptionValue}
+                  onValueChange={setDescriptionValue}
+                  onEdit={() => setEditingDescription(true)}
+                  onCancel={() => {
+                    setEditingDescription(false);
+                    setDescriptionValue(map.description || '');
+                  }}
+                  onSave={handleSaveDescription}
+                  variant="mobile"
+                />
               </div>
 
               {/* Busca de localização no mobile */}
