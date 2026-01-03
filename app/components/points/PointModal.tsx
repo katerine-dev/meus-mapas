@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Modal from '@/app/components/ui/Modal';
 import Button from '@/app/components/ui/Button';
 import Input from '@/app/components/ui/Input';
+import ErrorMessage from '@/app/components/ui/ErrorMessage';
 
 interface PointModalProps {
   isOpen: boolean;
@@ -59,11 +60,9 @@ function PointModalContent({
       </h2>
 
       {/* Erro da API */}
-      {apiError && (
-        <div className="mb-4 rounded-lg border border-destructive-border bg-destructive-light p-3 text-sm text-destructive">
-          {apiError}
-        </div>
-      )}
+      <div className="mb-4">
+        <ErrorMessage message={apiError} />
+      </div>
 
       <div className="space-y-4">
         {/* Nome */}

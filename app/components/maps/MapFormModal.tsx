@@ -5,6 +5,7 @@ import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import TextArea from '../ui/TextArea';
+import ErrorMessage from '../ui/ErrorMessage';
 import { validateMapData } from '@/app/validation/map';
 import type { ValidationError } from '@/app/validation/types';
 
@@ -104,11 +105,7 @@ export default function MapFormModal({
         </div>
 
         {/* Erro da API */}
-        {apiError && (
-          <div className="rounded-lg border border-destructive-border bg-destructive-light p-3 text-sm text-destructive">
-            {apiError}
-          </div>
-        )}
+        <ErrorMessage message={apiError} />
 
         <div>
           <Input placeholder="NOME*" value={name} onChange={setName} />
