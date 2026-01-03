@@ -246,11 +246,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
         const res = await fetch(`/api/maps/${mapId}/points/${selectedPointId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name,
-            latitude: pointModalData.latitude,
-            longitude: pointModalData.longitude,
-          }),
+          body: JSON.stringify({ name }),
         });
 
         if (res.status === 409) {

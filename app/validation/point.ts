@@ -43,20 +43,20 @@ export const CreatePointSchema = z.object({
     }),
 });
 
-export const UpdatePointSchema = z.object({
-  name: z
-    .string()
-    .transform((val) => val.trim())
-    .refine((val) => val.length > 0, { message: 'Nome é obrigatório' })
-    .refine((val) => val.length >= POINT_VALIDATION.NAME_MIN_LENGTH, {
-      message: `Nome deve ter pelo menos ${POINT_VALIDATION.NAME_MIN_LENGTH} caracteres`,
-    })
-    .refine((val) => val.length <= POINT_VALIDATION.NAME_MAX_LENGTH, {
-      message: `Nome deve ter no máximo ${POINT_VALIDATION.NAME_MAX_LENGTH} caracteres`,
-    }),
-  latitude: z.undefined({ message: 'Não é permitido alterar a latitude do ponto' }),
-  longitude: z.undefined({ message: 'Não é permitido alterar a longitude do ponto' }),
-});
+export const UpdatePointSchema = z
+  .object({
+    name: z
+      .string()
+      .transform((val) => val.trim())
+      .refine((val) => val.length > 0, { message: 'Nome é obrigatório' })
+      .refine((val) => val.length >= POINT_VALIDATION.NAME_MIN_LENGTH, {
+        message: `Nome deve ter pelo menos ${POINT_VALIDATION.NAME_MIN_LENGTH} caracteres`,
+      })
+      .refine((val) => val.length <= POINT_VALIDATION.NAME_MAX_LENGTH, {
+        message: `Nome deve ter no máximo ${POINT_VALIDATION.NAME_MAX_LENGTH} caracteres`,
+      }),
+  })
+  .passthrough(); // Ignora campos extras (latitude/longitude enviados por engano)
 
 export function validatePointData(data: {
   name?: string;

@@ -161,32 +161,26 @@ describe('validateUpdatePointData (atualização)', () => {
     });
   });
 
-  // Testes para campos que NÃO podem ser alterados (imutáveis)
-  // A localização de um ponto é definida na criação e não pode mudar
-  describe('campos proibidos', () => {
-    // Testa cada campo imutável individualmente
-    it.each([
-      { field: 'latitude', value: -23.5505, expectedMsg: 'Não é permitido alterar a latitude' },
-      { field: 'longitude', value: -46.6333, expectedMsg: 'Não é permitido alterar a longitude' },
-    ])('deve retornar erro ao tentar alterar $field', ({ field, value, expectedMsg }) => {
-      const errors = validateUpdatePointData({ name: 'Novo Nome', [field]: value });
-
-      expect(errors).toHaveLength(1);
-      expect(errors[0].field).toBe(field);
-      expect(errors[0].message).toContain(expectedMsg);
+  // Campos extras (latitude/longitude) são ignorados pelo passthrough()
+  // A API simplesmente não os utiliza, ao invés de retornar erro
+  describe('campos extras são ignorados', () => {
+    it('deve aceitar e ignorar latitude quando enviada', () => {
+      const errors = validateUpdatePointData({ name: 'Novo Nome', latitude: -23.5505 });
+      expect(errors).toHaveLength(0);
     });
 
-    // Garante que ambos os erros são retornados quando os dois campos são enviados
-    it('deve retornar erros para latitude e longitude juntos', () => {
+    it('deve aceitar e ignorar longitude quando enviada', () => {
+      const errors = validateUpdatePointData({ name: 'Novo Nome', longitude: -46.6333 });
+      expect(errors).toHaveLength(0);
+    });
+
+    it('deve aceitar e ignorar latitude e longitude juntos', () => {
       const errors = validateUpdatePointData({
         name: 'Novo Nome',
         latitude: -23.5505,
         longitude: -46.6333,
       });
-
-      expect(errors).toHaveLength(2);
-      expect(errors.map((e) => e.field)).toContain('latitude');
-      expect(errors.map((e) => e.field)).toContain('longitude');
+      expect(errors).toHaveLength(0);
     });
   });
 });

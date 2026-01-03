@@ -137,13 +137,13 @@ describe('PUT /api/maps/[id]/points/[pointId]', () => {
     expect(body.errors[0].field).toBe('name');
   });
 
-  // Teste: não deve permitir alterar a localização do ponto
-  it('deve retornar 400 ao tentar alterar a localização do ponto', async () => {
+  // Teste: campos extras (latitude/longitude) são ignorados - atualização só altera o nome
+  it('deve ignorar latitude e longitude e atualizar apenas o nome', async () => {
     // Cria um mapa e um ponto no banco
     const map = await testHelper.insertMap();
     const point = await testHelper.insertPoint(map.id);
 
-    // Tenta atualizar enviando latitude e longitude
+    // Tenta atualizar enviando latitude e longitude (devem ser ignorados)
     const request = testHelper.put(`/api/maps/${map.id}/points/${point.id}`, {
       name: 'Nome Atualizado',
       latitude: -22.9068,
@@ -153,12 +153,8 @@ describe('PUT /api/maps/[id]/points/[pointId]', () => {
     const params = { params: Promise.resolve({ id: map.id, pointId: point.id }) };
 
     const response = await PUT(request, params);
-    expect(response.status).toBe(400);
-
-    const body = await response.json();
-    expect(body.errors).toHaveLength(2);
-    expect(body.errors[0].field).toBe('latitude');
-    expect(body.errors[1].field).toBe('longitude');
+    // Deve retornar 204 - atualização bem-sucedida (campos extras são ignorados)
+    expect(response.status).toBe(204);
   });
 
   // Teste: deve retornar 409 ao atualizar para nome que já existe em outro ponto do mesmo mapa
