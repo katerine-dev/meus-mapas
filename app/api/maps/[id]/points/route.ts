@@ -55,3 +55,15 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     throw error;
   }
 }
+
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
+  const map = await mapsDb.getMapById(id);
+  if (!map) {
+    return new Response(null, { status: 404 });
+  }
+
+  await pointsDb.deleteAllPointsByMapId(id);
+  return new Response(null, { status: 204 });
+}

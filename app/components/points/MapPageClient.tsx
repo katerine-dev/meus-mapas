@@ -262,17 +262,11 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
           return { error: 'Erro ao excluir ponto. Tente novamente.' };
         }
       } else if (confirmModalMode === 'all') {
-        // Deletar todos os pontos
-        const results = await Promise.all(
-          points.map((point) =>
-            fetch(`/api/maps/${mapId}/points/${point.id}`, {
-              method: 'DELETE',
-            })
-          )
-        );
-        // Verifica se algum falhou
-        if (results.some((res) => !res.ok)) {
-          return { error: 'Erro ao excluir alguns pontos. Tente novamente.' };
+        const res = await fetch(`/api/maps/${mapId}/points`, {
+          method: 'DELETE',
+        });
+        if (!res.ok) {
+          return { error: 'Erro ao excluir pontos. Tente novamente.' };
         }
       }
       await fetchData();

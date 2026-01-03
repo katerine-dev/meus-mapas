@@ -1,10 +1,9 @@
 import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
-import { POST, GET } from './route';
+import { POST, GET, DELETE } from './route';
 import * as testHelper from '@/lib/test-helper';
 import connection from '@/app/db/connection';
 import { Map } from '@/app/model/map';
 import { Point } from '@/app/model/point';
-import * as uuid from 'uuid';
 
 describe('Criando um novo ponto', () => {
   // Mapa que será usado nos testes
@@ -244,6 +243,45 @@ describe('Buscando todos os pontos', () => {
     const request = testHelper.get(`/api/maps/${fakeMapId}/points`);
     const params = { params: Promise.resolve({ id: fakeMapId }) };
     const response = await GET(request, params);
+    expect(response.status).toBe(404);
+  });
+});
+
+describe('Deletando todos os pontos', () => {
+  let map: Map;
+
+  beforeAll(async () => {
+    await testHelper.cleanDatabase();
+    map = await testHelper.insertMap();
+  });
+
+  beforeEach(async () => {
+    await connection.query('DELETE FROM points');
+  });
+
+  it('deve deletar todos os pontos e retornar 204', async () => {
+    await testHelper.insertPoint(map.id);
+    await testHelper.insertPoint(map.id);
+    await testHelper.insertPoint(map.id);
+
+    const request = testHelper.delete(`/api/maps/${map.id}/points`);
+    const params = { params: Promise.resolve({ id: map.id }) };
+    const response = await DELETE(request, params);
+    expect(response.status).toBe(204);
+
+    // Verifica se todos foram soft-deleted
+    const result = await connection.query(
+      'SELECT * FROM points WHERE map_id = $1 AND deleted_at IS NULL',
+      [map.id]
+    );
+    expect(result.rows).toHaveLength(0);
+  });
+
+  it('deve retornar 404 se o mapa não existir', async () => {
+    const fakeMapId = '00000000-0000-0000-0000-000000000000';
+    const request = testHelper.delete(`/api/maps/${fakeMapId}/points`);
+    const params = { params: Promise.resolve({ id: fakeMapId }) };
+    const response = await DELETE(request, params);
     expect(response.status).toBe(404);
   });
 });

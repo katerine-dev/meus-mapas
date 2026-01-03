@@ -130,3 +130,18 @@ export async function deletePoint(id: string): Promise<Point | null> {
 
   return mapRowToPoint(result.rows[0]);
 }
+
+/**
+ * Soft delete de todos os pontos de um mapa.
+ * @returns Número de pontos deletados
+ */
+export async function deleteAllPointsByMapId(mapId: string): Promise<number> {
+  const result = await connection.query(
+    `UPDATE points
+     SET deleted_at = NOW()
+     WHERE map_id = $1 AND deleted_at IS NULL`,
+    [mapId]
+  );
+
+  return result.rowCount ?? 0;
+}
