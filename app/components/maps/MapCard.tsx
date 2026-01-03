@@ -63,10 +63,51 @@ export default function MapCard({ map, onEdit, onOpen, onDelete }: MapCardProps)
   return (
     <div
       onClick={onOpen}
-      className="card-interactive relative cursor-pointer overflow-hidden rounded-2xl border border-border bg-surface shadow-lg transition-all hover:shadow-xl"
+      className="card-interactive relative cursor-pointer rounded-2xl border border-border bg-surface shadow-lg transition-all hover:shadow-xl"
     >
+      {/* Botão de menu - fora da div de overflow para não ser cortado */}
+      <div className="absolute right-3 top-3 z-50" ref={menuRef}>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setMenuOpen(!menuOpen);
+          }}
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-black/30 text-white shadow-lg transition-colors hover:bg-black/70"
+        >
+          <EllipsisVerticalIcon className="h-5 w-5" />
+        </button>
+
+        {/* Menu dropdown */}
+        {menuOpen && (
+          <div className="absolute right-0 top-10 w-48 rounded-xl border border-border bg-surface py-2 shadow-xl">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+                setMenuOpen(false);
+              }}
+              className="flex w-full items-center gap-3 px-4 py-2 text-left text-text-primary hover:bg-surface-hover"
+            >
+              <DocumentTextIcon className="h-4 w-4 text-text-muted" />
+              Editar
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+                setMenuOpen(false);
+              }}
+              className="flex w-full items-center gap-3 px-4 py-2 text-left text-destructive hover:bg-destructive-light"
+            >
+              <TrashIcon className="h-4 w-4" />
+              Excluir
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Preview: tile do mapa ou fallback roxo com ícone */}
-      <div className="relative h-32 overflow-hidden bg-primary">
+      <div className="relative h-32 overflow-hidden rounded-t-2xl bg-primary">
         {tileUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -79,47 +120,6 @@ export default function MapCard({ map, onEdit, onOpen, onDelete }: MapCardProps)
             <MapIcon className="h-12 w-12 text-white/50" strokeWidth={1.5} />
           </div>
         )}
-
-        {/* Botão de menu */}
-        <div className="absolute right-3 top-3" ref={menuRef}>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setMenuOpen(!menuOpen);
-            }}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-black/30 text-white shadow-lg transition-colors hover:bg-black/70"
-          >
-            <EllipsisVerticalIcon className="h-5 w-5" />
-          </button>
-
-          {/* Menu dropdown */}
-          {menuOpen && (
-            <div className="absolute right-0 top-10 z-10 w-48 rounded-xl border border-border bg-surface py-2 shadow-xl">
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onEdit();
-                  setMenuOpen(false);
-                }}
-                className="flex w-full items-center gap-3 px-4 py-2 text-left text-text-primary hover:bg-surface-hover"
-              >
-                <DocumentTextIcon className="h-4 w-4 text-text-muted" />
-                Editar
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDelete();
-                  setMenuOpen(false);
-                }}
-                className="flex w-full items-center gap-3 px-4 py-2 text-left text-destructive hover:bg-destructive-light"
-              >
-                <TrashIcon className="h-4 w-4" />
-                Excluir
-              </button>
-            </div>
-          )}
-        </div>
       </div>
 
       {/* Informações do mapa */}
