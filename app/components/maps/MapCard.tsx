@@ -2,12 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 
-import {
-  MapIcon,
-  DocumentTextIcon,
-  ArrowTopRightOnSquareIcon,
-  TrashIcon,
-} from '@heroicons/react/24/outline';
+import { MapIcon, DocumentTextIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
 
 interface MapCardProps {
@@ -91,17 +86,6 @@ export default function MapCard({
               >
                 <DocumentTextIcon className="text-text-muted h-4 w-4" />
                 Editar
-              </button>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onOpen();
-                  setMenuOpen(false);
-                }}
-                className="text-text-primary hover:bg-surface-hover flex w-full items-center gap-3 px-4 py-2 text-left"
-              >
-                <ArrowTopRightOnSquareIcon className="text-text-muted h-4 w-4" />
-                Abrir
               </button>
               <button
                 onClick={(e) => {
