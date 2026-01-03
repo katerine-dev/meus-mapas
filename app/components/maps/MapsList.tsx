@@ -130,19 +130,23 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
   }
 
   // Função assíncrona para deletar um mapa
-  async function handleDeleteMap() {
+  async function handleDeleteMap(): Promise<{ error?: string } | void> {
     if (!selectedMap) return;
     try {
       const response = await fetch(`/api/maps/${selectedMap.id}`, {
         method: 'DELETE',
       });
-      if (response.ok) {
-        fetchMaps();
-        setIsDeleteModalOpen(false);
-        setSelectedMap(null);
+
+      if (!response.ok) {
+        return { error: 'Erro ao excluir mapa. Tente novamente.' };
       }
+
+      fetchMaps();
+      setIsDeleteModalOpen(false);
+      setSelectedMap(null);
     } catch (err) {
       console.error('Erro ao deletar mapa:', err);
+      return { error: 'Erro ao excluir mapa. Tente novamente.' };
     }
   }
 

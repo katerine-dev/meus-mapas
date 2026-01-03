@@ -1,12 +1,14 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Modal from './Modal';
 import Button from './Button';
+import ErrorMessage from './ErrorMessage';
 
 interface ConfirmModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: () => Promise<{ error?: string } | void>;
   title: string;
   message: string;
 }
@@ -22,6 +24,38 @@ export default function ConfirmModal({
   title,
   message,
 }: ConfirmModalProps) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Reseta o estado quando o modal abre
+  useEffect(() => {
+    if (isOpen) {
+      setError(null);
+      setLoading(false);
+    }
+  }, [isOpen]);
+
+  const handleConfirm = async () => {
+    setError(null);
+    setLoading(true);
+
+    try {
+      const result = await onConfirm();
+
+      if (result?.error) {
+        setError(result.error);
+        setLoading(false);
+        return;
+      }
+
+      // Sucesso - o onConfirm deve fechar o modal
+    } catch {
+      setError('Erro ao executar ação. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="flex flex-col gap-4">
@@ -31,13 +65,16 @@ export default function ConfirmModal({
           <p className="mt-2 text-sm text-text-muted">{message}</p>
         </div>
 
+        {/* Erro da API */}
+        <ErrorMessage message={error} />
+
         {/* Botões de ação */}
         <div className="flex gap-3">
-          <Button variant="secondary" onClick={onClose} fullWidth>
+          <Button variant="secondary" onClick={onClose} fullWidth disabled={loading}>
             Cancelar
           </Button>
-          <Button variant="danger" onClick={onConfirm} fullWidth>
-            Confirmar
+          <Button variant="danger" onClick={handleConfirm} fullWidth disabled={loading}>
+            {loading ? 'Aguarde...' : 'Confirmar'}
           </Button>
         </div>
       </div>

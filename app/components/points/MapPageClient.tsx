@@ -132,7 +132,6 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
 
   // Handlers do mapa
   const handleMapClick = useCallback((lat: number, lng: number) => {
-    console.log('handleMapClick called:', lat, lng);
     setPointModalMode('create');
     setPointModalData({ name: '', location: { latitude: lat, longitude: lng } });
     setPointModalOpen(true);
@@ -255,29 +254,37 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
   };
 
   // Confirmar exclusão
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = async (): Promise<{ error?: string } | void> => {
     try {
       if (confirmModalMode === 'single' && pointToDelete) {
-        await fetch(`/api/maps/${mapId}/points/${pointToDelete}`, {
+        const res = await fetch(`/api/maps/${mapId}/points/${pointToDelete}`, {
           method: 'DELETE',
         });
+        if (!res.ok) {
+          return { error: 'Erro ao excluir ponto. Tente novamente.' };
+        }
       } else if (confirmModalMode === 'all') {
         // Deletar todos os pontos
-        await Promise.all(
+        const results = await Promise.all(
           points.map((point) =>
             fetch(`/api/maps/${mapId}/points/${point.id}`, {
               method: 'DELETE',
             })
           )
         );
+        // Verifica se algum falhou
+        if (results.some((res) => !res.ok)) {
+          return { error: 'Erro ao excluir alguns pontos. Tente novamente.' };
+        }
       }
       await fetchData();
       setSelectedPointId(null);
+      setConfirmModalOpen(false);
+      setPointToDelete(null);
     } catch (error) {
       console.error('Erro ao deletar:', error);
+      return { error: 'Erro ao excluir. Tente novamente.' };
     }
-    setConfirmModalOpen(false);
-    setPointToDelete(null);
   };
 
   // Salvar descrição do mapa

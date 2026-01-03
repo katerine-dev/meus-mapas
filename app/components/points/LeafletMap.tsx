@@ -64,7 +64,6 @@ interface LeafletMapProps {
 function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
   useMapEvents({
     click: (e) => {
-      console.log('Map click event:', e.latlng.lat, e.latlng.lng);
       onMapClick(e.latlng.lat, e.latlng.lng);
     },
   });
