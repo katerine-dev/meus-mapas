@@ -4,15 +4,14 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import MapCard from './MapCard';
 import { PlusIcon } from '@heroicons/react/24/outline';
-import CreateMapModal from './CreateMapModal';
-import EditMapModal from './EditMapModal';
+import MapFormModal from './MapFormModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import SearchBar from './SearchBar';
 import Button from '../ui/Button';
 import ErrorState from '../ui/ErrorState';
 import Spinner from '../ui/Spinner';
-import { Map } from '../../model/map';
-import { DEFAULT_SORT, type SortKey } from '../../constants/sort';
+import { Map } from '@/app/model/map';
+import { DEFAULT_SORT, type SortKey } from '@/app/constants/sort';
 
 interface MapsListProps {
   onCreateClick?: () => void;
@@ -228,22 +227,24 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
       )}
 
       {/* Modal de criação de novo mapa */}
-      <CreateMapModal
+      <MapFormModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={handleCreateMap}
+        mode="create"
       />
 
       {/* Modal de editar */}
-      <EditMapModal
+      <MapFormModal
         isOpen={isEditModalOpen}
         onClose={() => {
           setIsEditModalOpen(false);
           setSelectedMap(null);
         }}
         onSubmit={handleEditDescription}
-        initialName={selectedMap?.name || ''}
-        initialDescription={selectedMap?.description || ''}
+        mode="edit"
+        initialName={selectedMap?.name}
+        initialDescription={selectedMap?.description}
       />
 
       {/* Modal de confirmação de exclusão */}

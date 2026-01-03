@@ -87,7 +87,7 @@ export default function MapCard({ map, onEdit, onOpen, onDelete }: MapCardProps)
               e.stopPropagation();
               setMenuOpen(!menuOpen);
             }}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30"
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-black/30 text-white shadow-lg transition-colors hover:bg-black/70"
           >
             <EllipsisVerticalIcon className="h-5 w-5" />
           </button>

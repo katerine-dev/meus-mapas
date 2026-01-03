@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from '../ui/Modal';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
@@ -8,20 +8,55 @@ import TextArea from '../ui/TextArea';
 import { validateMapData } from '@/app/validation/map';
 import type { ValidationError } from '@/app/validation/types';
 
-interface CreateMapModalProps {
+type MapFormMode = 'create' | 'edit';
+
+interface MapFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (name: string, description: string) => Promise<{ error?: string } | void>;
+  mode: MapFormMode;
+  /** Valores iniciais para edição (opcional para criação) */
+  initialName?: string;
+  initialDescription?: string;
 }
 
-// Componente modal para criar um novo mapa
-export default function CreateMapModal({ isOpen, onClose, onSubmit }: CreateMapModalProps) {
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
+/**
+ * Modal unificado para criar e editar mapas.
+ */
+export default function MapFormModal({
+  isOpen,
+  onClose,
+  onSubmit,
+  mode,
+  initialName = '',
+  initialDescription = '',
+}: MapFormModalProps) {
+  const [name, setName] = useState(initialName);
+  const [description, setDescription] = useState(initialDescription);
   const [errors, setErrors] = useState<ValidationError[]>([]);
   const [apiError, setApiError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const isCreateMode = mode === 'create';
+  const title = isCreateMode ? 'Criar Novo Mapa' : 'Editar Mapa';
+  const submitLabel = isCreateMode ? 'Criar' : 'Editar';
+  const loadingLabel = isCreateMode ? 'Criando...' : 'Salvando...';
+  const errorMessage = isCreateMode
+    ? 'Erro ao criar mapa. Tente novamente.'
+    : 'Erro ao editar mapa. Tente novamente.';
+
+  // Reseta o formulário quando o modal abre ou os valores iniciais mudam
+  useEffect(() => {
+    if (isOpen) {
+      setName(initialName);
+      setDescription(initialDescription);
+      setErrors([]);
+      setApiError(null);
+      setLoading(false);
+    }
+  }, [isOpen, initialName, initialDescription]);
+
+  // Função executada ao submeter o formulário
   const handleSubmit = async () => {
     // Executa a validação dos dados inseridos pelo usuário
     const validationErrors = validateMapData(name, description);
@@ -47,33 +82,25 @@ export default function CreateMapModal({ isOpen, onClose, onSubmit }: CreateMapM
         return;
       }
 
-      setName('');
-      setDescription('');
       onClose();
     } catch {
-      setApiError('Erro ao criar mapa. Tente novamente.');
+      setApiError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleClose = () => {
-    setName('');
-    setDescription('');
-    setErrors([]);
-    setApiError(null);
-    onClose();
-  };
-
   // Função auxiliar para buscar a mensagem de erro de um campo específico
   const getError = (field: string) => errors.find((e) => e.field === field)?.message;
 
+  if (!isOpen) return null;
+
   return (
-    <Modal isOpen={isOpen} onClose={handleClose}>
+    <Modal isOpen={isOpen} onClose={onClose}>
       <div className="flex flex-col gap-4">
         {/* Título */}
         <div className="flex justify-center">
-          <h1 className="text-2xl font-semibold text-purple-main">Criar Novo Mapa</h1>
+          <h1 className="text-2xl font-semibold text-purple-main">{title}</h1>
         </div>
 
         {/* Erro da API */}
@@ -103,7 +130,7 @@ export default function CreateMapModal({ isOpen, onClose, onSubmit }: CreateMapM
         </div>
 
         <Button onClick={handleSubmit} fullWidth disabled={loading}>
-          {loading ? 'Criando...' : 'Criar'}
+          {loading ? loadingLabel : submitLabel}
         </Button>
       </div>
     </Modal>
