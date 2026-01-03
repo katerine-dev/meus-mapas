@@ -10,6 +10,7 @@ import DeleteConfirmModal from './DeleteConfirmModal';
 import SearchBar from './SearchBar';
 import Button from '../ui/Button';
 import { Map } from '../../model/map';
+import { DEFAULT_SORT, type SortKey } from '../../constants/sort';
 
 interface MapsListProps {
   onCreateClick?: () => void;
@@ -21,7 +22,7 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
   const router = useRouter();
   const [maps, setMaps] = useState<Map[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortOption, setSortOption] = useState('recent');
+  const [sortOption, setSortOption] = useState<SortKey>(DEFAULT_SORT);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

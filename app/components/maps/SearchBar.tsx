@@ -2,25 +2,19 @@
 
 import { useState } from 'react';
 import { MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
-
-const SORT_OPTIONS: Record<string, string> = {
-  recent: 'Mais recentes',
-  oldest: 'Mais antigos',
-  az: 'A-Z',
-  za: 'Z-A',
-};
+import { SORT_OPTIONS, DEFAULT_SORT, type SortKey } from '../../constants/sort';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
-  onSortChange: (sort: string) => void;
+  onSortChange: (sort: SortKey) => void;
 }
 
 export default function SearchBar({ onSearch, onSortChange }: SearchBarProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOpen, setSortOpen] = useState(false);
-  const [currentSort, setCurrentSort] = useState('recent');
+  const [currentSort, setCurrentSort] = useState<SortKey>(DEFAULT_SORT);
 
-  const handleSortSelect = (key: string) => {
+  const handleSortSelect = (key: SortKey) => {
     setCurrentSort(key);
     onSortChange(key);
     setSortOpen(false);
