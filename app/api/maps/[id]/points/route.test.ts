@@ -4,6 +4,7 @@ import * as testHelper from '@/lib/test-helper';
 import connection from '@/app/db/connection';
 import { Map } from '@/app/model/map';
 import { Point } from '@/app/model/point';
+import * as uuid from 'uuid';
 
 describe('Criando um novo ponto', () => {
   // Mapa que será usado nos testes
@@ -264,7 +265,7 @@ describe('Deletando todos os pontos', () => {
     await testHelper.insertPoint(map.id);
     await testHelper.insertPoint(map.id);
 
-    const request = testHelper.delete(`/api/maps/${map.id}/points`);
+    const request = testHelper.del(`/api/maps/${map.id}/points`);
     const params = { params: Promise.resolve({ id: map.id }) };
     const response = await DELETE(request, params);
     expect(response.status).toBe(204);
@@ -279,7 +280,7 @@ describe('Deletando todos os pontos', () => {
 
   it('deve retornar 404 se o mapa não existir', async () => {
     const fakeMapId = '00000000-0000-0000-0000-000000000000';
-    const request = testHelper.delete(`/api/maps/${fakeMapId}/points`);
+    const request = testHelper.del(`/api/maps/${fakeMapId}/points`);
     const params = { params: Promise.resolve({ id: fakeMapId }) };
     const response = await DELETE(request, params);
     expect(response.status).toBe(404);
