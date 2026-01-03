@@ -5,7 +5,6 @@ import dynamic from 'next/dynamic';
 import {
   PencilIcon,
   TrashIcon,
-  ArrowPathIcon,
   ChevronUpIcon,
   ChevronDownIcon,
   MapPinIcon,
@@ -17,13 +16,14 @@ import PointModal from './PointModal';
 import ConfirmModal from './ConfirmModal';
 import LocationSearch from './LocationSearch';
 import ErrorState from '../ui/ErrorState';
+import Spinner from '../ui/Spinner';
 
 // Import dinâmico do mapa para evitar SSR (Leaflet não funciona no servidor)
 const LeafletMap = dynamic(() => import('./LeafletMap'), {
   ssr: false,
   loading: () => (
     <div className="flex h-full items-center justify-center bg-gray-100">
-      <ArrowPathIcon className="h-8 w-8 animate-spin text-purple-main" />
+      <Spinner />
     </div>
   ),
 });
@@ -329,7 +329,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
   if (loading) {
     return (
       <div className="flex h-96 items-center justify-center">
-        <ArrowPathIcon className="h-8 w-8 animate-spin text-purple-main" />
+        <Spinner />
       </div>
     );
   }
@@ -349,10 +349,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
   if (!mapCenter) {
     return (
       <div className="flex h-full items-center justify-center">
-        <div className="text-muted-foreground flex items-center gap-2">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
-          <span>Carregando mapa...</span>
-        </div>
+        <Spinner label="Carregando mapa..." />
       </div>
     );
   }
@@ -381,10 +378,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
             className="flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-medium text-white shadow-lg transition-all hover:bg-primary-hover hover:shadow-xl disabled:opacity-70"
           >
             {geoLocationLoading ? (
-              <>
-                <ArrowPathIcon className="h-5 w-5 animate-spin" />
-                <span>Obtendo localização...</span>
-              </>
+              <Spinner size="sm" variant="white" label="Obtendo localização..." />
             ) : (
               <>
                 <MapPinIcon className="h-5 w-5" />

@@ -3,13 +3,14 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import MapCard from './MapCard';
-import { PlusIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { PlusIcon } from '@heroicons/react/24/outline';
 import CreateMapModal from './CreateMapModal';
 import EditMapModal from './EditMapModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import SearchBar from './SearchBar';
 import Button from '../ui/Button';
 import ErrorState from '../ui/ErrorState';
+import Spinner from '../ui/Spinner';
 import { Map } from '../../model/map';
 import { DEFAULT_SORT, type SortKey } from '../../constants/sort';
 
@@ -163,7 +164,7 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <ArrowPathIcon className="h-8 w-8 animate-spin text-purple-main" />
+        <Spinner />
       </div>
     );
   }

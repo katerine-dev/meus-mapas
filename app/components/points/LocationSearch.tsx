@@ -3,6 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { MagnifyingGlassIcon, XMarkIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { Point } from '@/app/model/point';
+import Spinner from '../ui/Spinner';
 
 interface LocationSearchProps {
   onLocationFound: (lat: number, lng: number, name?: string, isExistingPoint?: boolean) => void;
@@ -196,7 +197,7 @@ export default function LocationSearch({ onLocationFound, points = [] }: Locatio
           {/* Spinner de loading */}
           {loading && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-muted border-t-primary" />
+              <Spinner size="sm" />
             </div>
           )}
         </div>
