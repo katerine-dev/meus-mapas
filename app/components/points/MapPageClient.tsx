@@ -2,12 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import { TrashIcon, ChevronUpIcon, ChevronDownIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { Point, Location } from '@/app/model/point';
 import { Map } from '@/app/model/map';
-import PointsList from './PointsList';
 import PointModal from './PointModal';
-import DescriptionEditor from './DescriptionEditor';
+import MapSidebar from './MapSidebar';
 import ConfirmModal from '@/app/components/ui/ConfirmModal';
 import LocationSearch from './LocationSearch';
 import ErrorState from '@/app/components/ui/ErrorState';
@@ -359,144 +357,28 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
         </div>
       </div>
 
-      {/* Painel lateral flutuante - Desktop */}
-      <div className="absolute bottom-4 left-4 top-4 z-[1000] hidden w-80 flex-col gap-4 overflow-hidden md:flex">
-        {/* Info do mapa */}
-        <div className="card-interactive overflow-hidden rounded-2xl border border-border bg-surface shadow-lg">
-          {/* Header com roxo sólido */}
-          <div className="flex items-center justify-between bg-primary px-5 py-4">
-            <h1 className="text-lg font-semibold text-white">{map.name}</h1>
-          </div>
-
-          {/* Conteúdo */}
-          <div className="p-4">
-            <DescriptionEditor
-              description={map.description || ''}
-              isEditing={editingDescription}
-              value={descriptionValue}
-              onValueChange={setDescriptionValue}
-              onEdit={() => setEditingDescription(true)}
-              onCancel={() => {
-                setEditingDescription(false);
-                setDescriptionValue(map.description || '');
-              }}
-              onSave={handleSaveDescription}
-              variant="desktop"
-            />
-          </div>
-        </div>
-
-        {/* Lista de pontos */}
-        <div className="card-interactive min-h-0 flex-1 overflow-hidden rounded-2xl border border-border bg-surface shadow-lg">
-          <PointsList
-            points={points}
-            selectedPointId={selectedPointId}
-            onSelectPoint={handleSelectPoint}
-            onEditPoint={handleEditPoint}
-            onDeletePoint={handleDeletePoint}
-          />
-        </div>
-
-        {/* Botão excluir todos - outline vermelho discreto */}
-        <button
-          onClick={handleDeleteAllPoints}
-          disabled={points.length === 0}
-          className="btn-interactive focus:ring-destructive/30 flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-destructive-border bg-surface px-3 py-2.5 text-sm text-destructive shadow-sm hover:bg-destructive-light hover:shadow-md focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:border-border disabled:text-text-muted disabled:opacity-50 disabled:hover:bg-surface disabled:hover:shadow-sm"
-        >
-          <TrashIcon className="h-4 w-4" />
-          <span>Excluir todos</span>
-        </button>
-      </div>
-
-      {/* Drawer Mobile - Bottom Sheet */}
-      <div className="absolute inset-x-0 bottom-0 z-[1000] md:hidden">
-        {/* Handle para expandir/colapsar */}
-        <button
-          onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
-          className="mx-auto flex w-full items-center justify-center rounded-t-2xl bg-white px-4 py-2 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]"
-        >
-          <div className="flex items-center gap-2">
-            <div className="h-1 w-10 rounded-full bg-border" />
-          </div>
-        </button>
-
-        {/* Conteúdo do drawer */}
-        <div
-          className={`bg-white transition-all duration-300 ease-in-out ${mobileDrawerOpen ? 'max-h-[50vh]' : 'max-h-14'} overflow-hidden`}
-        >
-          {/* Header do mapa - sempre visível */}
-          <div
-            className="flex cursor-pointer items-center justify-between bg-primary px-4 py-3"
-            onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
-          >
-            <div className="flex items-center gap-2">
-              <MapPinIcon className="h-5 w-5 text-white" />
-              <h1 className="font-semibold text-white">{map.name}</h1>
-              <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs text-white">
-                {points.length} pontos
-              </span>
-            </div>
-            {mobileDrawerOpen ? (
-              <ChevronDownIcon className="h-5 w-5 text-white" />
-            ) : (
-              <ChevronUpIcon className="h-5 w-5 text-white" />
-            )}
-          </div>
-
-          {/* Conteúdo expandido */}
-          {mobileDrawerOpen && (
-            <div className="flex max-h-[calc(50vh-48px)] flex-col overflow-hidden">
-              {/* Descrição */}
-              <div className="border-b border-border p-3">
-                <DescriptionEditor
-                  description={map.description || ''}
-                  isEditing={editingDescription}
-                  value={descriptionValue}
-                  onValueChange={setDescriptionValue}
-                  onEdit={() => setEditingDescription(true)}
-                  onCancel={() => {
-                    setEditingDescription(false);
-                    setDescriptionValue(map.description || '');
-                  }}
-                  onSave={handleSaveDescription}
-                  variant="mobile"
-                />
-              </div>
-
-              {/* Busca de localização no mobile */}
-              <div className="border-b border-border p-3">
-                <LocationSearch onLocationFound={handleLocationFound} points={points} />
-              </div>
-
-              {/* Lista de pontos */}
-              <div className="min-h-0 flex-1 overflow-auto">
-                <PointsList
-                  points={points}
-                  selectedPointId={selectedPointId}
-                  onSelectPoint={(pointId) => {
-                    handleSelectPoint(pointId);
-                    setMobileDrawerOpen(false);
-                  }}
-                  onEditPoint={handleEditPoint}
-                  onDeletePoint={handleDeletePoint}
-                />
-              </div>
-
-              {/* Botão excluir todos */}
-              <div className="border-t border-border p-3">
-                <button
-                  onClick={handleDeleteAllPoints}
-                  disabled={points.length === 0}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-destructive-border py-2 text-sm text-destructive hover:bg-destructive-light disabled:cursor-not-allowed disabled:border-border disabled:text-text-muted disabled:opacity-50"
-                >
-                  <TrashIcon className="h-4 w-4" />
-                  <span>Excluir todos</span>
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      {/* Sidebar: Desktop (painel lateral) + Mobile (drawer) */}
+      <MapSidebar
+        map={map}
+        points={points}
+        selectedPointId={selectedPointId}
+        mobileDrawerOpen={mobileDrawerOpen}
+        onMobileDrawerToggle={() => setMobileDrawerOpen(!mobileDrawerOpen)}
+        editingDescription={editingDescription}
+        descriptionValue={descriptionValue}
+        onDescriptionValueChange={setDescriptionValue}
+        onEditDescription={() => setEditingDescription(true)}
+        onCancelEditDescription={() => {
+          setEditingDescription(false);
+          setDescriptionValue(map.description || '');
+        }}
+        onSaveDescription={handleSaveDescription}
+        onSelectPoint={handleSelectPoint}
+        onEditPoint={handleEditPoint}
+        onDeletePoint={handleDeletePoint}
+        onDeleteAllPoints={handleDeleteAllPoints}
+        onLocationFound={handleLocationFound}
+      />
 
       {/* Modal de ponto */}
       <PointModal
