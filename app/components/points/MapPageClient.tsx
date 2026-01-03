@@ -94,7 +94,16 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
 
   // Handlers de pontos
   const handleSelectPoint = (pointId: string) => {
-    setSelectedPointId(pointId === selectedPointId ? null : pointId);
+    if (pointId === selectedPointId) {
+      setSelectedPointId(null);
+    } else {
+      setSelectedPointId(pointId);
+      // Centralizar o mapa no ponto selecionado
+      const point = points.find((p) => p.id === pointId);
+      if (point) {
+        setMapCenter([point.location.latitude, point.location.longitude]);
+      }
+    }
   };
 
   const handleEditPoint = (point: Point) => {
