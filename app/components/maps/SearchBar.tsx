@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
-import { SORT_OPTIONS, DEFAULT_SORT, type SortKey } from '../../constants/sort';
+import { SORT_OPTIONS, DEFAULT_SORT, type SortKey } from '@/app/constants/sort';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;

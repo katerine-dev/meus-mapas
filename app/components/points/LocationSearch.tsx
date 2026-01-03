@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { MagnifyingGlassIcon, XMarkIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { Point } from '@/app/model/point';
-import Spinner from '../ui/Spinner';
+import Spinner from '@/app/components/ui/Spinner';
 
 interface LocationSearchProps {
   onLocationFound: (lat: number, lng: number, name?: string, isExistingPoint?: boolean) => void;

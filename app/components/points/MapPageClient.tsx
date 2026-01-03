@@ -15,8 +15,8 @@ import PointsList from './PointsList';
 import PointModal from './PointModal';
 import ConfirmModal from '@/app/components/ui/ConfirmModal';
 import LocationSearch from './LocationSearch';
-import ErrorState from '../ui/ErrorState';
-import Spinner from '../ui/Spinner';
+import ErrorState from '@/app/components/ui/ErrorState';
+import Spinner from '@/app/components/ui/Spinner';
 
 // Import dinâmico do mapa para evitar SSR (Leaflet não funciona no servidor)
 const LeafletMap = dynamic(() => import('./LeafletMap'), {

@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Modal from '../ui/Modal';
-import Button from '../ui/Button';
-import Input from '../ui/Input';
-import TextArea from '../ui/TextArea';
-import ErrorMessage from '../ui/ErrorMessage';
+import Modal from '@/app/components/ui/Modal';
+import Button from '@/app/components/ui/Button';
+import Input from '@/app/components/ui/Input';
+import TextArea from '@/app/components/ui/TextArea';
+import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import { validateMapData } from '@/app/validation/map';
 import type { ValidationError } from '@/app/validation/types';
 

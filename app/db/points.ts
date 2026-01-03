@@ -1,5 +1,5 @@
 import connection from './connection';
-import { Point } from '../model/point';
+import { Point } from '@/app/model/point';
 import * as errors from './errors';
 
 interface CreatePointData {

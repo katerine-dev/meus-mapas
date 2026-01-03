@@ -7,9 +7,9 @@ import { PlusIcon } from '@heroicons/react/24/outline';
 import MapFormModal from './MapFormModal';
 import ConfirmModal from '@/app/components/ui/ConfirmModal';
 import SearchBar from './SearchBar';
-import Button from '../ui/Button';
-import ErrorState from '../ui/ErrorState';
-import Spinner from '../ui/Spinner';
+import Button from '@/app/components/ui/Button';
+import ErrorState from '@/app/components/ui/ErrorState';
+import Spinner from '@/app/components/ui/Spinner';
 import { Map } from '@/app/model/map';
 import { DEFAULT_SORT, type SortKey } from '@/app/constants/sort';
 

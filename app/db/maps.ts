@@ -1,5 +1,5 @@
 import connection from './connection';
-import { Map } from '../model/map';
+import { Map } from '@/app/model/map';
 import * as errors from './errors';
 
 interface CreateMapData {
