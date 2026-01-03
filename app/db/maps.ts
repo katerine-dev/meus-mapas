@@ -16,11 +16,17 @@ interface UpdateMapData {
 
 // Helper para mapear row do banco para objeto Map
 function mapRowToMap(row: Record<string, unknown>): Map {
+  // Extrai coordenadas do preview (primeiro ponto do mapa)
+  const previewLat = row.preview_lat as number | null;
+  const previewLng = row.preview_lng as number | null;
+
   return {
     id: row.id as string,
     name: row.name as string,
     description: row.description as string | undefined,
     pointsCount: Number(row.points_count ?? 0),
+    previewLocation:
+      previewLat && previewLng ? { latitude: previewLat, longitude: previewLng } : undefined,
     createdAt: row.created_at as Date,
     updatedAt: row.updated_at as Date,
     deletedAt: row.deleted_at as Date | null,
@@ -30,10 +36,12 @@ function mapRowToMap(row: Record<string, unknown>): Map {
 export async function getAllMaps(): Promise<Map[]> {
   // Ordenados por data de criação (mais recente primeiro)
   // Retorna apenas registros ativos (deleted_at IS NULL)
-  // Inclui contagem de pontos ativos de cada mapa
+  // Inclui contagem de pontos ativos e coordenadas do primeiro ponto para preview
   const result = await connection.query(
     `SELECT *,
-       (SELECT COUNT(*) FROM points WHERE map_id = maps.id AND deleted_at IS NULL) AS points_count
+       (SELECT COUNT(*) FROM points WHERE map_id = maps.id AND deleted_at IS NULL) AS points_count,
+       (SELECT location[0] FROM points WHERE map_id = maps.id AND deleted_at IS NULL ORDER BY created_at LIMIT 1) AS preview_lng,
+       (SELECT location[1] FROM points WHERE map_id = maps.id AND deleted_at IS NULL ORDER BY created_at LIMIT 1) AS preview_lat
      FROM maps
      WHERE deleted_at IS NULL
      ORDER BY created_at DESC`

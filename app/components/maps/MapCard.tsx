@@ -15,10 +15,29 @@ interface MapCardProps {
 
 // Componente card que exibe um mapa na lista
 export default function MapCard({ map, onEdit, onOpen, onDelete }: MapCardProps) {
-  const { name, description, pointsCount, updatedAt } = map;
+  const { name, description, pointsCount, updatedAt, previewLocation } = map;
   const [menuOpen, setMenuOpen] = useState(false);
   // Ref para o container do menu, usado para detectar cliques fora
   const menuRef = useRef<HTMLDivElement>(null);
+
+  // Converte lat/lng para coordenadas de tile do OpenStreetMap
+  // Fórmula: https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
+  const getTileUrl = () => {
+    if (!previewLocation) return null;
+    const zoom = 13; // Zoom mais afastado para ver área maior
+    const { latitude, longitude } = previewLocation;
+    const x = Math.floor(((longitude + 180) / 360) * Math.pow(2, zoom));
+    const y = Math.floor(
+      ((1 -
+        Math.log(Math.tan((latitude * Math.PI) / 180) + 1 / Math.cos((latitude * Math.PI) / 180)) /
+          Math.PI) /
+        2) *
+        Math.pow(2, zoom)
+    );
+    return `https://tile.openstreetmap.org/${zoom}/${x}/${y}.png`;
+  };
+
+  const tileUrl = getTileUrl();
 
   // Formata a data de atualização para o formato brasileiro (DD/MM/YYYY)
   const formattedDate = new Date(updatedAt).toLocaleDateString('pt-BR', {
@@ -46,9 +65,20 @@ export default function MapCard({ map, onEdit, onOpen, onDelete }: MapCardProps)
       onClick={onOpen}
       className="card-interactive relative cursor-pointer overflow-hidden rounded-2xl border border-border bg-surface shadow-lg transition-all hover:shadow-xl"
     >
-      {/* Preview roxo com ícone de mapa */}
-      <div className="relative flex h-32 items-center justify-center bg-primary">
-        <MapIcon className="h-12 w-12 text-white/50" strokeWidth={1.5} />
+      {/* Preview: tile do mapa ou fallback roxo com ícone */}
+      <div className="relative h-32 overflow-hidden bg-primary">
+        {tileUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={tileUrl}
+            alt={`Preview do mapa ${name}`}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <MapIcon className="h-12 w-12 text-white/50" strokeWidth={1.5} />
+          </div>
+        )}
 
         {/* Botão de menu */}
         <div className="absolute right-3 top-3" ref={menuRef}>
