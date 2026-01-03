@@ -36,6 +36,8 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
 
   // Estado de seleção e edição
   const [selectedPointId, setSelectedPointId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState(false);
+  const [nameValue, setNameValue] = useState('');
   const [editingDescription, setEditingDescription] = useState(false);
   const [descriptionValue, setDescriptionValue] = useState('');
 
@@ -110,6 +112,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
       if (mapRes.ok) {
         const mapData = await mapRes.json();
         setMap(mapData);
+        setNameValue(mapData.name || '');
         setDescriptionValue(mapData.description || '');
       }
 
@@ -279,6 +282,25 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
     }
   };
 
+  // Salvar nome do mapa
+  const handleSaveName = async () => {
+    if (!nameValue.trim()) return;
+    try {
+      await fetch(`/api/maps/${mapId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: nameValue.trim(),
+          description: map?.description,
+        }),
+      });
+      setMap((prev) => (prev ? { ...prev, name: nameValue.trim() } : null));
+    } catch (error) {
+      console.error('Erro ao salvar nome:', error);
+    }
+    setEditingName(false);
+  };
+
   // Salvar descrição do mapa
   const handleSaveDescription = async () => {
     try {
@@ -358,6 +380,15 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
         selectedPointId={selectedPointId}
         mobileDrawerOpen={mobileDrawerOpen}
         onMobileDrawerToggle={() => setMobileDrawerOpen(!mobileDrawerOpen)}
+        editingName={editingName}
+        nameValue={nameValue}
+        onNameValueChange={setNameValue}
+        onEditName={() => setEditingName(true)}
+        onCancelEditName={() => {
+          setEditingName(false);
+          setNameValue(map.name || '');
+        }}
+        onSaveName={handleSaveName}
         editingDescription={editingDescription}
         descriptionValue={descriptionValue}
         onDescriptionValueChange={setDescriptionValue}

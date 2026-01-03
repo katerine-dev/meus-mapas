@@ -1,6 +1,12 @@
 'use client';
 
-import { TrashIcon, ChevronUpIcon, ChevronDownIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import {
+  PencilIcon,
+  TrashIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+  MapPinIcon,
+} from '@heroicons/react/24/outline';
 import { Map } from '@/app/model/map';
 import { Point } from '@/app/model/point';
 import DescriptionEditor from './DescriptionEditor';
@@ -17,6 +23,13 @@ export interface MapSidebarProps {
   // Estado do drawer mobile
   mobileDrawerOpen: boolean;
   onMobileDrawerToggle: () => void;
+  // Estado de edição de nome
+  editingName: boolean;
+  nameValue: string;
+  onNameValueChange: (value: string) => void;
+  onEditName: () => void;
+  onCancelEditName: () => void;
+  onSaveName: () => void;
   // Estado de edição de descrição
   editingDescription: boolean;
   descriptionValue: string;
@@ -44,6 +57,12 @@ export default function MapSidebar({
   selectedPointId,
   mobileDrawerOpen,
   onMobileDrawerToggle,
+  editingName,
+  nameValue,
+  onNameValueChange,
+  onEditName,
+  onCancelEditName,
+  onSaveName,
   editingDescription,
   descriptionValue,
   onDescriptionValueChange,
@@ -62,8 +81,45 @@ export default function MapSidebar({
       <div className="absolute bottom-4 left-4 top-4 z-[1000] hidden w-80 flex-col gap-4 overflow-hidden md:flex">
         {/* Info do mapa */}
         <div className="card-interactive overflow-hidden rounded-2xl border border-border bg-surface shadow-lg">
-          <div className="flex items-center justify-between bg-primary px-5 py-4">
-            <h1 className="text-lg font-semibold text-white">{map.name}</h1>
+          <div className="bg-primary px-5 py-4">
+            {editingName ? (
+              <div className="space-y-2">
+                <input
+                  type="text"
+                  value={nameValue}
+                  onChange={(e) => onNameValueChange(e.target.value)}
+                  className="w-full rounded-lg bg-white/20 px-2 py-1 text-lg font-semibold text-white placeholder:text-white/60 focus:bg-white/30 focus:outline-none"
+                  autoFocus
+                />
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={onCancelEditName}
+                    className="text-sm text-white/80 hover:text-white"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={onSaveName}
+                    disabled={!nameValue.trim()}
+                    className="rounded-lg bg-white/20 px-2 py-1 text-sm text-white hover:bg-white/30 disabled:opacity-50"
+                  >
+                    Salvar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <h1 className="text-lg font-semibold text-white">{map.name}</h1>
+                <button
+                  onClick={onEditName}
+                  className="rounded-full p-1 text-white/80 hover:bg-white/20 hover:text-white"
+                  aria-label="Editar nome"
+                  title="Editar nome"
+                >
+                  <PencilIcon className="h-4 w-4" />
+                </button>
+              </div>
+            )}
           </div>
           <div className="p-4">
             <DescriptionEditor
@@ -137,6 +193,42 @@ export default function MapSidebar({
           {/* Conteúdo expandido */}
           {mobileDrawerOpen && (
             <div className="flex max-h-[calc(50vh-48px)] flex-col overflow-hidden">
+              {/* Nome do mapa */}
+              <div className="border-b border-border p-3">
+                {editingName ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={nameValue}
+                      onChange={(e) => onNameValueChange(e.target.value)}
+                      className="flex-1 rounded-lg border border-border px-2 py-1 text-sm focus:border-primary focus:outline-none"
+                      autoFocus
+                    />
+                    <button onClick={onCancelEditName} className="text-sm text-text-secondary">
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={onSaveName}
+                      disabled={!nameValue.trim()}
+                      className="rounded-lg bg-primary px-2 py-1 text-sm text-white disabled:opacity-50"
+                    >
+                      Salvar
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-text-primary">{map.name}</span>
+                    <button
+                      onClick={onEditName}
+                      className="rounded-full p-1 text-text-muted hover:bg-surface-hover hover:text-primary"
+                      aria-label="Editar nome"
+                    >
+                      <PencilIcon className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
+              </div>
+
               {/* Descrição */}
               <div className="border-b border-border p-3">
                 <DescriptionEditor
