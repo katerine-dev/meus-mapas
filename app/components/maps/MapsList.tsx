@@ -14,7 +14,6 @@ import { Map } from '@/app/model/map';
 import { DEFAULT_SORT, type SortKey } from '@/app/constants/sort';
 
 interface MapsListProps {
-  onCreateClick?: () => void;
   isCreateModalOpen: boolean;
   setIsCreateModalOpen: (open: boolean) => void;
 }
