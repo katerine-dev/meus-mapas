@@ -1,9 +1,11 @@
+import { Location } from './point';
+
 export interface Map {
   id: string;
   name: string;
   description?: string;
   pointsCount: number;
-  previewLocation?: { latitude: number; longitude: number };
+  previewLocation?: Location;
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
