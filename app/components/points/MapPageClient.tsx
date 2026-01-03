@@ -2,7 +2,14 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import { PencilIcon, TrashIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import {
+  PencilIcon,
+  TrashIcon,
+  ArrowPathIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+  MapPinIcon,
+} from '@heroicons/react/24/outline';
 import { Point } from '@/app/model/point';
 import { Map } from '@/app/model/map';
 import PointsList from './PointsList';
@@ -47,6 +54,9 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [confirmModalMode, setConfirmModalMode] = useState<'single' | 'all'>('single');
   const [pointToDelete, setPointToDelete] = useState<string | null>(null);
+
+  // Estado para painel mobile
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
   // Centro do mapa (São Paulo por padrão)
   const [mapCenter, setMapCenter] = useState<[number, number]>([-23.5505, -46.6333]);
@@ -237,8 +247,10 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
         />
       </div>
 
-      {/* Busca de localização - flutuante no topo */}
-      <div className="absolute left-1/2 top-4 z-[1000] w-full max-w-md -translate-x-1/2 px-4">
+      {/* Busca de localização - flutuante no topo (hidden no mobile quando drawer aberto) */}
+      <div
+        className={`absolute left-1/2 top-4 z-[1000] w-full max-w-md -translate-x-1/2 px-4 transition-opacity md:opacity-100 ${mobileDrawerOpen ? 'pointer-events-none opacity-0' : 'opacity-100'}`}
+      >
         <div className="rounded-xl bg-white shadow-lg">
           <div className="p-2">
             <LocationSearch onLocationFound={handleLocationFound} />
@@ -246,8 +258,8 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
         </div>
       </div>
 
-      {/* Painel lateral flutuante */}
-      <div className="absolute bottom-4 left-4 top-4 z-[1000] flex w-80 flex-col gap-4 overflow-hidden">
+      {/* Painel lateral flutuante - Desktop */}
+      <div className="absolute bottom-4 left-4 top-4 z-[1000] hidden w-80 flex-col gap-4 overflow-hidden md:flex">
         {/* Info do mapa */}
         <div className="card-interactive overflow-hidden rounded-2xl border border-border bg-surface shadow-lg">
           {/* Header com roxo sólido */}
@@ -319,6 +331,121 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
           <TrashIcon className="h-4 w-4" />
           <span>Excluir todos</span>
         </button>
+      </div>
+
+      {/* Drawer Mobile - Bottom Sheet */}
+      <div className="absolute inset-x-0 bottom-0 z-[1000] md:hidden">
+        {/* Handle para expandir/colapsar */}
+        <button
+          onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
+          className="mx-auto flex w-full items-center justify-center rounded-t-2xl bg-white px-4 py-2 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]"
+        >
+          <div className="flex items-center gap-2">
+            <div className="h-1 w-10 rounded-full bg-gray-300" />
+          </div>
+        </button>
+
+        {/* Conteúdo do drawer */}
+        <div
+          className={`bg-white transition-all duration-300 ease-in-out ${mobileDrawerOpen ? 'max-h-[70vh]' : 'max-h-32'} overflow-hidden`}
+        >
+          {/* Header do mapa - sempre visível */}
+          <div
+            className="flex cursor-pointer items-center justify-between bg-primary px-4 py-3"
+            onClick={() => setMobileDrawerOpen(!mobileDrawerOpen)}
+          >
+            <div className="flex items-center gap-2">
+              <MapPinIcon className="h-5 w-5 text-white" />
+              <h1 className="font-semibold text-white">{map.name}</h1>
+              <span className="rounded-full bg-white/20 px-2 py-0.5 text-xs text-white">
+                {points.length} pontos
+              </span>
+            </div>
+            {mobileDrawerOpen ? (
+              <ChevronDownIcon className="h-5 w-5 text-white" />
+            ) : (
+              <ChevronUpIcon className="h-5 w-5 text-white" />
+            )}
+          </div>
+
+          {/* Conteúdo expandido */}
+          {mobileDrawerOpen && (
+            <div className="flex max-h-[calc(70vh-48px)] flex-col overflow-hidden">
+              {/* Descrição */}
+              <div className="border-b border-border p-3">
+                {!editingDescription ? (
+                  <div className="flex items-start justify-between">
+                    <p className="text-sm text-text-muted">{map.description || 'Sem descrição'}</p>
+                    <button
+                      onClick={() => setEditingDescription(true)}
+                      className="ml-2 rounded-full p-1 text-text-muted hover:bg-surface-hover hover:text-primary"
+                    >
+                      <PencilIcon className="h-4 w-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <textarea
+                      value={descriptionValue}
+                      onChange={(e) => setDescriptionValue(e.target.value)}
+                      className="w-full rounded-lg border border-border p-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+                      rows={2}
+                      placeholder="Adicione uma descrição..."
+                    />
+                    <div className="mt-2 flex justify-end gap-2">
+                      <button
+                        onClick={() => {
+                          setEditingDescription(false);
+                          setDescriptionValue(map.description || '');
+                        }}
+                        className="rounded-lg px-3 py-1.5 text-sm text-text-secondary hover:bg-surface-hover"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        onClick={handleSaveDescription}
+                        className="rounded-lg bg-primary px-3 py-1.5 text-sm text-white hover:bg-primary-hover"
+                      >
+                        Salvar
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Busca de localização no mobile */}
+              <div className="border-b border-border p-3">
+                <LocationSearch onLocationFound={handleLocationFound} />
+              </div>
+
+              {/* Lista de pontos */}
+              <div className="min-h-0 flex-1 overflow-auto">
+                <PointsList
+                  points={points}
+                  selectedPointId={selectedPointId}
+                  onSelectPoint={(pointId) => {
+                    handleSelectPoint(pointId);
+                    setMobileDrawerOpen(false);
+                  }}
+                  onEditPoint={handleEditPoint}
+                  onDeletePoint={handleDeletePoint}
+                />
+              </div>
+
+              {/* Botão excluir todos */}
+              <div className="border-t border-border p-3">
+                <button
+                  onClick={handleDeleteAllPoints}
+                  disabled={points.length === 0}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-destructive-border py-2 text-sm text-destructive hover:bg-destructive-light disabled:cursor-not-allowed disabled:border-border disabled:text-text-muted disabled:opacity-50"
+                >
+                  <TrashIcon className="h-4 w-4" />
+                  <span>Excluir todos</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Modal de ponto */}

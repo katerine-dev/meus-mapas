@@ -156,8 +156,8 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
   return (
     <div className="flex flex-col gap-6">
       {/* Barra de busca com botão de criar mapa ao lado direito */}
-      <div className="flex items-center gap-4">
-        <div className="flex-1">
+      <div className="flex items-center gap-2 sm:gap-4">
+        <div className="min-w-0 flex-1">
           <SearchBar onSearch={setSearchQuery} onSortChange={setSortOption} />
         </div>
         <Button
@@ -171,7 +171,7 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
         <Button
           onClick={() => setIsCreateModalOpen(true)}
           variant="outlined"
-          className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow sm:hidden"
+          className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-white shadow sm:hidden"
           aria-label="Criar novo mapa"
         >
           <PlusIcon className="h-5 w-5" />

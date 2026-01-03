@@ -27,10 +27,10 @@ export default function SearchBar({ onSearch, onSortChange }: SearchBarProps) {
   };
 
   return (
-    <div className="flex h-12 items-center justify-between gap-4 rounded-2xl bg-white px-4 shadow-md">
+    <div className="flex h-12 items-center justify-between gap-2 rounded-2xl bg-white px-3 shadow-md sm:gap-4 sm:px-4">
       {/* Campo de busca */}
-      <div className="flex flex-1 items-center gap-3">
-        <MagnifyingGlassIcon className="h-5 w-5 text-purple-light" />
+      <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+        <MagnifyingGlassIcon className="h-5 w-5 flex-shrink-0 text-purple-light" />
         <input
           type="text"
           placeholder="Buscar mapas..."
@@ -39,17 +39,24 @@ export default function SearchBar({ onSearch, onSortChange }: SearchBarProps) {
             setSearchQuery(e.target.value);
             onSearch(e.target.value);
           }}
-          className="flex-1 bg-transparent text-purple-darkest placeholder:text-purple-light focus:outline-none"
+          className="min-w-0 flex-1 bg-transparent text-purple-darkest placeholder:text-purple-light focus:outline-none"
         />
       </div>
 
       {/* Ordenação */}
-      <div className="relative flex items-center gap-3">
+      <div className="relative flex flex-shrink-0 items-center">
         <button
           onClick={() => setSortOpen(!sortOpen)}
-          className="flex items-center gap-2 text-purple-darkest transition-colors hover:text-purple-main"
+          className="flex items-center gap-1 text-purple-darkest transition-colors hover:text-purple-main sm:gap-2"
         >
-          <span className="text-sm font-medium">{SORT_OPTIONS[currentSort]}</span>
+          <span className="hidden text-sm font-medium sm:inline">{SORT_OPTIONS[currentSort]}</span>
+          <span className="text-xs font-medium sm:hidden">
+            {currentSort === 'recent'
+              ? 'Recentes'
+              : currentSort === 'oldest'
+                ? 'Antigos'
+                : SORT_OPTIONS[currentSort]}
+          </span>
           <ChevronDownIcon className="h-4 w-4" />
         </button>
 
