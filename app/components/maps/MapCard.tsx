@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 import { MapIcon, DocumentTextIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
 import { Map } from '@/app/model/map';
+import { formatDateBR } from '@/lib/date';
 
 interface MapCardProps {
   map: Map;
@@ -40,11 +41,7 @@ export default function MapCard({ map, onEdit, onOpen, onDelete }: MapCardProps)
   const tileUrl = getTileUrl();
 
   // Formata a data de atualização para o formato brasileiro (DD/MM/YYYY)
-  const formattedDate = new Date(updatedAt).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  });
+  const formattedDate = formatDateBR(updatedAt);
 
   // Effect para fechar o menu ao clicar fora dele
   useEffect(() => {
