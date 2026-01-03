@@ -16,6 +16,7 @@ import PointsList from './PointsList';
 import PointModal from './PointModal';
 import ConfirmModal from './ConfirmModal';
 import LocationSearch from './LocationSearch';
+import ErrorState from '../ui/ErrorState';
 
 // Import dinâmico do mapa para evitar SSR (Leaflet não funciona no servidor)
 const LeafletMap = dynamic(() => import('./LeafletMap'), {
@@ -322,7 +323,10 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
   if (!map) {
     return (
       <div className="flex h-96 items-center justify-center">
-        <p className="text-red-500">Mapa não encontrado</p>
+        <ErrorState
+          title="Mapa não encontrado"
+          message="O mapa que você está procurando não existe ou foi removido."
+        />
       </div>
     );
   }

@@ -9,6 +9,7 @@ import EditMapModal from './EditMapModal';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import SearchBar from './SearchBar';
 import Button from '../ui/Button';
+import ErrorState from '../ui/ErrorState';
 import { Map } from '../../model/map';
 import { DEFAULT_SORT, type SortKey } from '../../constants/sort';
 
@@ -147,10 +148,15 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
   // Renderização quando há erro
   if (error) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <p className="text-red-500">Erro: {error}</p>
-      </div>
-      // TODO: Melhorar o visual da sinalização de erro
+      <ErrorState
+        title="Erro ao carregar mapas"
+        message={error}
+        onRetry={() => {
+          setError(null);
+          setLoading(true);
+          fetchMaps();
+        }}
+      />
     );
   }
 
