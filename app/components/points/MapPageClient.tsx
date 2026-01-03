@@ -66,10 +66,6 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
   const [mapCenter, setMapCenter] = useState<[number, number] | null>(null);
   const [centerInitialized, setCenterInitialized] = useState(false);
 
-  // Estado para geolocalização
-  const [geoLocationLoading, setGeoLocationLoading] = useState(false);
-  const [geoLocationAttempted, setGeoLocationAttempted] = useState(false);
-
   // Estado para ponto temporário (buscado mas ainda não salvo)
   const [tempPoint, setTempPoint] = useState<{
     name: string;
@@ -77,50 +73,41 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
     longitude: number;
   } | null>(null);
 
-  // Handler para usar localização do usuário
-  const handleUseMyLocation = useCallback(() => {
-    if (geoLocationLoading) return;
-
-    setGeoLocationLoading(true);
-    setGeoLocationAttempted(true);
-
-    if (!('geolocation' in navigator)) {
-      console.log('Geolocalização não suportada pelo navegador');
-      setMapCenter(SAO_PAULO_COORDS);
-      setGeoLocationLoading(false);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setMapCenter([position.coords.latitude, position.coords.longitude]);
-        setGeoLocationLoading(false);
-      },
-      (error) => {
-        console.log('Erro ao obter localização:', error.message);
-        setMapCenter(SAO_PAULO_COORDS);
-        setGeoLocationLoading(false);
-      },
-      {
-        enableHighAccuracy: false,
-        timeout: 10000,
-        maximumAge: 600000, // Cache de 10 minutos
-      }
-    );
-  }, [geoLocationLoading]);
-
-  // Centralizar no último ponto quando há pontos cadastrados
+  // Inicializar o centro do mapa
+  // Se há pontos, centraliza no último. Se não há, tenta geolocalização do usuário.
   useEffect(() => {
     if (!loading && !centerInitialized) {
       if (points.length > 0) {
         // Pegar o último ponto (mais recente)
         const lastPoint = points[points.length - 1];
         setMapCenter([lastPoint.location.latitude, lastPoint.location.longitude]);
+        setCenterInitialized(true);
       } else {
-        // Sem pontos, usa São Paulo como padrão
-        setMapCenter(SAO_PAULO_COORDS);
+        // Sem pontos - tenta usar a localização do usuário
+        // O browser irá pedir autorização automaticamente
+        if ('geolocation' in navigator) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              setMapCenter([position.coords.latitude, position.coords.longitude]);
+              setCenterInitialized(true);
+            },
+            () => {
+              // Usuário negou ou erro - usa fallback (São Paulo)
+              setMapCenter(SAO_PAULO_COORDS);
+              setCenterInitialized(true);
+            },
+            {
+              enableHighAccuracy: false,
+              timeout: 10000,
+              maximumAge: 600000, // Cache de 10 minutos
+            }
+          );
+        } else {
+          // Geolocalização não suportada - usa fallback
+          setMapCenter(SAO_PAULO_COORDS);
+          setCenterInitialized(true);
+        }
       }
-      setCenterInitialized(true);
     }
   }, [loading, points, centerInitialized]);
 
@@ -368,26 +355,6 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
           onTempPointClick={handleTempPointClick}
         />
       </div>
-
-      {/* Botão "Usar minha localização" - só aparece quando não há pontos e não tentou geolocalização */}
-      {points.length === 0 && !geoLocationAttempted && (
-        <div className="absolute bottom-20 left-1/2 z-[1000] -translate-x-1/2 md:bottom-8">
-          <button
-            onClick={handleUseMyLocation}
-            disabled={geoLocationLoading}
-            className="flex items-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-medium text-white shadow-lg transition-all hover:bg-primary-hover hover:shadow-xl disabled:opacity-70"
-          >
-            {geoLocationLoading ? (
-              <Spinner size="sm" variant="white" label="Obtendo localização..." />
-            ) : (
-              <>
-                <MapPinIcon className="h-5 w-5" />
-                <span>Usar minha localização</span>
-              </>
-            )}
-          </button>
-        </div>
-      )}
 
       {/* Busca de localização - flutuante no topo (hidden no mobile quando drawer aberto) */}
       <div
