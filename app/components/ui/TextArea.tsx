@@ -24,7 +24,7 @@ export default function TextArea({
       placeholder={placeholder}
       rows={rows}
       disabled={disabled}
-      className={`border-purple-light text-purple-darkest placeholder:text-purple-light focus:border-purple-main w-full resize-none rounded-lg border px-4 py-3 focus:outline-none ${className} `}
+      className={`focus:ring-focus-ring/30 w-full resize-none rounded-lg border border-border bg-surface px-4 py-3 text-text-primary placeholder:text-text-placeholder focus:border-primary focus:outline-none focus:ring-2 ${className} `}
     />
   );
 }
