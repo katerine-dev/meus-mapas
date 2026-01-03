@@ -4,7 +4,7 @@ import { ValidationError, zodErrorToValidationErrors } from './types';
 export const MAP_VALIDATION = {
   NAME_MIN_LENGTH: 1,
   NAME_MAX_LENGTH: 100,
-  DESCRIPTION_MAX_LENGTH: 500,
+  DESCRIPTION_MAX_LENGTH: 40,
 };
 
 export const MapSchema = z.object({
