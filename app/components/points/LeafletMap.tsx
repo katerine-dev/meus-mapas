@@ -12,7 +12,7 @@ import {
 } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Point } from '@/app/model/point';
+import { Point, Location } from '@/app/model/point';
 
 // Ícone padrão do marker
 const defaultIcon = new L.Icon({
@@ -56,7 +56,7 @@ interface LeafletMapProps {
   selectedPointId: string | null;
   onMapClick: (lat: number, lng: number) => void;
   onMarkerClick: (pointId: string) => void;
-  tempPoint?: { name: string; latitude: number; longitude: number } | null;
+  tempPoint?: { name: string; location: Location } | null;
   onTempPointClick?: () => void;
 }
 
@@ -140,7 +140,7 @@ export default function LeafletMap({
       {/* Marcador temporário para localização buscada */}
       {tempPoint && (
         <Marker
-          position={[tempPoint.latitude, tempPoint.longitude]}
+          position={[tempPoint.location.latitude, tempPoint.location.longitude]}
           icon={tempIcon}
           eventHandlers={{
             click: () => onTempPointClick?.(),

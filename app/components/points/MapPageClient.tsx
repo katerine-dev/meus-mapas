@@ -9,7 +9,7 @@ import {
   ChevronDownIcon,
   MapPinIcon,
 } from '@heroicons/react/24/outline';
-import { Point } from '@/app/model/point';
+import { Point, Location } from '@/app/model/point';
 import { Map } from '@/app/model/map';
 import PointsList from './PointsList';
 import PointModal from './PointModal';
@@ -49,11 +49,10 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
   // Estado dos modais
   const [pointModalOpen, setPointModalOpen] = useState(false);
   const [pointModalMode, setPointModalMode] = useState<'create' | 'edit'>('create');
-  const [pointModalData, setPointModalData] = useState<{
-    name: string;
-    latitude: number;
-    longitude: number;
-  }>({ name: '', latitude: 0, longitude: 0 });
+  const [pointModalData, setPointModalData] = useState<{ name: string; location: Location }>({
+    name: '',
+    location: { latitude: 0, longitude: 0 },
+  });
 
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [confirmModalMode, setConfirmModalMode] = useState<'single' | 'all'>('single');
@@ -67,11 +66,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
   const [centerInitialized, setCenterInitialized] = useState(false);
 
   // Estado para ponto temporário (buscado mas ainda não salvo)
-  const [tempPoint, setTempPoint] = useState<{
-    name: string;
-    latitude: number;
-    longitude: number;
-  } | null>(null);
+  const [tempPoint, setTempPoint] = useState<{ name: string; location: Location } | null>(null);
 
   // Inicializar o centro do mapa
   // Se há pontos, centraliza no último. Se não há, tenta geolocalização do usuário.
@@ -144,7 +139,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
   const handleMapClick = useCallback((lat: number, lng: number) => {
     console.log('handleMapClick called:', lat, lng);
     setPointModalMode('create');
-    setPointModalData({ name: '', latitude: lat, longitude: lng });
+    setPointModalData({ name: '', location: { latitude: lat, longitude: lng } });
     setPointModalOpen(true);
   }, []);
 
@@ -158,7 +153,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
 
     // Se for um local buscado (não um ponto existente), cria ponto temporário
     if (name && !isExistingPoint) {
-      setTempPoint({ name, latitude: lat, longitude: lng });
+      setTempPoint({ name, location: { latitude: lat, longitude: lng } });
       setSelectedPointId(null); // Limpa seleção de pontos existentes
     }
 
@@ -200,8 +195,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
     setPointModalMode('edit');
     setPointModalData({
       name: point.name,
-      latitude: point.location.latitude,
-      longitude: point.location.longitude,
+      location: point.location,
     });
     setSelectedPointId(point.id);
     setPointModalOpen(true);
@@ -227,8 +221,8 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             name,
-            latitude: pointModalData.latitude,
-            longitude: pointModalData.longitude,
+            latitude: pointModalData.location.latitude,
+            longitude: pointModalData.location.longitude,
           }),
         });
 
@@ -562,8 +556,8 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
         }}
         mode={pointModalMode}
         initialName={pointModalData.name}
-        latitude={pointModalData.latitude}
-        longitude={pointModalData.longitude}
+        latitude={pointModalData.location.latitude}
+        longitude={pointModalData.location.longitude}
         onSave={handleSavePoint}
       />
 
