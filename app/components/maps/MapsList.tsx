@@ -12,6 +12,8 @@ import ErrorState from '@/app/components/ui/ErrorState';
 import Spinner from '@/app/components/ui/Spinner';
 import { Map } from '@/app/model/map';
 import { DEFAULT_SORT, type SortKey } from './sort';
+import { getAllMaps, createMap, updateMap, deleteMap } from '@/lib/services/maps';
+import { DuplicateNameError } from '@/lib/errors';
 
 interface MapsListProps {
   isCreateModalOpen: boolean;
@@ -35,9 +37,7 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
   // Função assíncrona para buscar todos os mapas da API
   async function fetchMaps() {
     try {
-      const response = await fetch('/api/maps'); // GET /api/maps
-      if (!response.ok) throw new Error('Erro ao buscar mapas');
-      const data = await response.json();
+      const data = await getAllMaps();
       setMaps(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido');
@@ -78,22 +78,13 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
     description: string
   ): Promise<{ error?: string } | void> {
     try {
-      const response = await fetch('/api/maps', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, description }),
-      });
-
-      if (response.status === 409) {
-        const data = await response.json();
-        return { error: data.error || 'Já existe um mapa com este nome' };
-      }
-
-      if (response.ok) {
-        fetchMaps(); // Recarrega a lista após criar
-        setIsCreateModalOpen(false);
-      }
+      await createMap({ name, description });
+      fetchMaps();
+      setIsCreateModalOpen(false);
     } catch (err) {
+      if (err instanceof DuplicateNameError) {
+        return { error: err.message };
+      }
       console.error('Erro ao criar mapa:', err);
       return { error: 'Erro ao criar mapa. Tente novamente.' };
     }
@@ -106,23 +97,14 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
   ): Promise<{ error?: string } | void> {
     if (!selectedMap) return;
     try {
-      const response = await fetch(`/api/maps/${selectedMap.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, description }),
-      });
-
-      if (response.status === 409) {
-        const data = await response.json();
-        return { error: data.error || 'Já existe um mapa com este nome' };
-      }
-
-      if (response.ok) {
-        fetchMaps();
-        setIsEditModalOpen(false);
-        setSelectedMap(null);
-      }
+      await updateMap(selectedMap.id, { name, description });
+      fetchMaps();
+      setIsEditModalOpen(false);
+      setSelectedMap(null);
     } catch (err) {
+      if (err instanceof DuplicateNameError) {
+        return { error: err.message };
+      }
       console.error('Erro ao editar descrição:', err);
       return { error: 'Erro ao editar mapa. Tente novamente.' };
     }
@@ -132,14 +114,7 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
   async function handleDeleteMap(): Promise<{ error?: string } | void> {
     if (!selectedMap) return;
     try {
-      const response = await fetch(`/api/maps/${selectedMap.id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        return { error: 'Erro ao excluir mapa. Tente novamente.' };
-      }
-
+      await deleteMap(selectedMap.id);
       fetchMaps();
       setIsDeleteModalOpen(false);
       setSelectedMap(null);

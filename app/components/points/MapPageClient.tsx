@@ -10,6 +10,15 @@ import ConfirmModal from '@/app/components/ui/ConfirmModal';
 import LocationSearch from './LocationSearch';
 import ErrorState from '@/app/components/ui/ErrorState';
 import Spinner from '@/app/components/ui/Spinner';
+import { getMapById, updateMap } from '@/lib/services/maps';
+import {
+  getAllPoints,
+  createPoint,
+  updatePoint,
+  deletePoint,
+  deleteAllPoints,
+} from '@/lib/services/points';
+import { DuplicateNameError } from '@/lib/errors';
 
 // Import dinâmico do mapa para evitar SSR (Leaflet não funciona no servidor)
 const LeafletMap = dynamic(() => import('./LeafletMap'), {
@@ -104,22 +113,12 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
   // Buscar dados do mapa e pontos
   const fetchData = useCallback(async () => {
     try {
-      const [mapRes, pointsRes] = await Promise.all([
-        fetch(`/api/maps/${mapId}`),
-        fetch(`/api/maps/${mapId}/points`),
-      ]);
+      const [mapData, pointsData] = await Promise.all([getMapById(mapId), getAllPoints(mapId)]);
 
-      if (mapRes.ok) {
-        const mapData = await mapRes.json();
-        setMap(mapData);
-        setNameValue(mapData.name || '');
-        setDescriptionValue(mapData.description || '');
-      }
-
-      if (pointsRes.ok) {
-        const pointsData = await pointsRes.json();
-        setPoints(pointsData);
-      }
+      setMap(mapData);
+      setNameValue(mapData.name || '');
+      setDescriptionValue(mapData.description || '');
+      setPoints(pointsData);
     } catch (error) {
       console.error('Erro ao buscar dados:', error);
     } finally {
@@ -211,44 +210,23 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
   const handleSavePoint = async (name: string): Promise<{ error?: string } | void> => {
     try {
       if (pointModalMode === 'create') {
-        const res = await fetch(`/api/maps/${mapId}/points`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name,
-            latitude: pointModalData.location.latitude,
-            longitude: pointModalData.location.longitude,
-          }),
+        await createPoint(mapId, {
+          name,
+          latitude: pointModalData.location.latitude,
+          longitude: pointModalData.location.longitude,
         });
-
-        if (res.status === 409) {
-          const data = await res.json();
-          return { error: data.error || 'Já existe um ponto com este nome' };
-        }
-
-        if (res.ok) {
-          await fetchData();
-          setTempPoint(null); // Limpar ponto temporário após salvar
-          setPointModalOpen(false);
-        }
+        await fetchData();
+        setTempPoint(null);
+        setPointModalOpen(false);
       } else {
-        const res = await fetch(`/api/maps/${mapId}/points/${selectedPointId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name }),
-        });
-
-        if (res.status === 409) {
-          const data = await res.json();
-          return { error: data.error || 'Já existe um ponto com este nome' };
-        }
-
-        if (res.ok) {
-          await fetchData();
-          setPointModalOpen(false);
-        }
+        await updatePoint(mapId, selectedPointId!, { name });
+        await fetchData();
+        setPointModalOpen(false);
       }
     } catch (error) {
+      if (error instanceof DuplicateNameError) {
+        return { error: error.message };
+      }
       console.error('Erro ao salvar ponto:', error);
       return { error: 'Erro ao salvar ponto. Tente novamente.' };
     }
@@ -258,19 +236,9 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
   const handleConfirmDelete = async (): Promise<{ error?: string } | void> => {
     try {
       if (confirmModalMode === 'single' && pointToDelete) {
-        const res = await fetch(`/api/maps/${mapId}/points/${pointToDelete}`, {
-          method: 'DELETE',
-        });
-        if (!res.ok) {
-          return { error: 'Erro ao excluir ponto. Tente novamente.' };
-        }
+        await deletePoint(mapId, pointToDelete);
       } else if (confirmModalMode === 'all') {
-        const res = await fetch(`/api/maps/${mapId}/points`, {
-          method: 'DELETE',
-        });
-        if (!res.ok) {
-          return { error: 'Erro ao excluir pontos. Tente novamente.' };
-        }
+        await deleteAllPoints(mapId);
       }
       await fetchData();
       setSelectedPointId(null);
@@ -286,13 +254,9 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
   const handleSaveName = async () => {
     if (!nameValue.trim()) return;
     try {
-      await fetch(`/api/maps/${mapId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: nameValue.trim(),
-          description: map?.description,
-        }),
+      await updateMap(mapId, {
+        name: nameValue.trim(),
+        description: map?.description,
       });
       setMap((prev) => (prev ? { ...prev, name: nameValue.trim() } : null));
     } catch (error) {
@@ -304,13 +268,9 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
   // Salvar descrição do mapa
   const handleSaveDescription = async () => {
     try {
-      await fetch(`/api/maps/${mapId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: map?.name,
-          description: descriptionValue,
-        }),
+      await updateMap(mapId, {
+        name: map?.name || '',
+        description: descriptionValue,
       });
       setMap((prev) => (prev ? { ...prev, description: descriptionValue } : null));
     } catch (error) {

@@ -1,6 +1,7 @@
 import connection from './connection';
 import { Point } from '@/app/model/point';
-import * as errors from './errors';
+import { PG_UNIQUE_VIOLATION, DatabaseError } from './errors';
+import { DuplicateNameError } from '@/lib/errors';
 
 interface CreatePointData {
   mapId: string;
@@ -39,8 +40,8 @@ export async function createPoint(data: CreatePointData): Promise<string> {
 
     return result.rows[0].id;
   } catch (error) {
-    if ((error as errors.DatabaseError).code === errors.PG_UNIQUE_VIOLATION) {
-      throw new errors.DuplicateNameError();
+    if ((error as DatabaseError).code === PG_UNIQUE_VIOLATION) {
+      throw new DuplicateNameError();
     }
     throw error;
   }
@@ -104,8 +105,8 @@ export async function updatePoint(data: UpdatePointData): Promise<Point | null> 
 
     return mapRowToPoint(result.rows[0]);
   } catch (error) {
-    if ((error as errors.DatabaseError).code === errors.PG_UNIQUE_VIOLATION) {
-      throw new errors.DuplicateNameError();
+    if ((error as DatabaseError).code === PG_UNIQUE_VIOLATION) {
+      throw new DuplicateNameError();
     }
     throw error;
   }

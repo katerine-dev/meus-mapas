@@ -1,5 +1,5 @@
 import * as mapsDb from '@/app/db/maps';
-import { DuplicateNameError } from '@/app/db/errors';
+import { DuplicateNameError } from '@/lib/errors';
 import { validateMapData } from '@/app/validation/map';
 
 export async function POST(request: Request) {

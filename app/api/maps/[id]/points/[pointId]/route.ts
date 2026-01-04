@@ -1,5 +1,5 @@
 import * as pointsDb from '@/app/db/points';
-import { DuplicateNameError } from '@/app/db/errors';
+import { DuplicateNameError } from '@/lib/errors';
 import { validateUpdatePointData } from '@/app/validation/point';
 
 // Handler GET - Busca um ponto específico pelo ID

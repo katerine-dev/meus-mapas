@@ -1,6 +1,7 @@
 import connection from './connection';
 import { Map } from '@/app/model/map';
-import * as errors from './errors';
+import { PG_UNIQUE_VIOLATION, DatabaseError } from './errors';
+import { DuplicateNameError } from '@/lib/errors';
 
 interface CreateMapData {
   name: string;
@@ -64,8 +65,8 @@ export async function createMap(data: CreateMapData): Promise<string> {
     // Retorna o ID do mapa recém-criado
     return result.rows[0].id;
   } catch (error) {
-    if ((error as errors.DatabaseError).code === errors.PG_UNIQUE_VIOLATION) {
-      throw new errors.DuplicateNameError();
+    if ((error as DatabaseError).code === PG_UNIQUE_VIOLATION) {
+      throw new DuplicateNameError();
     }
     throw error;
   }
@@ -91,8 +92,8 @@ export async function updateMap(data: UpdateMapData): Promise<Map | null> {
 
     return mapRowToMap(result.rows[0]);
   } catch (error) {
-    if ((error as errors.DatabaseError).code === errors.PG_UNIQUE_VIOLATION) {
-      throw new errors.DuplicateNameError();
+    if ((error as DatabaseError).code === PG_UNIQUE_VIOLATION) {
+      throw new DuplicateNameError();
     }
     throw error;
   }
