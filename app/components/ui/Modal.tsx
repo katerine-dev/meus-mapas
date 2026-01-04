@@ -27,11 +27,17 @@ export default function Modal({ isOpen, onClose, children, ariaLabelledBy }: Mod
   return (
     // Container fixo que cobre toda a tela com z-index maior que o Leaflet (que usa 400+)
     <div className="fixed inset-0 z-[1000] flex items-center justify-center">
-      {/* Overlay escuro semi-transparente - fecha o modal ao clicar */}
+      {/*
+        Overlay escuro semi-transparente - fecha o modal ao clicar.
+        aria-hidden="true": remove o overlay da accessibility tree, pois é puramente decorativo.
+        data-testid: identificador estável para testes, já que o overlay não está na accessibility tree
+        e não pode ser localizado via queries semânticas (getByRole, etc).
+      */}
       <div
-        className="modal-overlay bg-text-primary/60 absolute inset-0"
+        className="bg-text-primary/60 absolute inset-0"
         onClick={onClose}
         aria-hidden="true"
+        data-testid="modal-overlay"
       />
 
       {/* Container do conteúdo do modal - centralizado sobre o overlay */}

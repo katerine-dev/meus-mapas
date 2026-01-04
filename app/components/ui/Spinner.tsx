@@ -28,6 +28,15 @@ const variantClasses = {
 /**
  * Componente de loading spinner padrão da aplicação.
  * Utiliza o ícone ArrowPathIcon do Heroicons com animação de rotação.
+ *
+ * Acessibilidade:
+ * - role="status": identifica o elemento como uma região de status para leitores de tela.
+ * - aria-live="polite": anuncia mudanças de forma não intrusiva, sem interromper o usuário.
+ * - aria-label: fornece um rótulo acessível quando não há label visível, garantindo
+ *   que usuários de leitores de tela saibam que algo está carregando.
+ *
+ * Isso também melhora a testabilidade: podemos localizar o spinner via role="status"
+ * ao invés de depender de classes CSS internas como .animate-spin.
  */
 export default function Spinner({
   size = 'md',
@@ -36,7 +45,12 @@ export default function Spinner({
   className = '',
 }: SpinnerProps) {
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
+    <div
+      role="status"
+      aria-live="polite"
+      aria-label={label ?? 'Carregando'}
+      className={`flex items-center gap-2 ${className}`}
+    >
       <ArrowPathIcon className={`animate-spin ${variantClasses[variant]} ${sizeClasses[size]}`} />
       {label && (
         <span className={variant === 'white' ? 'text-white' : 'text-text-muted'}>{label}</span>
