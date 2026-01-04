@@ -41,6 +41,9 @@ export default function SearchBar({ onSearch, onSortChange }: SearchBarProps) {
       <div className="relative flex flex-shrink-0 items-center">
         <button
           onClick={() => setSortOpen(!sortOpen)}
+          aria-label="Ordenar mapas"
+          aria-expanded={sortOpen}
+          aria-haspopup="listbox"
           className="flex items-center gap-1 text-text-primary transition-colors hover:text-primary sm:gap-2"
         >
           <span className="hidden text-sm font-medium sm:inline">{SORT_OPTIONS[currentSort]}</span>
