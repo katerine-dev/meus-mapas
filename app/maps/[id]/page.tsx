@@ -1,19 +1,19 @@
 import Header from '@/app/components/Header';
 import Footer from '@/app/components/Footer';
-import MapPageClient from '@/app/components/points/MapPageClient';
+import MapPage from '@/app/components/points/MapPage';
 
 interface MapPageProps {
   params: Promise<{ id: string }>;
 }
 
-export default async function MapPage({ params }: MapPageProps) {
+export default async function MapPageRoute({ params }: MapPageProps) {
   const { id } = await params;
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">
       <Header />
       <main className="flex-1 overflow-hidden">
-        <MapPageClient mapId={id} />
+        <MapPage mapId={id} />
       </main>
       <Footer />
     </div>

@@ -14,7 +14,7 @@ import PointsList from './PointsList';
 import LocationSearch from './LocationSearch';
 
 /**
- * Estado de edição de um campo (nome ou descrição)
+ * Estado de edição de um campo do mapa (nome ou descrição)
  */
 export interface EditState {
   isEditing: boolean;
