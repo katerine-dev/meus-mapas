@@ -20,8 +20,8 @@ export default function PointsList({
 }: PointsListProps) {
   return (
     <div className="flex h-full flex-col">
-      <div className="border-border-light border-b p-3">
-        <h2 className="text-text-primary text-sm font-semibold">
+      <div className="border-b border-border-light p-3">
+        <h2 className="text-sm font-semibold text-text-primary">
           Pontos cadastrados{' '}
           {points.length > 0 && <span className="text-primary">({points.length})</span>}
         </h2>
@@ -30,20 +30,22 @@ export default function PointsList({
       <div className="flex-1 overflow-y-auto">
         {points.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="bg-primary-light mb-3 rounded-full p-3">
-              <MapPinIcon className="text-primary h-6 w-6" />
+            <div className="mb-3 rounded-full bg-primary-light p-3">
+              <MapPinIcon className="h-6 w-6 text-primary" />
             </div>
-            <p className="text-text-secondary text-sm font-medium">Nenhum ponto ainda</p>
-            <p className="text-text-muted mt-1 text-xs">Clique no mapa para adicionar</p>
+            <p className="text-sm font-medium text-text-secondary">Nenhum ponto ainda</p>
+            <p className="mt-1 text-xs text-text-muted">Clique no mapa para adicionar</p>
           </div>
         ) : (
-          <ul>
+          <ul role="listbox" aria-label="Lista de pontos">
             {points.map((point) => (
               <li
                 key={point.id}
-                className={`list-item-interactive border-border-light group flex cursor-pointer items-center justify-between border-b px-3 py-2.5 ${
+                role="option"
+                aria-selected={point.id === selectedPointId}
+                className={`list-item-interactive group flex cursor-pointer items-center justify-between border-b border-border-light px-3 py-2.5 ${
                   point.id === selectedPointId
-                    ? 'border-l-selection-border bg-selection-bg border-l-2'
+                    ? 'border-l-2 border-l-selection-border bg-selection-bg'
                     : 'hover:bg-surface-hover'
                 }`}
                 onClick={() => onSelectPoint(point.id)}
@@ -54,7 +56,7 @@ export default function PointsList({
                       point.id === selectedPointId ? 'bg-primary' : 'bg-text-placeholder'
                     }`}
                   />
-                  <span className="text-text-primary truncate text-sm">{point.name}</span>
+                  <span className="truncate text-sm text-text-primary">{point.name}</span>
                 </div>
 
                 <div className="flex items-center gap-1">
@@ -63,7 +65,8 @@ export default function PointsList({
                       e.stopPropagation();
                       onEditPoint(point);
                     }}
-                    className={`icon-interactive text-text-muted hover:bg-primary-light hover:text-primary rounded-lg p-1.5 ${
+                    aria-label={`Editar ${point.name}`}
+                    className={`icon-interactive rounded-lg p-1.5 text-text-muted hover:bg-primary-light hover:text-primary ${
                       point.id === selectedPointId
                         ? 'opacity-100'
                         : 'opacity-0 group-hover:opacity-100'
@@ -76,7 +79,8 @@ export default function PointsList({
                       e.stopPropagation();
                       onDeletePoint(point.id);
                     }}
-                    className={`icon-interactive text-text-muted hover:bg-destructive-light hover:text-destructive rounded-lg p-1.5 ${
+                    aria-label={`Excluir ${point.name}`}
+                    className={`icon-interactive rounded-lg p-1.5 text-text-muted hover:bg-destructive-light hover:text-destructive ${
                       point.id === selectedPointId
                         ? 'opacity-100'
                         : 'opacity-0 group-hover:opacity-100'
