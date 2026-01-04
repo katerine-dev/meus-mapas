@@ -6,6 +6,7 @@ import { MapIcon, DocumentTextIcon, TrashIcon } from '@heroicons/react/24/outlin
 import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
 import { Map } from '@/app/model/map';
 import { formatDateBR } from '@/lib/date';
+import { DEFAULT_ZOOM } from '@/app/constants/map';
 
 interface MapCardProps {
   map: Map;
@@ -28,17 +29,16 @@ export default function MapCard({ map, onEdit, onOpen, onDelete }: MapCardProps)
   // Fórmula: https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames
   const getTileUrl = () => {
     if (!previewLocation) return null;
-    const zoom = 13; // Zoom mais afastado para ver área maior
     const { latitude, longitude } = previewLocation;
-    const x = Math.floor(((longitude + 180) / 360) * Math.pow(2, zoom));
+    const x = Math.floor(((longitude + 180) / 360) * Math.pow(2, DEFAULT_ZOOM));
     const y = Math.floor(
       ((1 -
         Math.log(Math.tan((latitude * Math.PI) / 180) + 1 / Math.cos((latitude * Math.PI) / 180)) /
           Math.PI) /
         2) *
-        Math.pow(2, zoom)
+        Math.pow(2, DEFAULT_ZOOM)
     );
-    return `https://tile.openstreetmap.org/${zoom}/${x}/${y}.png`;
+    return `https://tile.openstreetmap.org/${DEFAULT_ZOOM}/${x}/${y}.png`;
   };
 
   const tileUrl = getTileUrl();

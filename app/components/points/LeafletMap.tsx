@@ -13,6 +13,7 @@ import {
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Point, Location } from '@/app/model/point';
+import { DEFAULT_ZOOM } from '@/app/constants/map';
 
 // Ícone padrão do marker
 const defaultIcon = new L.Icon({
@@ -102,7 +103,7 @@ export default function LeafletMap({
   return (
     <MapContainer
       center={center}
-      zoom={13}
+      zoom={DEFAULT_ZOOM}
       style={{ height: '100%', width: '100%' }}
       scrollWheelZoom={true}
       zoomControl={false}

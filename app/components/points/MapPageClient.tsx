@@ -30,8 +30,7 @@ const LeafletMap = dynamic(() => import('./LeafletMap'), {
   ),
 });
 
-// Coordenadas de fallback (São Paulo)
-const SAO_PAULO_COORDS: [number, number] = [-23.5505, -46.6333];
+import { DEFAULT_COORDS, GEOLOCATION_TIMEOUT, GEOLOCATION_MAX_AGE } from '@/app/constants/map';
 
 interface MapPageClientProps {
   mapId: string;
@@ -91,19 +90,19 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
               setCenterInitialized(true);
             },
             () => {
-              // Usuário negou ou erro - usa fallback (São Paulo)
-              setMapCenter(SAO_PAULO_COORDS);
+              // Usuário negou ou erro - usa fallback
+              setMapCenter(DEFAULT_COORDS);
               setCenterInitialized(true);
             },
             {
               enableHighAccuracy: false,
-              timeout: 10000,
-              maximumAge: 600000, // Cache de 10 minutos
+              timeout: GEOLOCATION_TIMEOUT,
+              maximumAge: GEOLOCATION_MAX_AGE,
             }
           );
         } else {
           // Geolocalização não suportada - usa fallback
-          setMapCenter(SAO_PAULO_COORDS);
+          setMapCenter(DEFAULT_COORDS);
           setCenterInitialized(true);
         }
       }

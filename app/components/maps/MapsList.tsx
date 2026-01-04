@@ -11,7 +11,7 @@ import Button from '@/app/components/ui/Button';
 import ErrorState from '@/app/components/ui/ErrorState';
 import Spinner from '@/app/components/ui/Spinner';
 import { Map } from '@/app/model/map';
-import { DEFAULT_SORT, type SortKey } from './sort';
+import { DEFAULT_SORT, type SortKey } from '../../constants/sort';
 import { getAllMaps, createMap, updateMap, deleteMap } from '@/lib/services/maps';
 import { DuplicateNameError } from '@/lib/errors';
 

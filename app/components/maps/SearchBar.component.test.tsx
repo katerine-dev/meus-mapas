@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SearchBar from './SearchBar';
-import { SORT_OPTIONS } from './sort';
+import { SORT_OPTIONS } from '../../constants/sort';
 
 /**
  * Testes do componente SearchBar.
