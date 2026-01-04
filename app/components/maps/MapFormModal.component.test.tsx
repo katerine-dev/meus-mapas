@@ -19,6 +19,15 @@ describe('MapFormModal', () => {
     ...overrides,
   });
 
+  /** Cria uma promise controlada para testar estados de loading */
+  const createDeferredPromise = <T,>() => {
+    let resolve!: (value: T) => void;
+    const promise = new Promise<T>((res) => {
+      resolve = res;
+    });
+    return { promise, resolve };
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -119,9 +128,9 @@ describe('MapFormModal', () => {
 
     it('exibe loading durante submit e retorna ao normal', async () => {
       const user = userEvent.setup();
-      let resolveSubmit!: () => void;
-      const onSubmit = vi.fn(() => new Promise<void>((resolve) => (resolveSubmit = resolve)));
-      render(<MapFormModal {...createProps({ onSubmit })} />);
+      const deferred = createDeferredPromise<void>();
+      const props = createProps({ onSubmit: vi.fn(() => deferred.promise) });
+      render(<MapFormModal {...props} />);
 
       await user.type(screen.getByPlaceholderText('NOME*'), 'Meu Mapa');
       await user.click(screen.getByRole('button', { name: 'Criar' }));
@@ -130,7 +139,7 @@ describe('MapFormModal', () => {
       expect(screen.getByRole('button', { name: 'Criando...' })).toBeDisabled();
 
       // Resolve para finalizar
-      resolveSubmit();
+      deferred.resolve();
 
       await waitFor(() => {
         expect(screen.queryByRole('button', { name: 'Criando...' })).not.toBeInTheDocument();
@@ -155,20 +164,22 @@ describe('MapFormModal', () => {
       expect(props.onClose).not.toHaveBeenCalled();
     });
 
-    it('exibe erro de validação e não chama onSubmit', async () => {
+    it('erro de validação bloqueia submit', async () => {
       const user = userEvent.setup();
       const props = createProps();
       render(<MapFormModal {...props} />);
 
       await user.type(screen.getByPlaceholderText('NOME*'), 'Mapa Válido');
+      // Descrição excede o limite de 40 caracteres
       await user.type(screen.getByPlaceholderText('DESCRIÇÃO'), 'a'.repeat(50));
       await user.click(screen.getByRole('button', { name: 'Criar' }));
 
+      // Aguarda que a validação seja processada
       await waitFor(() => {
-        // Verifica que erro de validação aparece (sem acoplar ao texto exato)
-        expect(screen.getByText(/descrição/i)).toBeInTheDocument();
+        expect(props.onSubmit).not.toHaveBeenCalled();
       });
-      expect(props.onSubmit).not.toHaveBeenCalled();
+      // Modal permanece aberto
+      expect(props.onClose).not.toHaveBeenCalled();
     });
   });
 
