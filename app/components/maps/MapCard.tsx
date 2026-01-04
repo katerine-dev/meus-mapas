@@ -82,8 +82,12 @@ export default function MapCard({ map, onEdit, onOpen, onDelete }: MapCardProps)
 
         {/* Menu dropdown */}
         {menuOpen && (
-          <div className="absolute right-0 top-10 w-48 rounded-xl border border-border bg-surface py-2 shadow-xl">
+          <div
+            role="menu"
+            className="absolute right-0 top-10 w-48 rounded-xl border border-border bg-surface py-2 shadow-xl"
+          >
             <button
+              role="menuitem"
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit();
@@ -95,6 +99,7 @@ export default function MapCard({ map, onEdit, onOpen, onDelete }: MapCardProps)
               Editar
             </button>
             <button
+              role="menuitem"
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete();
