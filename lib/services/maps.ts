@@ -1,5 +1,5 @@
 import { Map } from '@/app/model/map';
-import { DuplicateNameError } from '@/lib/errors';
+import { handleResponse } from './fetch-helper';
 
 interface CreateMapData {
   name: string;
@@ -11,23 +11,12 @@ interface UpdateMapData {
   description?: string;
 }
 
-async function handleResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    if (response.status === 409) {
-      const data = await response.json();
-      throw new DuplicateNameError(data.error || 'Nome já existe');
-    }
-    throw new Error('Erro na requisição');
-  }
-  return response.json();
-}
-
 export function getAllMaps(): Promise<Map[]> {
-  return fetch('/api/maps').then((res) => handleResponse<Map[]>(res));
+  return fetch('/api/maps').then(handleResponse);
 }
 
 export function getMapById(id: string): Promise<Map> {
-  return fetch(`/api/maps/${id}`).then((res) => handleResponse<Map>(res));
+  return fetch(`/api/maps/${id}`).then(handleResponse);
 }
 
 export function createMap(data: CreateMapData): Promise<{ id: string }> {
@@ -35,21 +24,19 @@ export function createMap(data: CreateMapData): Promise<{ id: string }> {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
-  }).then((res) => handleResponse<{ id: string }>(res));
+  }).then(handleResponse);
 }
 
-export function updateMap(id: string, data: UpdateMapData): Promise<Map> {
+export function updateMap(id: string, data: UpdateMapData): Promise<void> {
   return fetch(`/api/maps/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
-  }).then((res) => handleResponse<Map>(res));
+  }).then((res) => handleResponse(res, true));
 }
 
 export function deleteMap(id: string): Promise<void> {
   return fetch(`/api/maps/${id}`, {
     method: 'DELETE',
-  }).then((res) => {
-    if (!res.ok) throw new Error('Erro ao excluir mapa');
-  });
+  }).then((res) => handleResponse(res, true));
 }

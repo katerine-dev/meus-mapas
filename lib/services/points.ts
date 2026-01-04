@@ -1,5 +1,5 @@
 import { Point } from '@/app/model/point';
-import { DuplicateNameError } from '@/lib/errors';
+import { handleResponse } from './fetch-helper';
 
 interface CreatePointData {
   name: string;
@@ -11,19 +11,8 @@ interface UpdatePointData {
   name: string;
 }
 
-async function handleResponse<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    if (response.status === 409) {
-      const data = await response.json();
-      throw new DuplicateNameError(data.error || 'Nome já existe');
-    }
-    throw new Error('Erro na requisição');
-  }
-  return response.json();
-}
-
 export function getAllPoints(mapId: string): Promise<Point[]> {
-  return fetch(`/api/maps/${mapId}/points`).then((res) => handleResponse<Point[]>(res));
+  return fetch(`/api/maps/${mapId}/points`).then(handleResponse);
 }
 
 export function createPoint(mapId: string, data: CreatePointData): Promise<{ id: string }> {
@@ -31,29 +20,25 @@ export function createPoint(mapId: string, data: CreatePointData): Promise<{ id:
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
-  }).then((res) => handleResponse<{ id: string }>(res));
+  }).then(handleResponse);
 }
 
-export function updatePoint(mapId: string, pointId: string, data: UpdatePointData): Promise<Point> {
+export function updatePoint(mapId: string, pointId: string, data: UpdatePointData): Promise<void> {
   return fetch(`/api/maps/${mapId}/points/${pointId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
-  }).then((res) => handleResponse<Point>(res));
+  }).then((res) => handleResponse(res, true));
 }
 
 export function deletePoint(mapId: string, pointId: string): Promise<void> {
   return fetch(`/api/maps/${mapId}/points/${pointId}`, {
     method: 'DELETE',
-  }).then((res) => {
-    if (!res.ok) throw new Error('Erro ao excluir ponto');
-  });
+  }).then((res) => handleResponse(res, true));
 }
 
 export function deleteAllPoints(mapId: string): Promise<void> {
   return fetch(`/api/maps/${mapId}/points`, {
     method: 'DELETE',
-  }).then((res) => {
-    if (!res.ok) throw new Error('Erro ao excluir pontos');
-  });
+  }).then((res) => handleResponse(res, true));
 }
