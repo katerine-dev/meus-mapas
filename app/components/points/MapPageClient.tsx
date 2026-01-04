@@ -339,28 +339,34 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
         selectedPointId={selectedPointId}
         mobileDrawerOpen={mobileDrawerOpen}
         onMobileDrawerToggle={() => setMobileDrawerOpen(!mobileDrawerOpen)}
-        editingName={editingName}
-        nameValue={nameValue}
-        onNameValueChange={setNameValue}
-        onEditName={() => setEditingName(true)}
-        onCancelEditName={() => {
-          setEditingName(false);
-          setNameValue(map.name || '');
+        nameEdit={{
+          isEditing: editingName,
+          value: nameValue,
+          onChange: setNameValue,
+          onEdit: () => setEditingName(true),
+          onCancel: () => {
+            setEditingName(false);
+            setNameValue(map.name || '');
+          },
+          onSave: handleSaveName,
         }}
-        onSaveName={handleSaveName}
-        editingDescription={editingDescription}
-        descriptionValue={descriptionValue}
-        onDescriptionValueChange={setDescriptionValue}
-        onEditDescription={() => setEditingDescription(true)}
-        onCancelEditDescription={() => {
-          setEditingDescription(false);
-          setDescriptionValue(map.description || '');
+        descriptionEdit={{
+          isEditing: editingDescription,
+          value: descriptionValue,
+          onChange: setDescriptionValue,
+          onEdit: () => setEditingDescription(true),
+          onCancel: () => {
+            setEditingDescription(false);
+            setDescriptionValue(map.description || '');
+          },
+          onSave: handleSaveDescription,
         }}
-        onSaveDescription={handleSaveDescription}
-        onSelectPoint={handleSelectPoint}
-        onEditPoint={handleEditPoint}
-        onDeletePoint={handleDeletePoint}
-        onDeleteAllPoints={handleDeleteAllPoints}
+        pointHandlers={{
+          onSelect: handleSelectPoint,
+          onEdit: handleEditPoint,
+          onDelete: handleDeletePoint,
+          onDeleteAll: handleDeleteAllPoints,
+        }}
         onLocationFound={handleLocationFound}
       />
 

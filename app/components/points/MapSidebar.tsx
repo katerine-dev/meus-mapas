@@ -14,6 +14,28 @@ import PointsList from './PointsList';
 import LocationSearch from './LocationSearch';
 
 /**
+ * Estado de edição de um campo (nome ou descrição)
+ */
+export interface EditState {
+  isEditing: boolean;
+  value: string;
+  onChange: (value: string) => void;
+  onEdit: () => void;
+  onCancel: () => void;
+  onSave: () => void;
+}
+
+/**
+ * Handlers para operações com pontos
+ */
+export interface PointHandlers {
+  onSelect: (pointId: string) => void;
+  onEdit: (point: Point) => void;
+  onDelete: (pointId: string) => void;
+  onDeleteAll: () => void;
+}
+
+/**
  * Props do sidebar (usadas tanto na versão desktop quanto mobile).
  */
 export interface MapSidebarProps {
@@ -23,25 +45,11 @@ export interface MapSidebarProps {
   // Estado do drawer mobile
   mobileDrawerOpen: boolean;
   onMobileDrawerToggle: () => void;
-  // Estado de edição de nome
-  editingName: boolean;
-  nameValue: string;
-  onNameValueChange: (value: string) => void;
-  onEditName: () => void;
-  onCancelEditName: () => void;
-  onSaveName: () => void;
-  // Estado de edição de descrição
-  editingDescription: boolean;
-  descriptionValue: string;
-  onDescriptionValueChange: (value: string) => void;
-  onEditDescription: () => void;
-  onCancelEditDescription: () => void;
-  onSaveDescription: () => void;
+  // Estados de edição
+  nameEdit: EditState;
+  descriptionEdit: EditState;
   // Handlers de pontos
-  onSelectPoint: (pointId: string) => void;
-  onEditPoint: (point: Point) => void;
-  onDeletePoint: (pointId: string) => void;
-  onDeleteAllPoints: () => void;
+  pointHandlers: PointHandlers;
   // Busca de localização (usado no mobile)
   onLocationFound: (lat: number, lng: number, name?: string, isExistingPoint?: boolean) => void;
 }
@@ -57,22 +65,9 @@ export default function MapSidebar({
   selectedPointId,
   mobileDrawerOpen,
   onMobileDrawerToggle,
-  editingName,
-  nameValue,
-  onNameValueChange,
-  onEditName,
-  onCancelEditName,
-  onSaveName,
-  editingDescription,
-  descriptionValue,
-  onDescriptionValueChange,
-  onEditDescription,
-  onCancelEditDescription,
-  onSaveDescription,
-  onSelectPoint,
-  onEditPoint,
-  onDeletePoint,
-  onDeleteAllPoints,
+  nameEdit,
+  descriptionEdit,
+  pointHandlers,
   onLocationFound,
 }: MapSidebarProps) {
   return (
@@ -82,25 +77,25 @@ export default function MapSidebar({
         {/* Info do mapa */}
         <div className="card-interactive overflow-hidden rounded-2xl border border-border bg-surface shadow-lg">
           <div className="bg-primary px-5 py-4">
-            {editingName ? (
+            {nameEdit.isEditing ? (
               <div className="space-y-2">
                 <input
                   type="text"
-                  value={nameValue}
-                  onChange={(e) => onNameValueChange(e.target.value)}
+                  value={nameEdit.value}
+                  onChange={(e) => nameEdit.onChange(e.target.value)}
                   className="w-full rounded-lg bg-white/20 px-2 py-1 text-lg font-semibold text-white placeholder:text-white/60 focus:bg-white/30 focus:outline-none"
                   autoFocus
                 />
                 <div className="flex justify-end gap-2">
                   <button
-                    onClick={onCancelEditName}
+                    onClick={nameEdit.onCancel}
                     className="text-sm text-white/80 hover:text-white"
                   >
                     Cancelar
                   </button>
                   <button
-                    onClick={onSaveName}
-                    disabled={!nameValue.trim()}
+                    onClick={nameEdit.onSave}
+                    disabled={!nameEdit.value.trim()}
                     className="rounded-lg bg-white/20 px-2 py-1 text-sm text-white hover:bg-white/30 disabled:opacity-50"
                   >
                     Salvar
@@ -111,7 +106,7 @@ export default function MapSidebar({
               <div className="flex items-center justify-between">
                 <h1 className="text-lg font-semibold text-white">{map.name}</h1>
                 <button
-                  onClick={onEditName}
+                  onClick={nameEdit.onEdit}
                   className="rounded-full p-1 text-white/80 hover:bg-white/20 hover:text-white"
                   aria-label="Editar nome"
                   title="Editar nome"
@@ -124,12 +119,12 @@ export default function MapSidebar({
           <div className="p-4">
             <DescriptionEditor
               description={map.description || ''}
-              isEditing={editingDescription}
-              value={descriptionValue}
-              onValueChange={onDescriptionValueChange}
-              onEdit={onEditDescription}
-              onCancel={onCancelEditDescription}
-              onSave={onSaveDescription}
+              isEditing={descriptionEdit.isEditing}
+              value={descriptionEdit.value}
+              onValueChange={descriptionEdit.onChange}
+              onEdit={descriptionEdit.onEdit}
+              onCancel={descriptionEdit.onCancel}
+              onSave={descriptionEdit.onSave}
               variant="desktop"
             />
           </div>
@@ -140,15 +135,15 @@ export default function MapSidebar({
           <PointsList
             points={points}
             selectedPointId={selectedPointId}
-            onSelectPoint={onSelectPoint}
-            onEditPoint={onEditPoint}
-            onDeletePoint={onDeletePoint}
+            onSelectPoint={pointHandlers.onSelect}
+            onEditPoint={pointHandlers.onEdit}
+            onDeletePoint={pointHandlers.onDelete}
           />
         </div>
 
         {/* Botão excluir todos */}
         <button
-          onClick={onDeleteAllPoints}
+          onClick={pointHandlers.onDeleteAll}
           disabled={points.length === 0}
           className="btn-interactive focus:ring-destructive/30 flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-destructive-border bg-surface px-3 py-2.5 text-sm text-destructive shadow-sm hover:bg-destructive-light hover:shadow-md focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:border-border disabled:text-text-muted disabled:opacity-50 disabled:hover:bg-surface disabled:hover:shadow-sm"
         >
@@ -195,21 +190,21 @@ export default function MapSidebar({
             <div className="flex max-h-[calc(50vh-48px)] flex-col overflow-hidden">
               {/* Nome do mapa */}
               <div className="border-b border-border p-3">
-                {editingName ? (
+                {nameEdit.isEditing ? (
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
-                      value={nameValue}
-                      onChange={(e) => onNameValueChange(e.target.value)}
+                      value={nameEdit.value}
+                      onChange={(e) => nameEdit.onChange(e.target.value)}
                       className="flex-1 rounded-lg border border-border px-2 py-1 text-sm focus:border-primary focus:outline-none"
                       autoFocus
                     />
-                    <button onClick={onCancelEditName} className="text-sm text-text-secondary">
+                    <button onClick={nameEdit.onCancel} className="text-sm text-text-secondary">
                       Cancelar
                     </button>
                     <button
-                      onClick={onSaveName}
-                      disabled={!nameValue.trim()}
+                      onClick={nameEdit.onSave}
+                      disabled={!nameEdit.value.trim()}
                       className="rounded-lg bg-primary px-2 py-1 text-sm text-white disabled:opacity-50"
                     >
                       Salvar
@@ -219,7 +214,7 @@ export default function MapSidebar({
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-text-primary">{map.name}</span>
                     <button
-                      onClick={onEditName}
+                      onClick={nameEdit.onEdit}
                       className="rounded-full p-1 text-text-muted hover:bg-surface-hover hover:text-primary"
                       aria-label="Editar nome"
                     >
@@ -233,12 +228,12 @@ export default function MapSidebar({
               <div className="border-b border-border p-3">
                 <DescriptionEditor
                   description={map.description || ''}
-                  isEditing={editingDescription}
-                  value={descriptionValue}
-                  onValueChange={onDescriptionValueChange}
-                  onEdit={onEditDescription}
-                  onCancel={onCancelEditDescription}
-                  onSave={onSaveDescription}
+                  isEditing={descriptionEdit.isEditing}
+                  value={descriptionEdit.value}
+                  onValueChange={descriptionEdit.onChange}
+                  onEdit={descriptionEdit.onEdit}
+                  onCancel={descriptionEdit.onCancel}
+                  onSave={descriptionEdit.onSave}
                   variant="mobile"
                 />
               </div>
@@ -254,18 +249,18 @@ export default function MapSidebar({
                   points={points}
                   selectedPointId={selectedPointId}
                   onSelectPoint={(pointId) => {
-                    onSelectPoint(pointId);
+                    pointHandlers.onSelect(pointId);
                     onMobileDrawerToggle(); // Fecha o drawer ao selecionar
                   }}
-                  onEditPoint={onEditPoint}
-                  onDeletePoint={onDeletePoint}
+                  onEditPoint={pointHandlers.onEdit}
+                  onDeletePoint={pointHandlers.onDelete}
                 />
               </div>
 
               {/* Botão excluir todos */}
               <div className="border-t border-border p-3">
                 <button
-                  onClick={onDeleteAllPoints}
+                  onClick={pointHandlers.onDeleteAll}
                   disabled={points.length === 0}
                   className="flex w-full items-center justify-center gap-2 rounded-lg border border-destructive-border py-2 text-sm text-destructive hover:bg-destructive-light disabled:cursor-not-allowed disabled:border-border disabled:text-text-muted disabled:opacity-50"
                 >
