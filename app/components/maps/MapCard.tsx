@@ -125,7 +125,11 @@ export default function MapCard({ map, onEdit, onOpen, onDelete }: MapCardProps)
         ) : (
           // Fallback: fundo roxo com ícone de mapa
           // Exibido quando não há previewLocation ou quando a imagem falha ao carregar
-          <div className="flex h-full items-center justify-center">
+          <div
+            className="flex h-full items-center justify-center"
+            role="img"
+            aria-label="Preview indisponível"
+          >
             <MapIcon className="h-12 w-12 text-white/50" strokeWidth={1.5} />
           </div>
         )}

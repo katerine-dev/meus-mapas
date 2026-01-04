@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MapCard from './MapCard';
 import type { Map } from '@/app/model/map';
@@ -144,10 +144,12 @@ describe('MapCard', () => {
   });
 
   describe('Preview do mapa', () => {
-    it('não exibe imagem quando não há previewLocation', () => {
+    it('exibe fallback quando não há previewLocation', () => {
       render(<MapCard {...createProps()} />);
 
-      expect(screen.queryByRole('img')).not.toBeInTheDocument();
+      // Sem previewLocation, exibe fallback acessível ao invés de imagem do tile
+      expect(screen.queryByRole('img', { name: /preview do mapa/i })).not.toBeInTheDocument();
+      expect(screen.getByRole('img', { name: 'Preview indisponível' })).toBeInTheDocument();
     });
 
     it('exibe imagem quando há previewLocation', () => {
@@ -160,6 +162,25 @@ describe('MapCard', () => {
       const img = screen.getByRole('img', { name: /preview do mapa/i });
       expect(img).toBeInTheDocument();
       expect(img).toHaveAttribute('src');
+    });
+
+    it('exibe fallback quando imagem do tile falha ao carregar', () => {
+      // Protege contra falhas do tile server (offline, rate limit, coordenadas inválidas).
+      // Em produção isso garante que o card permanece utilizável mesmo sem preview.
+      const mapComPreview = {
+        ...baseMap,
+        previewLocation: { latitude: -23.5505, longitude: -46.6333 },
+      };
+      render(<MapCard {...createProps({ map: mapComPreview })} />);
+
+      const img = screen.getByRole('img', { name: /preview do mapa/i });
+
+      // Simula erro de carregamento da imagem (ex.: tile server retorna 429 ou 503)
+      fireEvent.error(img);
+
+      // Após o erro, a imagem do tile é removida e o fallback acessível é exibido
+      expect(screen.queryByRole('img', { name: /preview do mapa/i })).not.toBeInTheDocument();
+      expect(screen.getByRole('img', { name: 'Preview indisponível' })).toBeInTheDocument();
     });
   });
 });

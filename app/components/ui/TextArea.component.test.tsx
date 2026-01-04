@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -8,74 +9,97 @@ import TextArea from './TextArea';
  *
  * Comportamento essencial:
  * - Renderiza campo multilinha com valor, placeholder e rows
- * - Dispara onChange ao digitar (incluindo Enter para nova linha)
+ * - Dispara onChange ao digitar (com valor completo, incluindo \n)
  * - Respeita estado disabled
  */
 
-describe('TextArea', () => {
-  // Helper que reduz repetição: renderiza, configura userEvent e retorna o textarea
-  const setup = (props = {}) => {
-    const defaultProps = {
-      value: '',
-      onChange: vi.fn(),
-      ...props,
-    };
-    render(<TextArea {...defaultProps} />);
-    return {
-      user: userEvent.setup(),
-      textarea: screen.getByRole('textbox'),
-      onChange: defaultProps.onChange,
-    };
+/**
+ * TestHarness para TextArea controlado.
+ *
+ * TextArea é um componente controlled (value + onChange). Em testes com value fixo,
+ * o React "reseta" o campo a cada keystroke, resultando em valores incorretos.
+ * Este harness simula uso real: mantém estado interno e repassa para o TextArea.
+ */
+function TextAreaHarness({
+  initialValue = '',
+  onChangeSpy,
+  ...props
+}: {
+  initialValue?: string;
+  onChangeSpy?: (value: string) => void;
+} & Omit<React.ComponentProps<typeof TextArea>, 'value' | 'onChange'>) {
+  const [value, setValue] = useState(initialValue);
+
+  const handleChange = (newValue: string) => {
+    setValue(newValue);
+    onChangeSpy?.(newValue);
   };
 
+  return <TextArea value={value} onChange={handleChange} {...props} />;
+}
+
+describe('TextArea', () => {
   it('renderiza com valor e placeholder', () => {
-    render(
-      <TextArea value="Texto inicial" onChange={vi.fn()} placeholder="Digite uma descrição" />
-    );
+    render(<TextAreaHarness initialValue="Texto inicial" placeholder="Digite uma descrição" />);
 
     const textarea = screen.getByRole('textbox');
     expect(textarea).toHaveValue('Texto inicial');
     expect(screen.getByPlaceholderText('Digite uma descrição')).toBeInTheDocument();
   });
 
-  it('usa rows padrão (3) ou customizado', () => {
-    const { textarea } = setup();
-    expect(textarea).toHaveAttribute('rows', '3');
+  it('usa rows padrão (3)', () => {
+    render(<TextAreaHarness />);
 
-    // Testa rows customizado
-    render(<TextArea value="" onChange={vi.fn()} rows={5} />);
-    expect(screen.getAllByRole('textbox')[1]).toHaveAttribute('rows', '5');
+    expect(screen.getByRole('textbox')).toHaveAttribute('rows', '3');
   });
 
-  it('chama onChange ao digitar', async () => {
-    const { user, textarea, onChange } = setup();
+  it('aceita rows customizado', () => {
+    render(<TextAreaHarness rows={5} />);
 
-    await user.type(textarea, 'Novo texto');
+    expect(screen.getByRole('textbox')).toHaveAttribute('rows', '5');
+  });
 
-    expect(onChange).toHaveBeenCalledTimes('Novo texto'.length);
-    expect(onChange).toHaveBeenLastCalledWith('o');
+  it('chama onChange com valor completo ao digitar', async () => {
+    const onChangeSpy = vi.fn();
+    render(<TextAreaHarness onChangeSpy={onChangeSpy} />);
+
+    await userEvent.type(screen.getByRole('textbox'), 'Novo texto');
+
+    // Valida comportamento real: onChange recebe o valor acumulado, não apenas a tecla
+    expect(onChangeSpy).toHaveBeenCalled();
+    expect(onChangeSpy).toHaveBeenLastCalledWith('Novo texto');
+    expect(screen.getByRole('textbox')).toHaveValue('Novo texto');
   });
 
   it('suporta texto multilinha com Enter', async () => {
     // Enter em TextArea insere nova linha (diferente de Input onde pode submeter form)
-    const { user, textarea, onChange } = setup();
+    const onChangeSpy = vi.fn();
+    render(<TextAreaHarness onChangeSpy={onChangeSpy} />);
 
-    await user.type(textarea, 'Linha 1{Enter}Linha 2');
+    await userEvent.type(screen.getByRole('textbox'), 'Linha 1{Enter}Linha 2');
 
-    expect(onChange).toHaveBeenCalled();
+    // Valida que o valor final contém quebra de linha
+    const lastValue = onChangeSpy.mock.calls.at(-1)?.[0] as string;
+    expect(lastValue).toContain('\n');
+    expect(lastValue).toBe('Linha 1\nLinha 2');
   });
 
   it('respeita estado disabled', async () => {
-    const { user, textarea, onChange } = setup({ disabled: true, value: 'Original' });
+    const onChangeSpy = vi.fn();
+    render(<TextAreaHarness initialValue="Original" onChangeSpy={onChangeSpy} disabled />);
 
+    const textarea = screen.getByRole('textbox');
     expect(textarea).toBeDisabled();
-    await user.type(textarea, 'Novo texto');
-    expect(onChange).not.toHaveBeenCalled();
+
+    await userEvent.type(textarea, 'Novo texto');
+
+    expect(onChangeSpy).not.toHaveBeenCalled();
+    expect(textarea).toHaveValue('Original');
   });
 
   it('está habilitado por padrão', () => {
-    const { textarea } = setup();
+    render(<TextAreaHarness />);
 
-    expect(textarea).toBeEnabled();
+    expect(screen.getByRole('textbox')).toBeEnabled();
   });
 });

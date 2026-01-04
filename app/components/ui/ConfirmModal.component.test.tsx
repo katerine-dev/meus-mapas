@@ -9,8 +9,6 @@ import ConfirmModal from './ConfirmModal';
  * ConfirmModal é o diálogo de confirmação para ações destrutivas.
  * Testes focam em comportamento: interações, estados de loading e tratamento de erros.
  *
- * Nota: O teste de "clique no overlay fecha" foi removido pois é responsabilidade
- * do Modal base, testado em Modal.component.test.tsx. Evita duplicação de testes.
  */
 
 describe('ConfirmModal', () => {
@@ -98,7 +96,7 @@ describe('ConfirmModal', () => {
   });
 
   describe('Estados de loading', () => {
-    it('exibe spinner durante confirmação', async () => {
+    it('exibe spinner e desabilita botões durante confirmação', async () => {
       const user = userEvent.setup();
       const deferred = createDeferredPromise<void>();
       const props = createProps({ onConfirm: () => deferred.promise });
@@ -106,25 +104,19 @@ describe('ConfirmModal', () => {
 
       await user.click(screen.getByRole('button', { name: 'Confirmar' }));
 
-      // Spinner usa role="status" para acessibilidade - evita acoplamento a classes CSS
+      // Durante loading: spinner visível e botões desabilitados para evitar múltiplos cliques
       expect(screen.getByRole('status')).toBeInTheDocument();
-
-      // Resolve a promise para limpar o estado de loading
-      deferred.resolve(undefined);
-    });
-
-    it('desabilita botões durante loading', async () => {
-      const user = userEvent.setup();
-      const deferred = createDeferredPromise<void>();
-      const props = createProps({ onConfirm: () => deferred.promise });
-      render(<ConfirmModal {...props} />);
-
-      await user.click(screen.getByRole('button', { name: 'Confirmar' }));
-
-      // Durante loading, botões ficam desabilitados para evitar múltiplos cliques
       expect(screen.getByRole('button', { name: 'Cancelar' })).toBeDisabled();
 
+      // Resolve a promise para sair do estado de loading
       deferred.resolve(undefined);
+
+      // Aguarda a UI estabilizar após resolver a promise.
+      // Sem este waitFor, o React pode atualizar o estado após o teste terminar,
+      // causando warnings de "act" ou comportamento flaky em alguns ambientes.
+      await waitFor(() => {
+        expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      });
     });
   });
 

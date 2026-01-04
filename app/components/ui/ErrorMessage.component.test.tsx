@@ -9,8 +9,6 @@ import ErrorMessage from './ErrorMessage';
  * 1. Não renderiza nada quando não há mensagem (null ou vazia) - evita "espaço vazio" na UI
  * 2. Renderiza a mensagem quando fornecida - exibe feedback de erro ao usuário
  *
- * Testes de mensagens longas/caracteres especiais foram removidos pois não testam
- * comportamento do componente - apenas que o React renderiza strings corretamente.
  */
 
 describe('ErrorMessage', () => {

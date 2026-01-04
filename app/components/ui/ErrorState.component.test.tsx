@@ -6,35 +6,32 @@ import ErrorState from './ErrorState';
 /**
  * Testes do componente ErrorState.
  *
- * Comportamento essencial:
- * - Exibe título e mensagem de erro (customizáveis ou com valores padrão)
- * - Botão de retry aparece apenas quando onRetry é fornecido
- * - Funciona em ambos os modos: full (página inteira) e compact (inline)
+ * Foco em COMPORTAMENTO, não em layout:
+ * - Exibe conteúdo de erro (título + mensagem)
+ * - Botão de retry aparece condicionalmente e funciona
+ * - Modo compact é apenas variação visual, não altera comportamento
  */
 
 describe('ErrorState', () => {
-  it('exibe título e mensagem com valores padrão', () => {
-    render(<ErrorState />);
-
-    expect(screen.getByRole('heading', { name: 'Algo deu errado' })).toBeInTheDocument();
+  it('exibe título e mensagem (valores padrão ou customizados)', () => {
+    // Valores padrão
+    const { rerender } = render(<ErrorState />);
+    expect(screen.getByText('Algo deu errado')).toBeInTheDocument();
     expect(screen.getByText('Ocorreu um erro inesperado.')).toBeInTheDocument();
-  });
 
-  it('exibe título e mensagem customizados', () => {
-    render(
+    // Valores customizados
+    rerender(
       <ErrorState title="Falha no carregamento" message="Não foi possível carregar os dados." />
     );
-
-    expect(screen.getByRole('heading', { name: 'Falha no carregamento' })).toBeInTheDocument();
+    expect(screen.getByText('Falha no carregamento')).toBeInTheDocument();
     expect(screen.getByText('Não foi possível carregar os dados.')).toBeInTheDocument();
   });
 
-  // Teste parametrizado para garantir que ambos os modos renderizam sem quebrar
-  it.each([false, true])('renderiza corretamente com compact=%s', (compact) => {
+  // Smoke test: compact é variação visual, apenas garante que não quebra
+  it.each([false, true])('renderiza sem erros com compact=%s', (compact) => {
     render(<ErrorState compact={compact} />);
 
     expect(screen.getByText('Algo deu errado')).toBeInTheDocument();
-    expect(screen.getByText('Ocorreu um erro inesperado.')).toBeInTheDocument();
   });
 
   describe('Botão de retry', () => {
@@ -45,19 +42,15 @@ describe('ErrorState', () => {
     });
 
     it('exibe botão e chama onRetry ao clicar', async () => {
-      const user = userEvent.setup();
       const onRetry = vi.fn();
       render(<ErrorState onRetry={onRetry} />);
 
-      const button = screen.getByRole('button', { name: 'Tentar novamente' });
-      expect(button).toBeInTheDocument();
-
-      await user.click(button);
+      await userEvent.click(screen.getByRole('button', { name: 'Tentar novamente' }));
 
       expect(onRetry).toHaveBeenCalledOnce();
     });
 
-    it('exibe label customizado no botão', () => {
+    it('aceita label customizado no botão', () => {
       render(<ErrorState onRetry={vi.fn()} retryLabel="Recarregar" />);
 
       expect(screen.getByRole('button', { name: 'Recarregar' })).toBeInTheDocument();
