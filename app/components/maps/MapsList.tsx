@@ -11,7 +11,7 @@ import Button from '@/app/components/ui/Button';
 import ErrorState from '@/app/components/ui/ErrorState';
 import Spinner from '@/app/components/ui/Spinner';
 import { Map } from '@/app/model/map';
-import { DEFAULT_SORT, type SortKey } from '@/app/constants/sort';
+import { DEFAULT_SORT, type SortKey } from './sort';
 
 interface MapsListProps {
   isCreateModalOpen: boolean;

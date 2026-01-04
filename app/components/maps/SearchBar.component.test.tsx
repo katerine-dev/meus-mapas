@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SearchBar from './SearchBar';
+import { SORT_OPTIONS } from './sort';
 
 /**
  * Testes do componente SearchBar.
@@ -44,10 +45,10 @@ describe('SearchBar', () => {
       await user.click(sortButton);
 
       expect(sortButton).toHaveAttribute('aria-expanded', 'true');
-      expect(screen.getByRole('button', { name: 'Mais recentes' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Mais antigos' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'A-Z' })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Z-A' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: SORT_OPTIONS.recent })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: SORT_OPTIONS.oldest })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: SORT_OPTIONS.az })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: SORT_OPTIONS.za })).toBeInTheDocument();
     });
 
     it('selecionar opção chama onSortChange e fecha dropdown', async () => {
@@ -56,11 +57,11 @@ describe('SearchBar', () => {
       render(<SearchBar {...props} />);
 
       await user.click(screen.getByRole('button', { name: 'Ordenar mapas' }));
-      await user.click(screen.getByRole('button', { name: 'A-Z' }));
+      await user.click(screen.getByRole('button', { name: SORT_OPTIONS.az }));
 
       expect(props.onSortChange).toHaveBeenCalledOnce();
       expect(props.onSortChange).toHaveBeenCalledWith('az');
-      expect(screen.queryByRole('button', { name: 'Mais antigos' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: SORT_OPTIONS.oldest })).not.toBeInTheDocument();
     });
 
     it('botão tem atributos ARIA corretos', () => {

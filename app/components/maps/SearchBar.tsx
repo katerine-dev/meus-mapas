@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { MagnifyingGlassIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
-import { SORT_OPTIONS, DEFAULT_SORT, type SortKey } from '@/app/constants/sort';
+import { SORT_OPTIONS, DEFAULT_SORT, type SortKey } from './sort';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -46,14 +46,7 @@ export default function SearchBar({ onSearch, onSortChange }: SearchBarProps) {
           aria-haspopup="listbox"
           className="flex items-center gap-1 text-text-primary transition-colors hover:text-primary sm:gap-2"
         >
-          <span className="hidden text-sm font-medium sm:inline">{SORT_OPTIONS[currentSort]}</span>
-          <span className="text-xs font-medium sm:hidden">
-            {currentSort === 'recent'
-              ? 'Recentes'
-              : currentSort === 'oldest'
-                ? 'Antigos'
-                : SORT_OPTIONS[currentSort]}
-          </span>
+          <span className="text-xs font-medium sm:text-sm">{SORT_OPTIONS[currentSort]}</span>
           <ChevronDownIcon className="h-4 w-4" />
         </button>
 
