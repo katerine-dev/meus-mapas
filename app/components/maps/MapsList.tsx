@@ -11,7 +11,7 @@ import Button from '@/app/components/ui/Button';
 import ErrorState from '@/app/components/ui/ErrorState';
 import Spinner from '@/app/components/ui/Spinner';
 import { Map } from '@/app/model/map';
-import { DEFAULT_SORT, type SortKey } from '../../constants/sort';
+import { DEFAULT_SORT, sortByKey, type SortKey } from '@/app/constants/sort';
 import { getAllMaps, createMap, updateMap, deleteMap } from '@/lib/services/maps';
 import { DuplicateNameError } from '@/lib/errors';
 
@@ -59,18 +59,7 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
         map.name.toLowerCase().includes(query) || map.description?.toLowerCase().includes(query)
       );
     })
-    .sort((a, b) => {
-      switch (sortOption) {
-        case 'oldest':
-          return new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime();
-        case 'az':
-          return a.name.localeCompare(b.name);
-        case 'za':
-          return b.name.localeCompare(a.name);
-        default: // 'recent'
-          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
-      }
-    });
+    .sort((a, b) => sortByKey(a, b, sortOption));
 
   // Função assíncrona para criar um novo mapa
   async function handleCreateMap(
