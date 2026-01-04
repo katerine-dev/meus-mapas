@@ -1,13 +1,18 @@
 import * as pointsDb from '@/app/db/points';
 import { DuplicateNameError } from '@/lib/errors';
 import { validateUpdatePointData } from '@/app/validation/point';
+import { validateUuid } from '@/app/validation/types';
 
 // Handler GET - Busca um ponto específico pelo ID
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string; pointId: string }> }
 ) {
-  const { pointId } = await params;
+  const { id, pointId } = await params;
+
+  if (!validateUuid(id) || !validateUuid(pointId)) {
+    return new Response(null, { status: 400 });
+  }
 
   const point = await pointsDb.getPointById(pointId);
 
@@ -24,7 +29,12 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string; pointId: string }> }
 ) {
-  const { pointId } = await params;
+  const { id, pointId } = await params;
+
+  if (!validateUuid(id) || !validateUuid(pointId)) {
+    return new Response(null, { status: 400 });
+  }
+
   const body = await request.json();
 
   const errors = validateUpdatePointData(body);
@@ -58,7 +68,11 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string; pointId: string }> }
 ) {
-  const { pointId } = await params;
+  const { id, pointId } = await params;
+
+  if (!validateUuid(id) || !validateUuid(pointId)) {
+    return new Response(null, { status: 400 });
+  }
 
   // Tenta fazer soft delete do ponto
   const deletedPoint = await pointsDb.deletePoint(pointId);

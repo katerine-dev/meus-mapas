@@ -286,3 +286,32 @@ describe('Deletando todos os pontos', () => {
     expect(response.status).toBe(404);
   });
 });
+
+describe('Validação de UUID', () => {
+  const invalidId = 'invalid-uuid';
+
+  it('GET deve retornar 400 para UUID inválido', async () => {
+    const params = { params: Promise.resolve({ id: invalidId }) };
+    const request = testHelper.get(`/api/maps/${invalidId}/points`);
+    const response = await GET(request, params);
+    expect(response.status).toBe(400);
+  });
+
+  it('POST deve retornar 400 para UUID inválido', async () => {
+    const params = { params: Promise.resolve({ id: invalidId }) };
+    const request = testHelper.post(`/api/maps/${invalidId}/points`, {
+      name: 'Test',
+      latitude: -23.5,
+      longitude: -46.6,
+    });
+    const response = await POST(request, params);
+    expect(response.status).toBe(400);
+  });
+
+  it('DELETE deve retornar 400 para UUID inválido', async () => {
+    const params = { params: Promise.resolve({ id: invalidId }) };
+    const request = testHelper.del(`/api/maps/${invalidId}/points`);
+    const response = await DELETE(request, params);
+    expect(response.status).toBe(400);
+  });
+});

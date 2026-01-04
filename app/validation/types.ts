@@ -5,6 +5,12 @@ export interface ValidationError {
   message: string;
 }
 
+export const uuidSchema = z.uuid({ message: 'ID inválido' });
+
+export function validateUuid(id: string): boolean {
+  return uuidSchema.safeParse(id).success;
+}
+
 export function zodErrorToValidationErrors(error: z.ZodError): ValidationError[] {
   const errors: ValidationError[] = [];
   const seenFields = new Set<string>();

@@ -229,3 +229,50 @@ describe('DELETE /api/maps/[id]/points/[pointId]', () => {
     expect(response.status).toBe(404);
   });
 });
+
+describe('Validação de UUID', () => {
+  const validUuid = '00000000-0000-0000-0000-000000000000';
+  const invalidId = 'invalid-uuid';
+
+  it('GET deve retornar 400 para mapId inválido', async () => {
+    const params = { params: Promise.resolve({ id: invalidId, pointId: validUuid }) };
+    const request = testHelper.get(`/api/maps/${invalidId}/points/${validUuid}`);
+    const response = await GET(request, params);
+    expect(response.status).toBe(400);
+  });
+
+  it('GET deve retornar 400 para pointId inválido', async () => {
+    const params = { params: Promise.resolve({ id: validUuid, pointId: invalidId }) };
+    const request = testHelper.get(`/api/maps/${validUuid}/points/${invalidId}`);
+    const response = await GET(request, params);
+    expect(response.status).toBe(400);
+  });
+
+  it('PUT deve retornar 400 para mapId inválido', async () => {
+    const params = { params: Promise.resolve({ id: invalidId, pointId: validUuid }) };
+    const request = testHelper.put(`/api/maps/${invalidId}/points/${validUuid}`, { name: 'Test' });
+    const response = await PUT(request, params);
+    expect(response.status).toBe(400);
+  });
+
+  it('PUT deve retornar 400 para pointId inválido', async () => {
+    const params = { params: Promise.resolve({ id: validUuid, pointId: invalidId }) };
+    const request = testHelper.put(`/api/maps/${validUuid}/points/${invalidId}`, { name: 'Test' });
+    const response = await PUT(request, params);
+    expect(response.status).toBe(400);
+  });
+
+  it('DELETE deve retornar 400 para mapId inválido', async () => {
+    const params = { params: Promise.resolve({ id: invalidId, pointId: validUuid }) };
+    const request = testHelper.del(`/api/maps/${invalidId}/points/${validUuid}`);
+    const response = await DELETE(request, params);
+    expect(response.status).toBe(400);
+  });
+
+  it('DELETE deve retornar 400 para pointId inválido', async () => {
+    const params = { params: Promise.resolve({ id: validUuid, pointId: invalidId }) };
+    const request = testHelper.del(`/api/maps/${validUuid}/points/${invalidId}`);
+    const response = await DELETE(request, params);
+    expect(response.status).toBe(400);
+  });
+});

@@ -2,9 +2,14 @@ import * as pointsDb from '@/app/db/points';
 import * as mapsDb from '@/app/db/maps';
 import { DuplicateNameError } from '@/lib/errors';
 import { validatePointData } from '@/app/validation/point';
+import { validateUuid } from '@/app/validation/types';
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+
+  if (!validateUuid(id)) {
+    return new Response(null, { status: 400 });
+  }
 
   // Verifica se o mapa existe e não está deletado
   const map = await mapsDb.getMapById(id);
@@ -18,6 +23,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+
+  if (!validateUuid(id)) {
+    return new Response(null, { status: 400 });
+  }
+
   const body = await request.json();
 
   // Verifica se o mapa existe e não está deletado antes de criar ponto
@@ -58,6 +68,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+
+  if (!validateUuid(id)) {
+    return new Response(null, { status: 400 });
+  }
 
   const map = await mapsDb.getMapById(id);
   if (!map) {

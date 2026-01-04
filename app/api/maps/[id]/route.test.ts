@@ -248,3 +248,28 @@ describe('DELETE /api/maps/[id]', () => {
     });
   });
 });
+
+describe('Validação de UUID', () => {
+  const invalidId = 'invalid-uuid';
+
+  it('GET deve retornar 400 para UUID inválido', async () => {
+    const params = { params: Promise.resolve({ id: invalidId }) };
+    const request = testHelper.get(`/api/maps/${invalidId}`);
+    const response = await GET(request, params);
+    expect(response.status).toBe(400);
+  });
+
+  it('PUT deve retornar 400 para UUID inválido', async () => {
+    const params = { params: Promise.resolve({ id: invalidId }) };
+    const request = testHelper.put(`/api/maps/${invalidId}`, { name: 'Test', description: '' });
+    const response = await PUT(request, params);
+    expect(response.status).toBe(400);
+  });
+
+  it('DELETE deve retornar 400 para UUID inválido', async () => {
+    const params = { params: Promise.resolve({ id: invalidId }) };
+    const request = testHelper.del(`/api/maps/${invalidId}`);
+    const response = await DELETE(request, params);
+    expect(response.status).toBe(400);
+  });
+});

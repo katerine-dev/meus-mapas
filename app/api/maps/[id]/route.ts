@@ -3,11 +3,16 @@ import * as mapsDb from '@/app/db/maps';
 import { DuplicateNameError } from '@/lib/errors';
 // Importa a função de validação e tipos de erro do utilitário de validação
 import { validateMapData } from '@/app/validation/map';
+import { validateUuid } from '@/app/validation/types';
 
 // Handler GET - Busca um mapa específico pelo ID
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   // Aguarda a resolução dos parâmetros da rota
   const { id } = await params;
+
+  if (!validateUuid(id)) {
+    return new Response(null, { status: 400 });
+  }
 
   // Busca o mapa no banco de dados pelo ID
   const map = await mapsDb.getMapById(id);
@@ -25,6 +30,11 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   // Aguarda a resolução dos parâmetros da rota
   const { id } = await params;
+
+  if (!validateUuid(id)) {
+    return new Response(null, { status: 400 });
+  }
+
   // Extrai os dados do corpo da requisição
   const body = await request.json();
 
@@ -66,6 +76,10 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   // Aguarda a resolução dos parâmetros da rota
   const { id } = await params;
+
+  if (!validateUuid(id)) {
+    return new Response(null, { status: 400 });
+  }
 
   // Tenta fazer soft delete do mapa (e seus pontos) no banco de dados
   const deletedMap = await mapsDb.deleteMap(id);
