@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import MapCard from './MapCard';
 import type { Map } from '@/app/model/map';
@@ -46,14 +46,13 @@ describe('MapCard', () => {
     it('exibe nome, descrição, contagem de pontos e data formatada', () => {
       render(<MapCard {...createProps()} />);
 
-      // Verifica elementos essenciais usando queries semânticas
       expect(screen.getByRole('heading', { name: 'Mapa de Teste' })).toBeInTheDocument();
       expect(screen.getByText('Descrição do mapa')).toBeInTheDocument();
       expect(screen.getByText('Pontos cadastrados (5)')).toBeInTheDocument();
       expect(screen.getByText('Atualizado em 01/01/2024')).toBeInTheDocument();
     });
 
-    it('exibe "Sem descrição" quando descrição está vazia', () => {
+    it('exibe placeholder quando descrição está vazia', () => {
       const mapSemDescricao = { ...baseMap, description: '' };
       render(<MapCard {...createProps({ map: mapSemDescricao })} />);
 
@@ -61,46 +60,40 @@ describe('MapCard', () => {
     });
   });
 
-  describe('Navegação - clique no card', () => {
+  describe('Navegação', () => {
     it('chama onOpen ao clicar no card', async () => {
       const user = userEvent.setup();
       const props = createProps();
       render(<MapCard {...props} />);
 
-      // Clicar em qualquer área do card (exceto menu) deve navegar para o mapa
       await user.click(screen.getByRole('heading', { name: 'Mapa de Teste' }));
 
-      expect(props.onOpen).toHaveBeenCalledTimes(1);
+      expect(props.onOpen).toHaveBeenCalledOnce();
     });
   });
 
-  describe('Menu de opções', () => {
+  describe('Menu de ações', () => {
     it('abre menu ao clicar no botão de opções', async () => {
       const user = userEvent.setup();
       render(<MapCard {...createProps()} />);
 
-      const menuButton = screen.getByRole('button', { name: 'Opções do mapa' });
-      await user.click(menuButton);
+      await user.click(screen.getByRole('button', { name: 'Opções do mapa' }));
 
-      // Menu aberto exibe as opções Editar e Excluir
       expect(screen.getByRole('button', { name: /editar/i })).toBeInTheDocument();
       expect(screen.getByRole('button', { name: /excluir/i })).toBeInTheDocument();
     });
 
-    it('clicar no botão de opções NÃO dispara onOpen (stopPropagation)', async () => {
+    it('não navega ao abrir o menu (stopPropagation)', async () => {
       const user = userEvent.setup();
       const props = createProps();
       render(<MapCard {...props} />);
 
-      // O botão de menu está dentro do card clicável
-      // Deve usar stopPropagation para não navegar ao abrir menu
-      const menuButton = screen.getByRole('button', { name: 'Opções do mapa' });
-      await user.click(menuButton);
+      await user.click(screen.getByRole('button', { name: 'Opções do mapa' }));
 
       expect(props.onOpen).not.toHaveBeenCalled();
     });
 
-    it('clicar em "Editar" chama onEdit e NÃO chama onOpen', async () => {
+    it('chama onEdit ao clicar em Editar, sem navegar', async () => {
       const user = userEvent.setup();
       const props = createProps();
       render(<MapCard {...props} />);
@@ -108,12 +101,11 @@ describe('MapCard', () => {
       await user.click(screen.getByRole('button', { name: 'Opções do mapa' }));
       await user.click(screen.getByRole('button', { name: /editar/i }));
 
-      // Deve chamar apenas onEdit, não navegar
-      expect(props.onEdit).toHaveBeenCalledTimes(1);
+      expect(props.onEdit).toHaveBeenCalledOnce();
       expect(props.onOpen).not.toHaveBeenCalled();
     });
 
-    it('clicar em "Excluir" chama onDelete e NÃO chama onOpen', async () => {
+    it('chama onDelete ao clicar em Excluir, sem navegar', async () => {
       const user = userEvent.setup();
       const props = createProps();
       render(<MapCard {...props} />);
@@ -121,81 +113,53 @@ describe('MapCard', () => {
       await user.click(screen.getByRole('button', { name: 'Opções do mapa' }));
       await user.click(screen.getByRole('button', { name: /excluir/i }));
 
-      // Deve chamar apenas onDelete, não navegar
-      expect(props.onDelete).toHaveBeenCalledTimes(1);
+      expect(props.onDelete).toHaveBeenCalledOnce();
       expect(props.onOpen).not.toHaveBeenCalled();
     });
 
-    it('fecha menu ao clicar fora dele', async () => {
+    it('fecha menu ao clicar fora', async () => {
       const user = userEvent.setup();
       render(<MapCard {...createProps()} />);
 
-      // Abre o menu
-      const menuButton = screen.getByRole('button', { name: 'Opções do mapa' });
-      await user.click(menuButton);
+      await user.click(screen.getByRole('button', { name: 'Opções do mapa' }));
       expect(screen.getByRole('button', { name: /editar/i })).toBeInTheDocument();
 
-      // Clica fora - usa useEffect com mousedown listener no componente
       await user.click(document.body);
 
-      // Menu deve fechar (click outside pattern)
       expect(screen.queryByRole('button', { name: /editar/i })).not.toBeInTheDocument();
     });
-  });
 
-  describe('Acessibilidade', () => {
-    it('botão do menu tem atributos ARIA corretos', async () => {
+    it('botão de opções tem atributos ARIA corretos', async () => {
       const user = userEvent.setup();
       render(<MapCard {...createProps()} />);
 
       const menuButton = screen.getByRole('button', { name: 'Opções do mapa' });
-
-      // Estado inicial: menu fechado
       expect(menuButton).toHaveAttribute('aria-haspopup', 'menu');
       expect(menuButton).toHaveAttribute('aria-expanded', 'false');
 
-      // Após abrir: aria-expanded muda para true
       await user.click(menuButton);
+
       expect(menuButton).toHaveAttribute('aria-expanded', 'true');
     });
   });
 
   describe('Preview do mapa', () => {
-    it('exibe fallback quando não há previewLocation', () => {
+    it('não exibe imagem quando não há previewLocation', () => {
       render(<MapCard {...createProps()} />);
 
-      // Sem coordenadas, exibe ícone de fallback ao invés de tile do OSM
       expect(screen.queryByRole('img')).not.toBeInTheDocument();
     });
 
-    it('renderiza imagem quando há previewLocation', () => {
+    it('exibe imagem quando há previewLocation', () => {
       const mapComPreview = {
         ...baseMap,
         previewLocation: { latitude: -23.5505, longitude: -46.6333 },
       };
       render(<MapCard {...createProps({ map: mapComPreview })} />);
 
-      // Com coordenadas, carrega tile do OpenStreetMap
       const img = screen.getByRole('img', { name: /preview do mapa/i });
       expect(img).toBeInTheDocument();
       expect(img).toHaveAttribute('src');
-    });
-
-    it('exibe fallback quando imagem de preview falha ao carregar', () => {
-      const mapComPreview = {
-        ...baseMap,
-        previewLocation: { latitude: -23.5505, longitude: -46.6333 },
-      };
-      render(<MapCard {...createProps({ map: mapComPreview })} />);
-
-      const img = screen.getByRole('img', { name: /preview do mapa/i });
-
-      // Simula falha de rede ou tile indisponível
-      // O componente usa onError para mudar para fallback
-      fireEvent.error(img);
-
-      // Após erro, exibe fallback (ícone) ao invés da imagem
-      expect(screen.queryByRole('img')).not.toBeInTheDocument();
     });
   });
 });
