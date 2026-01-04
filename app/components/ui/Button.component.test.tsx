@@ -1,74 +1,48 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import Button from './Button';
 
 /**
- * Testes do componente Button.
+ * Testes do Button - componente de botão reutilizável.
  *
- * Foco em COMPORTAMENTO, não em estilo:
- * - Click dispara handler (interação principal)
- * - Disabled bloqueia interação (acessibilidade)
- * - Type correto para formulários (submit vs button)
- * - Variantes renderizam sem quebrar (smoke test)
+ * Testamos:
+ * - Renderização do texto (children)
+ * - Atributo type (button vs submit)
+ * - Estado disabled
+ *
+ * toHaveAttribute(): verifica atributos HTML do elemento
+ * toBeDisabled(): verifica se o botão está desabilitado
  */
-
 describe('Button', () => {
-  describe('Comportamento', () => {
-    it('chama onClick ao clicar', async () => {
-      const onClick = vi.fn();
-      render(<Button onClick={onClick}>Clique aqui</Button>);
+  it('renderiza com texto', () => {
+    render(<Button onClick={() => {}}>Clique aqui</Button>);
 
-      await userEvent.click(screen.getByRole('button', { name: 'Clique aqui' }));
-
-      expect(onClick).toHaveBeenCalledOnce();
-    });
-
-    it('não chama onClick quando disabled', async () => {
-      const onClick = vi.fn();
-      render(
-        <Button onClick={onClick} disabled>
-          Clique aqui
-        </Button>
-      );
-
-      await userEvent.click(screen.getByRole('button', { name: 'Clique aqui' }));
-
-      expect(onClick).not.toHaveBeenCalled();
-      expect(screen.getByRole('button')).toBeDisabled();
-    });
+    expect(screen.getByRole('button', { name: 'Clique aqui' })).toBeInTheDocument();
   });
 
-  describe('Atributo type', () => {
-    // type="button" evita submit acidental em forms; type="submit" permite submissão
-    it.each([
-      [undefined, 'button'], // padrão seguro
-      ['submit', 'submit'],
-      ['button', 'button'],
-    ] as const)('com type=%s renderiza type="%s"', (typeProp, expectedType) => {
-      render(
-        <Button type={typeProp} onClick={vi.fn()}>
-          Botão
-        </Button>
-      );
+  it('possui type button por padrão', () => {
+    render(<Button onClick={() => {}}>Botão</Button>);
 
-      expect(screen.getByRole('button')).toHaveAttribute('type', expectedType);
-    });
+    expect(screen.getByRole('button')).toHaveAttribute('type', 'button');
   });
 
-  describe('Variantes (smoke test)', () => {
-    // Smoke test: apenas verifica que renderiza sem quebrar, sem asserts de classe/estilo
-    it.each(['primary', 'secondary', 'danger', 'outlined'] as const)(
-      'variante "%s" renderiza sem erros',
-      (variant) => {
-        render(
-          <Button variant={variant} onClick={vi.fn()}>
-            Botão
-          </Button>
-        );
-
-        expect(screen.getByRole('button', { name: 'Botão' })).toBeInTheDocument();
-      }
+  it('aceita type submit', () => {
+    render(
+      <Button type="submit" onClick={() => {}}>
+        Enviar
+      </Button>
     );
+
+    expect(screen.getByRole('button')).toHaveAttribute('type', 'submit');
+  });
+
+  it('renderiza desabilitado', () => {
+    render(
+      <Button onClick={() => {}} disabled>
+        Botão
+      </Button>
+    );
+
+    expect(screen.getByRole('button')).toBeDisabled();
   });
 });

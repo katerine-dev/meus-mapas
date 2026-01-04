@@ -3,20 +3,21 @@ import { render, screen } from '@testing-library/react';
 import ErrorMessage from './ErrorMessage';
 
 /**
- * Testes do componente ErrorMessage.
+ * Testes do ErrorMessage - exibe mensagem de erro inline.
  *
- * Comportamento essencial:
- * 1. Não renderiza nada quando não há mensagem (null ou vazia) - evita "espaço vazio" na UI
- * 2. Renderiza a mensagem quando fornecida - exibe feedback de erro ao usuário
- *
+ * toBeEmptyDOMElement(): verifica que o container está vazio
+ * (usado quando o componente retorna null)
  */
-
 describe('ErrorMessage', () => {
-  it.each([null, ''])('não renderiza nada quando message é %s', (message) => {
-    const { container } = render(<ErrorMessage message={message} />);
+  it('não renderiza quando message é null', () => {
+    const { container } = render(<ErrorMessage message={null} />);
 
-    // container.toBeEmptyDOMElement() é apropriado aqui pois validamos
-    // que o componente retorna null (não há elemento para buscar semanticamente)
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it('não renderiza quando message é vazia', () => {
+    const { container } = render(<ErrorMessage message="" />);
+
     expect(container).toBeEmptyDOMElement();
   });
 

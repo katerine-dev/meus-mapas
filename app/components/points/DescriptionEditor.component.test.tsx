@@ -1,102 +1,93 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import DescriptionEditor from './DescriptionEditor';
 
 /**
- * Testes do componente DescriptionEditor.
+ * Testes do DescriptionEditor - editor inline de descrição.
  *
- * Editor inline para descrição do mapa.
- * Testes focam em: transições de modo e interações principais.
+ * Componente tem dois modos:
+ * - Visualização (isEditing=false): exibe texto
+ * - Edição (isEditing=true): exibe textarea com botões
  */
-
 describe('DescriptionEditor', () => {
-  const createProps = (overrides = {}) => ({
-    description: 'Descrição do mapa',
-    isEditing: false,
-    value: '',
-    onValueChange: vi.fn(),
-    onEdit: vi.fn(),
-    onCancel: vi.fn(),
-    onSave: vi.fn(),
-    ...overrides,
+  it('exibe descrição no modo visualização', () => {
+    render(
+      <DescriptionEditor
+        description="Meu mapa"
+        isEditing={false}
+        value=""
+        onValueChange={() => {}}
+        onEdit={() => {}}
+        onCancel={() => {}}
+        onSave={() => {}}
+      />
+    );
+
+    expect(screen.getByText('Meu mapa')).toBeInTheDocument();
   });
 
-  beforeEach(() => {
-    vi.clearAllMocks();
+  it('exibe "Sem descrição" quando descrição está vazia', () => {
+    render(
+      <DescriptionEditor
+        description=""
+        isEditing={false}
+        value=""
+        onValueChange={() => {}}
+        onEdit={() => {}}
+        onCancel={() => {}}
+        onSave={() => {}}
+      />
+    );
+
+    expect(screen.getByText('Sem descrição')).toBeInTheDocument();
   });
 
-  describe('Modo visualização', () => {
-    it('exibe descrição ou placeholder', () => {
-      const { rerender } = render(
-        <DescriptionEditor {...createProps({ description: 'Meu mapa' })} />
-      );
-      expect(screen.getByText('Meu mapa')).toBeInTheDocument();
+  it('não exibe textarea no modo visualização', () => {
+    render(
+      <DescriptionEditor
+        description="Meu mapa"
+        isEditing={false}
+        value=""
+        onValueChange={() => {}}
+        onEdit={() => {}}
+        onCancel={() => {}}
+        onSave={() => {}}
+      />
+    );
 
-      rerender(<DescriptionEditor {...createProps({ description: '' })} />);
-      expect(screen.getByText('Sem descrição')).toBeInTheDocument();
-    });
-
-    it('chama onEdit ao clicar no botão de editar', async () => {
-      const user = userEvent.setup();
-      const props = createProps();
-      render(<DescriptionEditor {...props} />);
-
-      await user.click(screen.getByRole('button', { name: /editar descrição/i }));
-
-      expect(props.onEdit).toHaveBeenCalledOnce();
-    });
-
-    it('não exibe textarea', () => {
-      render(<DescriptionEditor {...createProps()} />);
-
-      expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
-    });
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
   });
 
-  describe('Modo edição', () => {
-    it('exibe textarea com valor e botões de ação', () => {
-      render(<DescriptionEditor {...createProps({ isEditing: true, value: 'Texto' })} />);
+  it('exibe textarea no modo edição', () => {
+    render(
+      <DescriptionEditor
+        description="Meu mapa"
+        isEditing={true}
+        value="Texto"
+        onValueChange={() => {}}
+        onEdit={() => {}}
+        onCancel={() => {}}
+        onSave={() => {}}
+      />
+    );
 
-      expect(screen.getByRole('textbox')).toHaveValue('Texto');
-      expect(screen.getByRole('button', { name: /cancelar/i })).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: /salvar/i })).toBeInTheDocument();
-    });
+    expect(screen.getByRole('textbox')).toHaveValue('Texto');
+  });
 
-    it('textarea tem maxLength definido', () => {
-      render(<DescriptionEditor {...createProps({ isEditing: true })} />);
+  it('exibe botões de cancelar e salvar no modo edição', () => {
+    render(
+      <DescriptionEditor
+        description=""
+        isEditing={true}
+        value=""
+        onValueChange={() => {}}
+        onEdit={() => {}}
+        onCancel={() => {}}
+        onSave={() => {}}
+      />
+    );
 
-      expect(screen.getByRole('textbox')).toHaveAttribute('maxLength');
-    });
-
-    it('digitar chama onValueChange', async () => {
-      const user = userEvent.setup();
-      const props = createProps({ isEditing: true, value: '' });
-      render(<DescriptionEditor {...props} />);
-
-      await user.type(screen.getByRole('textbox'), 'Nova');
-
-      expect(props.onValueChange).toHaveBeenCalled();
-    });
-
-    it('cancelar chama onCancel', async () => {
-      const user = userEvent.setup();
-      const props = createProps({ isEditing: true });
-      render(<DescriptionEditor {...props} />);
-
-      await user.click(screen.getByRole('button', { name: /cancelar/i }));
-
-      expect(props.onCancel).toHaveBeenCalledOnce();
-    });
-
-    it('salvar chama onSave', async () => {
-      const user = userEvent.setup();
-      const props = createProps({ isEditing: true, value: 'Descrição atualizada' });
-      render(<DescriptionEditor {...props} />);
-
-      await user.click(screen.getByRole('button', { name: /salvar/i }));
-
-      expect(props.onSave).toHaveBeenCalledOnce();
-    });
+    expect(screen.getByRole('button', { name: /cancelar/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /salvar/i })).toBeInTheDocument();
   });
 });

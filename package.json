@@ -17,9 +17,9 @@
     "db:logs": "docker compose logs -f meus-mapas-db",
     "migrations:create": "node-pg-migrate create -j sql",
     "migrations:migrate": "node-pg-migrate up --envPath .env.local",
-    "test": "vitest",
-    "test:unit": "vitest --config vitest.component.config.ts",
-    "test:all": "npm run test:unit -- --run && npm run test -- --run"
+    "test:api": "vitest",
+    "test:spa": "vitest --config vitest.component.config.ts",
+    "test:all": "npm run test:spa -- --run && npm run test:api -- --run"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
