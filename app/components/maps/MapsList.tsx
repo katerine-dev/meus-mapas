@@ -67,7 +67,16 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
     description: string
   ): Promise<{ error?: string } | void> {
     try {
-      await createMap({ name, description });
+      // Monta o objeto do request
+      const data: { name: string; description?: string } = { name };
+
+      // Só adiciona description se não estiver vazia
+      const trimmedDescription = description.trim();
+      if (trimmedDescription) {
+        data.description = trimmedDescription;
+      }
+
+      await createMap(data);
       fetchMaps();
       setIsCreateModalOpen(false);
     } catch (err) {
@@ -86,7 +95,16 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
   ): Promise<{ error?: string } | void> {
     if (!selectedMap) return;
     try {
-      await updateMap(selectedMap.id, { name, description });
+      // Monta o objeto do request
+      const data: { name: string; description?: string } = { name };
+
+      // Só adiciona description se não estiver vazia
+      const trimmedDescription = description.trim();
+      if (trimmedDescription) {
+        data.description = trimmedDescription;
+      }
+
+      await updateMap(selectedMap.id, data);
       fetchMaps();
       setIsEditModalOpen(false);
       setSelectedMap(null);

@@ -14,9 +14,11 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Normaliza description: string vazia -> null
+    const description = body.description?.trim() || null;
     const id = await mapsDb.createMap({
       name: body.name.trim(),
-      description: body.description,
+      description,
     });
 
     return Response.json({ id }, { status: 201 });

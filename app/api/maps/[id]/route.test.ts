@@ -102,8 +102,8 @@ describe('PUT /api/maps/[id]', () => {
     // Cria um mapa com descrição
     const map = await testHelper.insertMap();
 
-    // Atualiza com descrição vazia
-    const updatedData = { name: 'Mapa Sem Descrição', description: '' };
+    // Omite description do request (API converte undefined para null)
+    const updatedData = { name: 'Mapa Sem Descrição' };
     const request = testHelper.put(`/api/maps/${map.id}`, updatedData);
 
     const params = { params: Promise.resolve({ id: map.id }) };
@@ -111,10 +111,10 @@ describe('PUT /api/maps/[id]', () => {
     const response = await PUT(request, params);
     expect(response.status).toBe(204);
 
-    // Verifica se a descrição foi atualizada para vazio
+    // Verifica se a descrição foi atualizada para null
     const result = await connection.query('SELECT * FROM maps WHERE id = $1', [map.id]);
     expect(result.rows[0].name).toBe(updatedData.name);
-    expect(result.rows[0].description).toBe(updatedData.description);
+    expect(result.rows[0].description).toBeNull();
   });
 
   // Teste: não deve permitir atualizar mapa deletado (retorna 404)
@@ -261,7 +261,7 @@ describe('Validação de UUID', () => {
 
   it('PUT deve retornar 400 para UUID inválido', async () => {
     const params = { params: Promise.resolve({ id: invalidId }) };
-    const request = testHelper.put(`/api/maps/${invalidId}`, { name: 'Test', description: '' });
+    const request = testHelper.put(`/api/maps/${invalidId}`, { name: 'Test' });
     const response = await PUT(request, params);
     expect(response.status).toBe(400);
   });

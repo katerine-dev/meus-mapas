@@ -40,8 +40,15 @@ describe('MapCard', () => {
     expect(screen.getByText('Pontos cadastrados (5)')).toBeInTheDocument();
   });
 
-  it('renderiza "Sem descrição" quando descrição está vazia', () => {
-    const mapaSemDescricao = { ...mapa, description: '' };
+  it('renderiza "Sem descrição" quando descrição é undefined', () => {
+    const mapaSemDescricao = {
+      id: mapa.id,
+      name: mapa.name,
+      pointsCount: mapa.pointsCount,
+      createdAt: mapa.createdAt,
+      updatedAt: mapa.updatedAt,
+      deletedAt: mapa.deletedAt,
+    };
     render(
       <MapCard map={mapaSemDescricao} onEdit={() => {}} onOpen={() => {}} onDelete={() => {}} />
     );

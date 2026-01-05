@@ -47,13 +47,15 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   }
 
   try {
+    // Normaliza description: string vazia -> null
+    const description = body.description?.trim() || null;
     // Atualiza o mapa no banco de dados com os novos valores
     // updateMap retorna null se o mapa não existir ou estiver deletado
     const map = await mapsDb.updateMap({
       id,
       // Remove espaços em branco do início e fim do nome antes de salvar
       name: body.name.trim(),
-      description: body.description,
+      description,
     });
 
     // Se o mapa não existir ou estiver deletado, retorna 404 Not Found
