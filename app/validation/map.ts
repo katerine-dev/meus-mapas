@@ -10,12 +10,10 @@ export const MAP_VALIDATION = {
 export const MapSchema = z.object({
   name: z
     .string()
-    .transform((val) => val.trim())
-    .refine((val) => val.length > 0, { message: 'Nome é obrigatório' })
-    .refine((val) => val.length >= MAP_VALIDATION.NAME_MIN_LENGTH, {
-      message: `Nome deve ter pelo menos ${MAP_VALIDATION.NAME_MIN_LENGTH} caracteres`,
+    .refine((val) => val.trim().length >= MAP_VALIDATION.NAME_MIN_LENGTH, {
+      message: 'Nome é obrigatório',
     })
-    .refine((val) => val.length <= MAP_VALIDATION.NAME_MAX_LENGTH, {
+    .refine((val) => val.trim().length <= MAP_VALIDATION.NAME_MAX_LENGTH, {
       message: `Nome deve ter no máximo ${MAP_VALIDATION.NAME_MAX_LENGTH} caracteres`,
     }),
   description: z

@@ -10,17 +10,18 @@ export const POINT_VALIDATION = {
   LONGITUDE_MAX: 180,
 };
 
+// Schema reutilizável para o campo name
+const nameSchema = z
+  .string()
+  .refine((val) => val.trim().length >= POINT_VALIDATION.NAME_MIN_LENGTH, {
+    message: 'Nome é obrigatório',
+  })
+  .refine((val) => val.trim().length <= POINT_VALIDATION.NAME_MAX_LENGTH, {
+    message: `Nome deve ter no máximo ${POINT_VALIDATION.NAME_MAX_LENGTH} caracteres`,
+  });
+
 export const CreatePointSchema = z.object({
-  name: z
-    .string()
-    .transform((val) => val.trim())
-    .refine((val) => val.length > 0, { message: 'Nome é obrigatório' })
-    .refine((val) => val.length >= POINT_VALIDATION.NAME_MIN_LENGTH, {
-      message: `Nome deve ter pelo menos ${POINT_VALIDATION.NAME_MIN_LENGTH} caracteres`,
-    })
-    .refine((val) => val.length <= POINT_VALIDATION.NAME_MAX_LENGTH, {
-      message: `Nome deve ter no máximo ${POINT_VALIDATION.NAME_MAX_LENGTH} caracteres`,
-    }),
+  name: nameSchema,
   latitude: z
     .number({
       message: 'Latitude é obrigatória e deve ser um número',
@@ -45,16 +46,7 @@ export const CreatePointSchema = z.object({
 
 export const UpdatePointSchema = z
   .object({
-    name: z
-      .string()
-      .transform((val) => val.trim())
-      .refine((val) => val.length > 0, { message: 'Nome é obrigatório' })
-      .refine((val) => val.length >= POINT_VALIDATION.NAME_MIN_LENGTH, {
-        message: `Nome deve ter pelo menos ${POINT_VALIDATION.NAME_MIN_LENGTH} caracteres`,
-      })
-      .refine((val) => val.length <= POINT_VALIDATION.NAME_MAX_LENGTH, {
-        message: `Nome deve ter no máximo ${POINT_VALIDATION.NAME_MAX_LENGTH} caracteres`,
-      }),
+    name: nameSchema,
   })
   .passthrough(); // Ignora campos extras (latitude/longitude enviados por engano)
 
