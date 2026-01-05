@@ -12,7 +12,7 @@ import ErrorState from '@/app/components/ui/ErrorState';
 import Spinner from '@/app/components/ui/Spinner';
 import { Map } from '@/app/model/map';
 import { DEFAULT_SORT, sortByKey, type SortKey } from '@/app/constants/sort';
-import { getAllMaps, createMap, updateMap, deleteMap } from '@/lib/services/maps';
+import { getAllMaps, createMap, updateMap, deleteMap } from '@/app/services/maps';
 import { DuplicateNameError } from '@/lib/errors';
 import { MAP_ERROR_MESSAGES } from '@/app/constants/messages';
 import { MODAL_MODE } from '@/app/constants/modal';

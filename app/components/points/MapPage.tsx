@@ -10,14 +10,14 @@ import ConfirmModal from '@/app/components/ui/ConfirmModal';
 import LocationSearch from './LocationSearch';
 import ErrorState from '@/app/components/ui/ErrorState';
 import Spinner from '@/app/components/ui/Spinner';
-import { getMapById, updateMap } from '@/lib/services/maps';
+import { getMapById, updateMap } from '@/app/services/maps';
 import {
   getAllPoints,
   createPoint,
   updatePoint,
   deletePoint,
   deleteAllPoints,
-} from '@/lib/services/points';
+} from '@/app/services/points';
 import { DuplicateNameError } from '@/lib/errors';
 import { MODAL_MODE, CONFIRM_MODE, type ModalMode, type ConfirmMode } from '@/app/constants/modal';
 import { POINT_ERROR_MESSAGES } from '@/app/constants/messages';
