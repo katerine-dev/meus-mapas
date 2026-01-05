@@ -3,10 +3,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 
-// Componente de cabeçalho da aplicação
 export default function Header() {
   return (
-    // Header com roxo sólido minimalista
     <header className="bg-primary px-8 py-1">
       {/* Container centralizado com largura máxima */}
       <div className="mx-auto flex max-w-6xl items-center justify-between">

@@ -5,7 +5,6 @@ import { DuplicateNameError } from '@/lib/errors';
 
 interface CreateMapData {
   name: string;
-  // ? = opcional
   description?: string;
 }
 
