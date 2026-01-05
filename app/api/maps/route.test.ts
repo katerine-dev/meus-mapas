@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, beforeAll } from 'vitest';
 import { POST, GET } from './route';
 import * as testHelper from '@/lib/test-helper';
-import connection from '@/app/db/connection';
+import connection from '@/app/api/db/connection';
 import { Map } from '@/app/model/map';
 import * as uuid from 'uuid';
 

@@ -1,5 +1,5 @@
 // Importa as funções de acesso ao banco de dados de mapas
-import * as mapsDb from '@/app/db/maps';
+import * as mapsDb from '@/app/api/db/maps';
 import { DuplicateNameError } from '@/lib/errors';
 // Importa a função de validação e tipos de erro do utilitário de validação
 import { validateMapData } from '@/app/validation/map';

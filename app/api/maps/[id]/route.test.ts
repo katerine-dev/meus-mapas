@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { GET, PUT, DELETE } from './route';
 import * as testHelper from '@/lib/test-helper';
-import connection from '@/app/db/connection';
+import connection from '@/app/api/db/connection';
 
 describe('GET /api/maps/[id]', () => {
   // Limpa o banco antes de cada teste

@@ -1,4 +1,4 @@
-import connection from '@/app/db/connection';
+import connection from '@/app/api/db/connection';
 import { faker } from '@faker-js/faker';
 import type { Map } from '@/app/model/map';
 import type { Point } from '@/app/model/point';

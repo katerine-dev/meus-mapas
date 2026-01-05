@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import { config } from 'dotenv';
-import { DatabaseError, PG_DATABASE_EXISTS } from '@/app/db/errors';
+import { DatabaseError, PG_DATABASE_EXISTS } from '@/app/api/db/errors';
 
 config({ path: '.env.test' });
 // Função de setup global executada uma vez antes de todos os testes

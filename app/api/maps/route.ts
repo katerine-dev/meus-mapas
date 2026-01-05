@@ -1,4 +1,4 @@
-import * as mapsDb from '@/app/db/maps';
+import * as mapsDb from '@/app/api/db/maps';
 import { DuplicateNameError } from '@/lib/errors';
 import { validateMapData } from '@/app/validation/map';
 

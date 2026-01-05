@@ -1,4 +1,4 @@
-import * as pointsDb from '@/app/db/points';
+import * as pointsDb from '@/app/api/db/points';
 import { DuplicateNameError } from '@/lib/errors';
 import { validateUpdatePointData } from '@/app/validation/point';
 import { validateUuid } from '@/app/validation/types';
