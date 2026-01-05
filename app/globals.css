@@ -11,11 +11,13 @@ html {
 body {
   height: 100%;
   /* Adiciona padding para safe areas em dispositivos com notch */
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+    env(safe-area-inset-left);
 }
 
 /* Previne scroll bounce no iOS */
-html, body {
+html,
+body {
   overscroll-behavior: none;
 }
 
