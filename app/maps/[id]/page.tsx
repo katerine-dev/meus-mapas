@@ -10,7 +10,7 @@ export default async function MapPageRoute({ params }: MapPageProps) {
   const { id } = await params;
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden">
+    <div className="flex h-dvh flex-col overflow-hidden">
       <Header />
       <main className="flex-1 overflow-hidden">
         <MapPage mapId={id} />
