@@ -38,7 +38,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
   // Validação
   const errors = validatePointData({
-    name: body.name || '',
+    name: body.name,
     latitude: body.latitude,
     longitude: body.longitude,
   });

@@ -20,13 +20,14 @@ export const MapSchema = z.object({
     }),
   description: z
     .string()
+    .min(1, { message: 'Descrição não pode ser vazia' })
     .max(MAP_VALIDATION.DESCRIPTION_MAX_LENGTH, {
       message: `Descrição deve ter no máximo ${MAP_VALIDATION.DESCRIPTION_MAX_LENGTH} caracteres`,
     })
     .optional(),
 });
 
-export function validateMapData(name: string, description: string): ValidationError[] {
+export function validateMapData(name?: string, description?: string): ValidationError[] {
   const result = MapSchema.safeParse({ name, description });
 
   if (result.success) {

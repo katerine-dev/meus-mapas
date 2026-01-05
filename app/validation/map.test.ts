@@ -42,10 +42,17 @@ describe('validateMapData', () => {
 
   // Testes para o campo 'description' - opcional, máximo 40 caracteres
   describe('campo description', () => {
-    // Description é opcional, então vazio deve ser aceito
-    it('deve aceitar description vazia', () => {
-      const errors = validateMapData('Meu Mapa', '');
+    // Description é opcional - pode ser omitida (undefined)
+    it('deve aceitar description undefined', () => {
+      const errors = validateMapData('Meu Mapa', undefined);
       expect(errors).toHaveLength(0);
+    });
+
+    // Description não pode ser string vazia
+    it('deve retornar erro quando description é string vazia', () => {
+      const errors = validateMapData('Meu Mapa', '');
+      expect(errors).toHaveLength(1);
+      expect(errors[0].field).toBe('description');
     });
 
     // Testa se description muito longa é rejeitada

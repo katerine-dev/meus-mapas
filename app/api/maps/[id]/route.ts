@@ -39,23 +39,20 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   const body = await request.json();
 
   // Executa a validação dos dados recebidos antes de atualizar no banco
-  // Usa || '' para garantir que sempre passe uma string, mesmo se o campo for undefined
-  const errors = validateMapData(body.name || '', body.description || '');
+  const errors = validateMapData(body.name, body.description);
   // Se houver erros de validação, retorna status 400 (Bad Request) com a lista de erros
   if (errors.length > 0) {
     return Response.json({ errors }, { status: 400 });
   }
 
   try {
-    // Normaliza description: string vazia -> null
-    const description = body.description?.trim() || null;
     // Atualiza o mapa no banco de dados com os novos valores
     // updateMap retorna null se o mapa não existir ou estiver deletado
     const map = await mapsDb.updateMap({
       id,
       // Remove espaços em branco do início e fim do nome antes de salvar
       name: body.name.trim(),
-      description,
+      description: body.description,
     });
 
     // Se o mapa não existir ou estiver deletado, retorna 404 Not Found
