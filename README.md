@@ -94,10 +94,7 @@ Execute os testes da API:
 npm run test:api
 ```
 
-```
-
 O setup automático (vitest.setup.ts) cria o banco de teste e executa as migrações.
-```
 
 Execute os testes do Front End:
 
