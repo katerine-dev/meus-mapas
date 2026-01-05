@@ -9,15 +9,15 @@ import ErrorMessage from '@/app/components/ui/ErrorMessage';
 import { validateMapData } from '@/app/validation/map';
 import { MapSchema } from '@/app/validation/map';
 import type { ValidationError } from '@/app/validation/types';
-
-type MapFormMode = 'create' | 'edit';
+import { MODAL_MODE, type ModalMode } from '@/app/constants/modal';
+import { MAP_ERROR_MESSAGES } from '@/app/constants/messages';
 
 interface MapFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (name: string, description: string) => Promise<{ error?: string } | void>;
-  mode: MapFormMode;
-  /** Valores iniciais para edição (opcional para criação) */
+  mode: ModalMode;
+  /* Valores iniciais para edição (opcional para criação), obrigatório pra edição */
   initialName?: string;
   initialDescription?: string;
 }
@@ -39,13 +39,11 @@ export default function MapFormModal({
   const [apiError, setApiError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const isCreateMode = mode === 'create';
+  const isCreateMode = mode === MODAL_MODE.CREATE;
   const title = isCreateMode ? 'Criar Novo Mapa' : 'Editar Mapa';
   const submitLabel = isCreateMode ? 'Criar' : 'Editar';
   const loadingLabel = isCreateMode ? 'Criando...' : 'Salvando...';
-  const errorMessage = isCreateMode
-    ? 'Erro ao criar mapa. Tente novamente.'
-    : 'Erro ao editar mapa. Tente novamente.';
+  const errorMessage = isCreateMode ? MAP_ERROR_MESSAGES.CREATE : MAP_ERROR_MESSAGES.EDIT;
 
   // Reseta o formulário quando o modal abre ou os valores iniciais mudam
   useEffect(() => {

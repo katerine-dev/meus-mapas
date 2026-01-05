@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 import { MapIcon, DocumentTextIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { EllipsisVerticalIcon } from '@heroicons/react/24/solid';
 import { Map } from '@/app/model/map';
+import { NO_DESCRIPTION_PLACEHOLDER } from '@/app/constants/messages';
 import { formatDateBR } from '@/lib/date';
 import { DEFAULT_ZOOM } from '@/app/constants/map';
 
@@ -143,7 +144,9 @@ export default function MapCard({ map, onEdit, onOpen, onDelete }: MapCardProps)
       {/* Informações do mapa */}
       <div className="p-4">
         <h3 className="truncate text-lg font-semibold text-text-primary">{name}</h3>
-        <p className="line-clamp-2 text-sm text-text-muted">{description || 'Sem descrição'}</p>
+        <p className="line-clamp-2 text-sm text-text-muted">
+          {description || NO_DESCRIPTION_PLACEHOLDER}
+        </p>
         <p className="mt-2 text-sm font-medium text-primary">Pontos cadastrados ({pointsCount})</p>
         <p className="mt-1 text-xs text-text-placeholder">Atualizado em {formattedDate}</p>
       </div>

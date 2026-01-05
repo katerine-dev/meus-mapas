@@ -14,6 +14,8 @@ import { Map } from '@/app/model/map';
 import { DEFAULT_SORT, sortByKey, type SortKey } from '@/app/constants/sort';
 import { getAllMaps, createMap, updateMap, deleteMap } from '@/lib/services/maps';
 import { DuplicateNameError } from '@/lib/errors';
+import { MAP_ERROR_MESSAGES } from '@/app/constants/messages';
+import { MODAL_MODE } from '@/app/constants/modal';
 
 interface MapsListProps {
   isCreateModalOpen: boolean;
@@ -84,7 +86,7 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
         return { error: err.message };
       }
       console.error('Erro ao criar mapa:', err);
-      return { error: 'Erro ao criar mapa. Tente novamente.' };
+      return { error: MAP_ERROR_MESSAGES.CREATE };
     }
   }
 
@@ -113,7 +115,7 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
         return { error: err.message };
       }
       console.error('Erro ao editar descrição:', err);
-      return { error: 'Erro ao editar mapa. Tente novamente.' };
+      return { error: MAP_ERROR_MESSAGES.EDIT };
     }
   }
 
@@ -127,7 +129,7 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
       setSelectedMap(null);
     } catch (err) {
       console.error('Erro ao deletar mapa:', err);
-      return { error: 'Erro ao excluir mapa. Tente novamente.' };
+      return { error: MAP_ERROR_MESSAGES.DELETE };
     }
   }
 
@@ -157,7 +159,7 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
   if (error) {
     return (
       <ErrorState
-        title="Erro ao carregar mapas"
+        title={MAP_ERROR_MESSAGES.LOAD}
         message={error}
         onRetry={() => {
           setError(null);
@@ -216,7 +218,7 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={handleCreateMap}
-        mode="create"
+        mode={MODAL_MODE.CREATE}
       />
 
       {/* Modal de editar */}
@@ -227,7 +229,7 @@ export default function MapsList({ isCreateModalOpen, setIsCreateModalOpen }: Ma
           setSelectedMap(null);
         }}
         onSubmit={handleEditDescription}
-        mode="edit"
+        mode={MODAL_MODE.EDIT}
         initialName={selectedMap?.name}
         initialDescription={selectedMap?.description}
       />

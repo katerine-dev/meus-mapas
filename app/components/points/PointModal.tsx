@@ -5,11 +5,13 @@ import Modal from '@/app/components/ui/Modal';
 import Button from '@/app/components/ui/Button';
 import Input from '@/app/components/ui/Input';
 import ErrorMessage from '@/app/components/ui/ErrorMessage';
+import { MODAL_MODE, type ModalMode } from '@/app/constants/modal';
+import { POINT_ERROR_MESSAGES } from '@/app/constants/messages';
 
 interface PointModalProps {
   isOpen: boolean;
   onClose: () => void;
-  mode: 'create' | 'edit';
+  mode: ModalMode;
   initialName: string;
   latitude: number;
   longitude: number;
@@ -47,7 +49,7 @@ function PointModalContent({
 
       // Sucesso - o modal será fechado pelo componente pai
     } catch {
-      setApiError('Erro ao salvar ponto. Tente novamente.');
+      setApiError(POINT_ERROR_MESSAGES.SAVE);
     } finally {
       setLoading(false);
     }
@@ -56,7 +58,7 @@ function PointModalContent({
   return (
     <>
       <h2 id="point-modal-title" className="mb-4 text-xl font-bold text-text-primary">
-        {mode === 'create' ? 'Novo ponto' : 'Editar ponto'}
+        {mode === MODAL_MODE.CREATE ? 'Novo ponto' : 'Editar ponto'}
       </h2>
 
       {/* Erro da API */}

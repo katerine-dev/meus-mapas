@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { GENERIC_ERROR_MESSAGE } from '@/app/constants/messages';
 import Modal from './Modal';
 import Button from './Button';
 import ErrorMessage from './ErrorMessage';
@@ -39,7 +40,7 @@ function ConfirmModalContent({
 
       // Sucesso - o onConfirm deve fechar o modal
     } catch {
-      setError('Erro ao executar ação. Tente novamente.');
+      setError(GENERIC_ERROR_MESSAGE);
     } finally {
       setLoading(false);
     }

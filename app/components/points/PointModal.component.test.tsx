@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import PointModal from './PointModal';
+import { MODAL_MODE } from '@/app/constants/modal';
 
 /**
  * Testes do PointModal - modal para criar e editar pontos.
@@ -14,7 +15,7 @@ describe('PointModal', () => {
       <PointModal
         isOpen={false}
         onClose={() => {}}
-        mode="create"
+        mode={MODAL_MODE.CREATE}
         initialName=""
         latitude={-23.5505}
         longitude={-46.6333}
@@ -30,7 +31,7 @@ describe('PointModal', () => {
       <PointModal
         isOpen={true}
         onClose={() => {}}
-        mode="create"
+        mode={MODAL_MODE.CREATE}
         initialName=""
         latitude={-23.5505}
         longitude={-46.6333}
@@ -46,7 +47,7 @@ describe('PointModal', () => {
       <PointModal
         isOpen={true}
         onClose={() => {}}
-        mode="edit"
+        mode={MODAL_MODE.EDIT}
         initialName="Praça da Sé"
         latitude={-23.5505}
         longitude={-46.6333}
@@ -62,7 +63,7 @@ describe('PointModal', () => {
       <PointModal
         isOpen={true}
         onClose={() => {}}
-        mode="edit"
+        mode={MODAL_MODE.EDIT}
         initialName="Praça da Sé"
         latitude={-23.5505}
         longitude={-46.6333}
@@ -78,7 +79,7 @@ describe('PointModal', () => {
       <PointModal
         isOpen={true}
         onClose={() => {}}
-        mode="create"
+        mode={MODAL_MODE.CREATE}
         initialName=""
         latitude={-23.5505}
         longitude={-46.6333}
@@ -95,7 +96,7 @@ describe('PointModal', () => {
       <PointModal
         isOpen={true}
         onClose={() => {}}
-        mode="create"
+        mode={MODAL_MODE.CREATE}
         initialName=""
         latitude={-23.5505}
         longitude={-46.6333}

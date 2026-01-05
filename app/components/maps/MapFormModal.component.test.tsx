@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import MapFormModal from './MapFormModal';
+import { MODAL_MODE } from '@/app/constants/modal';
 
 /**
  * Testes do MapFormModal - modal para criar e editar mapas.
@@ -14,7 +15,12 @@ import MapFormModal from './MapFormModal';
 describe('MapFormModal', () => {
   it('não renderiza quando fechado', () => {
     render(
-      <MapFormModal isOpen={false} onClose={() => {}} onSubmit={async () => {}} mode="create" />
+      <MapFormModal
+        isOpen={false}
+        onClose={() => {}}
+        onSubmit={async () => {}}
+        mode={MODAL_MODE.CREATE}
+      />
     );
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
@@ -22,7 +28,12 @@ describe('MapFormModal', () => {
 
   it('renderiza título "Criar Novo Mapa" no modo criação', () => {
     render(
-      <MapFormModal isOpen={true} onClose={() => {}} onSubmit={async () => {}} mode="create" />
+      <MapFormModal
+        isOpen={true}
+        onClose={() => {}}
+        onSubmit={async () => {}}
+        mode={MODAL_MODE.CREATE}
+      />
     );
 
     expect(screen.getByText('Criar Novo Mapa')).toBeInTheDocument();
@@ -34,7 +45,7 @@ describe('MapFormModal', () => {
         isOpen={true}
         onClose={() => {}}
         onSubmit={async () => {}}
-        mode="edit"
+        mode={MODAL_MODE.EDIT}
         initialName="Meu Mapa"
       />
     );
@@ -48,7 +59,7 @@ describe('MapFormModal', () => {
         isOpen={true}
         onClose={() => {}}
         onSubmit={async () => {}}
-        mode="edit"
+        mode={MODAL_MODE.EDIT}
         initialName="Mapa Existente"
         initialDescription="Descrição existente"
       />
@@ -60,7 +71,12 @@ describe('MapFormModal', () => {
 
   it('botão submit está desabilitado com nome vazio', () => {
     render(
-      <MapFormModal isOpen={true} onClose={() => {}} onSubmit={async () => {}} mode="create" />
+      <MapFormModal
+        isOpen={true}
+        onClose={() => {}}
+        onSubmit={async () => {}}
+        mode={MODAL_MODE.CREATE}
+      />
     );
 
     expect(screen.getByRole('button', { name: 'Criar' })).toBeDisabled();

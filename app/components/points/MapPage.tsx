@@ -19,6 +19,8 @@ import {
   deleteAllPoints,
 } from '@/lib/services/points';
 import { DuplicateNameError } from '@/lib/errors';
+import { MODAL_MODE, CONFIRM_MODE, type ModalMode, type ConfirmMode } from '@/app/constants/modal';
+import { POINT_ERROR_MESSAGES } from '@/app/constants/messages';
 
 // Import dinâmico do mapa para evitar SSR (Leaflet não funciona no servidor)
 const LeafletMap = dynamic(() => import('./LeafletMap'), {
@@ -32,11 +34,11 @@ const LeafletMap = dynamic(() => import('./LeafletMap'), {
 
 import { DEFAULT_COORDS, GEOLOCATION_TIMEOUT, GEOLOCATION_MAX_AGE } from '@/app/constants/map';
 
-interface MapPageClientProps {
+interface MapPageProps {
   mapId: string;
 }
 
-export default function MapPageClient({ mapId }: MapPageClientProps) {
+export default function MapPage({ mapId }: MapPageProps) {
   // Estado do mapa
   const [map, setMap] = useState<Map | null>(null);
   const [points, setPoints] = useState<Point[]>([]);
@@ -51,14 +53,14 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
 
   // Estado dos modais
   const [pointModalOpen, setPointModalOpen] = useState(false);
-  const [pointModalMode, setPointModalMode] = useState<'create' | 'edit'>('create');
+  const [pointModalMode, setPointModalMode] = useState<ModalMode>(MODAL_MODE.CREATE);
   const [pointModalData, setPointModalData] = useState<{ name: string; location: Location }>({
     name: '',
     location: { latitude: 0, longitude: 0 },
   });
 
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
-  const [confirmModalMode, setConfirmModalMode] = useState<'single' | 'all'>('single');
+  const [confirmModalMode, setConfirmModalMode] = useState<ConfirmMode>(CONFIRM_MODE.SINGLE);
   const [pointToDelete, setPointToDelete] = useState<string | null>(null);
 
   // Estado para painel mobile
@@ -131,7 +133,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
 
   // Handlers do mapa
   const handleMapClick = useCallback((lat: number, lng: number) => {
-    setPointModalMode('create');
+    setPointModalMode(MODAL_MODE.CREATE);
     setPointModalData({ name: '', location: { latitude: lat, longitude: lng } });
     setPointModalOpen(true);
   }, []);
@@ -163,7 +165,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
   // Handler para clicar no ponto temporário
   const handleTempPointClick = useCallback(() => {
     if (tempPoint) {
-      setPointModalMode('create');
+      setPointModalMode(MODAL_MODE.CREATE);
       setPointModalData(tempPoint);
       setPointModalOpen(true);
     }
@@ -185,7 +187,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
   };
 
   const handleEditPoint = (point: Point) => {
-    setPointModalMode('edit');
+    setPointModalMode(MODAL_MODE.EDIT);
     setPointModalData({
       name: point.name,
       location: point.location,
@@ -196,19 +198,19 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
 
   const handleDeletePoint = (pointId: string) => {
     setPointToDelete(pointId);
-    setConfirmModalMode('single');
+    setConfirmModalMode(CONFIRM_MODE.SINGLE);
     setConfirmModalOpen(true);
   };
 
   const handleDeleteAllPoints = () => {
-    setConfirmModalMode('all');
+    setConfirmModalMode(CONFIRM_MODE.ALL);
     setConfirmModalOpen(true);
   };
 
   // Salvar ponto (criar ou editar)
   const handleSavePoint = async (name: string): Promise<{ error?: string } | void> => {
     try {
-      if (pointModalMode === 'create') {
+      if (pointModalMode === MODAL_MODE.CREATE) {
         await createPoint(mapId, {
           name,
           latitude: pointModalData.location.latitude,
@@ -227,16 +229,16 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
         return { error: error.message };
       }
       console.error('Erro ao salvar ponto:', error);
-      return { error: 'Erro ao salvar ponto. Tente novamente.' };
+      return { error: POINT_ERROR_MESSAGES.SAVE };
     }
   };
 
   // Confirmar exclusão
   const handleConfirmDelete = async (): Promise<{ error?: string } | void> => {
     try {
-      if (confirmModalMode === 'single' && pointToDelete) {
+      if (confirmModalMode === CONFIRM_MODE.SINGLE && pointToDelete) {
         await deletePoint(mapId, pointToDelete);
-      } else if (confirmModalMode === 'all') {
+      } else if (confirmModalMode === CONFIRM_MODE.ALL) {
         await deleteAllPoints(mapId);
       }
       await fetchData();
@@ -245,7 +247,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
       setPointToDelete(null);
     } catch (error) {
       console.error('Erro ao deletar:', error);
-      return { error: 'Erro ao excluir. Tente novamente.' };
+      return { error: POINT_ERROR_MESSAGES.DELETE };
     }
   };
 
@@ -390,7 +392,7 @@ export default function MapPageClient({ mapId }: MapPageClientProps) {
         onClose={() => setConfirmModalOpen(false)}
         onConfirm={handleConfirmDelete}
         title={
-          confirmModalMode === 'single'
+          confirmModalMode === CONFIRM_MODE.SINGLE
             ? 'Você está apagando um ponto'
             : 'Você está apagando TODOS os pontos desse mapa'
         }
